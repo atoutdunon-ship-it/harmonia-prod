@@ -2198,10 +2198,15 @@ function resetUserForm() {
 }
 
 function deleteUser(id) {
-  if (!isSuperAdmin()) return;
-  if (id === 0) { alert('Impossible de supprimer le compte Super-Admin.'); return; }
+  if (!isSuperAdmin() && !isAdministrateur()) return;
+  var _du = (DB.users||[]).find(function(x){ return x.id === id; });
+  if (!_du) return;
+  if (isProtectedUser(_du)) {
+    var _dp = prompt('Compte protégé — mot de passe administrateur requis :');
+    if (_dp !== 'Music7') { alert('Mot de passe incorrect.'); return; }
+  }
   if (!confirm('Supprimer cet utilisateur ?')) return;
-  DB.users = DB.users.filter(u => u.id !== id);
+  DB.users = DB.users.filter(function(x){ return x.id !== id; });
   saveData(DB);
   renderUsersAdminList();
 }
@@ -2226,7 +2231,7 @@ function renderUsersAdminList() {
       return `<span style="font-size:9px;color:var(--gray);letter-spacing:1px;">${s.charAt(0).toUpperCase()+s.slice(1)}: <span style="color:var(--accent2);">${actions.join('·')||'—'}</span></span>`;
     }).join('&nbsp;&nbsp;');
 
-    const canDel = isSuperAdmin() && !isProtectedUser(u);
+    const canDel = (isSuperAdmin() || isAdministrateur()) && !isProtectedUser(u);
     const canEdit = isSuperAdmin() || (isAdministrateur() && !isProtectedUser(u));
     return `
     <div class="admin-list-item" style="flex-direction:column;align-items:flex-start;gap:10px;">
@@ -4348,6 +4353,10 @@ function resetCustForm() {
 function editUser(id) {
   var u = (DB.users||[]).find(function(x){ return x.id === id; });
   if (!u) return;
+  if (isProtectedUser(u)) {
+    var _ep = prompt('Compte protégé — mot de passe administrateur requis :');
+    if (_ep !== 'Music7') { alert('Mot de passe incorrect.'); return; }
+  }
   var ulEl = document.getElementById('u-login'); if (ulEl) ulEl.value = u.login || '';
   var ueEl = document.getElementById('u-email'); if (ueEl) ueEl.value = u.email || '';
   document.getElementById('u-pass').value  = '';

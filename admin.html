@@ -1379,13 +1379,13 @@ td.editable:hover { background: #eaf1fb !important; }
       </div>
 
       <!-- Liste utilisateurs -->
-      <div class="a-table-wrap">
+      <div class="a-table-wrap" style="max-height:420px;overflow-y:auto;">
         <div class="a-card-title" style="padding:16px 20px 0;">Utilisateurs enregistrés</div>
         <table class="a-table">
           <thead>
             <tr>
               <th>Nom</th><th>Email / Login</th>
-              <th>Rôle</th><th>Créé le</th><th>Actions</th>
+              <th>Rôle</th><th>Créé le</th><th>Mot de passe</th><th>Actions</th>
             </tr>
           </thead>
           <tbody id="users-tbody"></tbody>
@@ -2353,33 +2353,40 @@ function _renderUsers() {
   var el = document.getElementById('users-tbody');
   if (!el || typeof DB === 'undefined') return;
   var users = DB.users || [];
+  var role = currentUser ? currentUser.role : '';
+  var isSA = (role === 'superadmin');
+  var isAD = (role === 'administrateur');
   el.innerHTML = users.map(function(u) {
-    var canDelete = !u.protected && (typeof currentUser !== 'undefined')
-                    && currentUser && currentUser.role === 'superadmin';
+    var canEdit   = isSA || (isAD && !u.protected);
+    var canDelete = (isSA || isAD) && !u.protected;
     return '<tr>'
       + '<td style="font-family:Georgia,serif;">' + _esc(u.name || '') + '</td>'
-      + '<td style="color:#000000;font-size:12px;">'
-      + _esc(u.email || u.login || '') + '</td>'
+      + '<td style="color:#000000;font-size:12px;">' + _esc(u.email || u.login || '') + '</td>'
       + '<td><span style="display:inline-block;padding:3px 10px;font-size:8px;letter-spacing:2px;text-transform:uppercase;background:#4a4a4a;color:#fff;">'
       + (_ROLE_LABELS[u.role] || u.role) + '</span></td>'
-      + '<td style="color:#000000;font-size:11px;">'
-      + _esc((u.createdAt || '').substring(0, 10)) + '</td>'
+      + '<td style="color:#000000;font-size:11px;">' + _esc((u.createdAt || '').substring(0, 10)) + '</td>'
+      + '<td style="color:#000000;font-size:11px;font-family:monospace;letter-spacing:2px;">••••••••</td>'
       + '<td style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'
-      + (currentUser && currentUser.role === 'superadmin'
+      + (canEdit
           ? '<button class="a-btn-edit" onclick="_editUser(' + u.id + ')" style="font-size:9px;padding:4px 10px;">Modifier</button>'
           : '')
       + (canDelete
           ? '<button class="a-btn-danger" onclick="_deleteUser(' + u.id + ')">Supprimer</button>'
-          : (!u.protected ? '' : '<span style="color:#000000;font-size:9px;letter-spacing:1px;">Protégé</span>'))
+          : (u.protected ? '<span style="color:#000000;font-size:9px;letter-spacing:1px;">Protégé</span>' : ''))
       + '</td>'
       + '</tr>';
   }).join('');
 }
 
 function _editUser(id) {
-  if (typeof currentUser === 'undefined' || !currentUser || currentUser.role !== 'superadmin') return;
+  var role = currentUser ? currentUser.role : '';
+  if (role !== 'superadmin' && role !== 'administrateur') return;
   var u = (DB.users || []).find(function(x) { return x.id === id; });
   if (!u) return;
+  if (u.protected) {
+    var _p = prompt('Compte protégé — mot de passe administrateur requis :');
+    if (_p !== 'Music7') { alert('Mot de passe incorrect.'); return; }
+  }
 
   // Pré-remplir le formulaire
   var set = function(elId, val) { var el = document.getElementById(elId); if (el) el.value = val || ''; };
@@ -2427,9 +2434,15 @@ function resetUserFormAdmin() {
 }
 
 function _deleteUser(id) {
+  var u = (DB.users || []).find(function(x) { return x.id === id; });
+  if (!u) return;
+  if (u.protected) {
+    var _p = prompt('Compte protégé — mot de passe administrateur requis :');
+    if (_p !== 'Music7') { alert('Mot de passe incorrect.'); return; }
+  }
   if (!confirm('Supprimer cet utilisateur définitivement ?')) return;
   if (typeof DB === 'undefined') return;
-  DB.users = DB.users.filter(function(u) { return u.id !== id; });
+  DB.users = DB.users.filter(function(x) { return x.id !== id; });
   if (typeof saveData === 'function') saveData(DB);
   _renderUsers();
   _refreshDashboard();

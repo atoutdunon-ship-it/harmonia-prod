@@ -2464,18 +2464,21 @@
 .hamburger.open span:nth-child(2) { opacity:0; }
 .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
 @media (max-width:900px) {
-  nav { padding:0 16px; }
+  nav { padding:0 16px; height:56px; }
+  /* Logo réduit sur mobile */
+  .nav-logo img { height:20px !important; }
   .hamburger { display:flex; }
-  .nav-connect-btn, .nav-cart-btn { display:none !important; }
-  /* Afficher le bouton connexion DANS le menu mobile */
-  #mobile-connect-li { display:block !important; }
+  /* Masquer éléments desktop inutiles sur mobile */
+  .nav-connect-btn, .nav-cart-btn,
+  .nav-search-btn, .lang-dropdown { display:none !important; }
+  /* Afficher le bouton connexion EN BAS du menu mobile */
+  #mobile-connect-li { display:block !important; margin-top:8px; border-top:1px solid rgba(31,158,92,0.15); }
   .nav-links {
     display:none; flex-direction:column; position:absolute;
-    top:80px; left:0; right:0;
+    top:56px; left:0; right:0;
     background:rgba(3,13,7,0.98); backdrop-filter:blur(12px);
     -webkit-backdrop-filter:blur(12px);
-    padding:24px 0; gap:0; border-bottom:1px solid rgba(31,158,92,0.2);
-    /* iOS Safari */
+    padding:16px 0 24px; gap:0; border-bottom:1px solid rgba(31,158,92,0.2);
     -webkit-overflow-scrolling:touch;
   }
   .nav-links.open { display:flex; }
@@ -2483,7 +2486,18 @@
   .nav-links li + li::before { display:none; }
   .nav-links a { display:block; padding:14px 32px; font-size:13px; letter-spacing:2px; border-bottom:1px solid rgba(31,158,92,0.08); }
   .nav-links a:hover { color:var(--accent2); background:rgba(31,158,92,0.05); }
-  .lang-switcher { padding:14px 32px; border-bottom:1px solid rgba(31,158,92,0.08); }
+  /* Bouton connexion dans le dropdown : style distinct */
+  #mobile-connect-li { padding:16px 32px; }
+  #mobile-connect-li button,
+  #mobile-connect-li a {
+    display:block !important; width:100% !important; padding:12px 0 !important;
+    background:rgba(31,158,92,0.12) !important;
+    border:1px solid rgba(31,158,92,0.4) !important;
+    border-bottom:1px solid rgba(31,158,92,0.4) !important;
+    color:var(--white) !important; font-family:Arial,sans-serif !important;
+    font-size:11px !important; letter-spacing:3px !important; text-transform:uppercase !important;
+    text-align:center !important; cursor:pointer !important; border-radius:2px !important;
+  }
 }
 /* ═══════════════════════════════════════════
    BOUTIQUE — SHOP MODULE
@@ -3624,8 +3638,9 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   body    { font-size: 15px; }
 
   /* Nav */
-  nav     { padding: 0 16px !important; height: 64px; }
-  .nav-logo img { height: 28px !important; }
+  nav     { padding: 0 16px !important; height: 56px; }
+  .nav-logo img { height: 20px !important; }
+  .nav-links { top: 56px; }
 
   /* Hero */
   .hero-content   { padding: 80px 20px 48px !important; }
