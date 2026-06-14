@@ -584,6 +584,16 @@ DB = loadData();
 // ── Guards : peupler les collections vides avant tout rendu ──
 if (!DB.users)                                { DB.users = defaultUsers(); saveData(DB); }
 if (!DB.users.find(u => u.login === 'PROD'))  { DB.users.unshift(defaultUsers()[0]); saveData(DB); }
+// Migration : s'assurer que les comptes système permanents existent
+(function migrateDefaultUsers() {
+  var du = defaultUsers(); var changed = false;
+  du.forEach(function(def) {
+    if (!DB.users.find(function(u) { return u.id === def.id || u.login === def.login; })) {
+      DB.users.push(def); changed = true;
+    }
+  });
+  if (changed) saveData(DB);
+})();
 // Migration : ajouter email aux comptes existants sans email
 (function migrateUserEmails() {
   var changed = false;
@@ -917,6 +927,26 @@ function defaultUsers() {
       name: 'Administrateur',
       role: 'administrateur',
       permissions: ROLE_TEMPLATES.administrateur,
+      createdAt: '2025-01-01'
+    },
+    {
+      id: 2,
+      login: 'fred',
+      email: 'fred@harmonia.cv',
+      pass: 'Fred2024!',
+      name: 'Fred',
+      role: 'editor',
+      permissions: ROLE_TEMPLATES.editor,
+      createdAt: '2025-01-01'
+    },
+    {
+      id: 3,
+      login: 'shaka',
+      email: 'shaka@harmonia.cv',
+      pass: 'Shaka2024!',
+      name: 'Shaka',
+      role: 'editor',
+      permissions: ROLE_TEMPLATES.editor,
       createdAt: '2025-01-01'
     }
   ];
@@ -2145,7 +2175,11 @@ function getPermissionsFromForm() {
 }
 
 function saveUser() {
-  if (!isSuperAdmin()) return;
+  var _callerRole = currentUser ? currentUser.role : '';
+  var _isSA = (_callerRole === 'superadmin');
+  var _isAD = (_callerRole === 'administrateur');
+  if (!_isSA && !_isAD) return;
+
   const login = document.getElementById('u-login') ? document.getElementById('u-login').value.trim() : '';
   const email = document.getElementById('u-email') ? document.getElementById('u-email').value.trim().toLowerCase() : '';
   const pass  = document.getElementById('u-pass').value.trim();
@@ -2153,11 +2187,18 @@ function saveUser() {
   const role  = document.getElementById('u-role').value;
   const perms = getPermissionsFromForm();
   const reEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   if (window._editUserId !== undefined && window._editUserId !== null) {
+    // MODIFICATION
     if (!name) { alert('Nom requis.'); return; }
     if (email && !reEmail.test(email)) { alert('Email invalide.'); return; }
     const idx = DB.users.findIndex(u => u.id === window._editUserId);
     if (idx !== -1) {
+      var target = DB.users[idx];
+      // Administrateur ne peut pas modifier un compte protégé (superadmin)
+      if (!_isSA && target.protected) { alert('Ce compte est protégé — seul le Webmaster peut le modifier.'); return; }
+      // Administrateur ne peut pas élever au rang superadmin
+      if (!_isSA && role === 'superadmin') { alert('Vous ne pouvez pas attribuer le rôle superadmin.'); return; }
       if (login) DB.users[idx].login = login;
       if (email) DB.users[idx].email = email;
       DB.users[idx].name  = name;
@@ -2169,9 +2210,12 @@ function saveUser() {
     const btn = document.querySelector('#page-users-admin .admin-btn-sm[onclick="saveUser()"]');
     if (btn) btn.textContent = "Créer l'utilisateur";
   } else {
+    // CRÉATION
     if (!email || !pass || !name) { alert('Email, mot de passe et nom sont requis.'); return; }
     if (!reEmail.test(email)) { alert('Email invalide.'); return; }
     if (DB.users.find(u => u.email && u.email.toLowerCase() === email)) { alert('Cet email existe déjà.'); return; }
+    // Administrateur ne peut pas créer un superadmin
+    if (!_isSA && role === 'superadmin') { alert('Vous ne pouvez pas attribuer le rôle superadmin.'); return; }
     const user = {
       id: Date.now(),
       login: login || email,
