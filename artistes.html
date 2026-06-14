@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nos Artistes — HARMONIA</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDYxYTEwIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMGQyNjE4Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0idXJsKCNnKSIvPjxyZWN0IHg9IjciIHk9IjgiIHdpZHRoPSIyLjUiIGhlaWdodD0iMTYiIHJ4PSIxLjIiIGZpbGw9IiMyZWNjODAiLz48cmVjdCB4PSIyMi41IiB5PSI4IiB3aWR0aD0iMi41IiBoZWlnaHQ9IjE2IiByeD0iMS4yIiBmaWxsPSIjMWY5ZTVjIi8+PHJlY3QgeD0iNyIgeT0iMTQuNSIgd2lkdGg9IjE4IiBoZWlnaHQ9IjMiIHJ4PSIxLjIiIGZpbGw9IiMyZWNjODAiLz48L3N2Zz4=">
+<link rel="stylesheet" href="harmonia-shared.css">
+<style>
+.artists-cat-btn {
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  background: none;
+  border: 1px solid rgba(46,204,128,0.35);
+  width: 240px;
+  padding: 20px 0;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.35s ease;
+  border-radius: 2px;
+}
+.artists-cat-btn:hover {
+  color: var(--white);
+  border-color: rgba(46,204,128,0.35);
+  background: rgba(46,204,128,0.05);
+}
+.artists-cat-btn.active-cat {
+  color: var(--white);
+  border-color: rgba(46,204,128,0.35);
+  background: rgba(46,204,128,0.10);
+  box-shadow: 0 0 20px rgba(46,204,128,0.12);
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo" style="display:flex;align-items:center;">
+    <img src="images/logo-base.png" alt="HARMONIA" style="height:36px;">
+  </a>
+  <button class="hamburger" id="hamburger-btn" aria-label="Menu" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links">
+    <li data-module-nav="about"><a href="qui-sommes-nous.html" data-i18n="nav_about">QUI SOMMES-NOUS</a></li>
+    <li data-module-nav="artists"><a href="artistes.html" style="color:var(--accent2);" data-i18n="nav_artists">Artistes</a></li>
+    <li data-module-nav="cesaria"><a href="cesaria.html" data-i18n="nav_cesaria">Cesária Évora</a></li>
+    <li data-module-nav="news"><a href="actualites.html" data-i18n="nav_news">Actualités</a></li>
+    <li data-module-nav="shop"><a href="boutique.html" data-i18n="nav_boutique">Boutique</a></li>
+    <li data-module-nav="contact"><a href="contact.html" data-i18n="nav_contact">Contact</a></li>
+    <li id="mobile-connect-li" style="width:100%;"><button onclick="openAdmin(event)" style="display:block;width:100%;background:none;border:none;border-bottom:1px solid rgba(31,158,92,0.08);color:var(--white);font-family:Arial,sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:14px 32px;text-align:left;cursor:pointer;" data-i18n="nav_login">Se connecter</button></li>
+  </ul>
+  <div class="lang-dropdown" id="lang-dropdown">
+    <button class="lang-current" id="lang-current-btn">
+      <span id="lang-current-label">Português</span>
+      <span class="lang-arrow"></span>
+    </button>
+    <div class="lang-menu">
+      <button class="lang-option" data-lang="pt">Português</button>
+      <button class="lang-option" data-lang="fr">Français</button>
+      <button class="lang-option" data-lang="en">English</button>
+      <button class="lang-option" data-lang="es">Español</button>
+    </div>
+  </div>
+  <button class="nav-search-btn" onclick="openSearch()" title="Rechercher" aria-label="Rechercher">Rechercher</button>
+  <button class="nav-cart-btn" id="nav-cart-btn" onclick="openMiniCart()" title="Panier" aria-label="Panier">PANIER<span id="cart-badge" class="cart-badge" style="display:none;"></span></button>
+  <button class="nav-connect-btn" id="nav-connect-btn" onclick="openAdmin(event)" data-i18n="nav_login">Se connecter</button>
+</nav>
+
+<section id="artists" style="padding-top:140px;">
+  <div class="section-label" data-i18n="artists_label" data-editable-key="artists_label">Nos artistes</div>
+  <h2 class="section-title" data-i18n="artists_title" data-editable-key="artists_title">Le Roster</h2>
+  <div class="section-divider"></div>
+
+  <!-- Boutons de sélection de catégorie -->
+  <div style="display:flex;justify-content:center;gap:32px;margin:60px 0 80px;">
+    <button id="btn-traditionnel" class="artists-cat-btn active-cat" onclick="showArtistCat('traditional', this)" data-i18n="artists_cat_traditional" data-editable-key="artists_cat_traditional">TRADITIONNEL</button>
+    <button id="btn-urban" class="artists-cat-btn" onclick="showArtistCat('urban', this)" data-i18n="artists_cat_urban" data-editable-key="artists_cat_urban">URBAN</button>
+  </div>
+
+  <!-- Grille artistes par catégorie -->
+  <div id="artists-cat-traditional" class="artists-cat-panel">
+    <div class="artists-grid" id="artists-grid-traditional"></div>
+  </div>
+  <div id="artists-cat-urban" class="artists-cat-panel" style="display:none;">
+    <div class="artists-grid" id="artists-grid-urban"></div>
+  </div>
+
+</section>
+
+
+<!-- RECHERCHE OVERLAY -->
+<div id="search-overlay" role="search">
+  <div class="search-box">
+    <span class="search-box-icon">🔍</span>
+    <input type="text" id="search-input" placeholder="Artiste, morceau, album, événement..."
+      oninput="doSearch(this.value)"
+      onkeydown="if(event.key==='Escape')closeSearch()"
+      autocomplete="off" spellcheck="false">
+    <button class="search-close" onclick="closeSearch()" title="Fermer">✕</button>
+  </div>
+  <div id="search-results"></div>
+</div>
+
+<!-- FICHE ARTISTE (overlay) -->
+<div id="artist-page" style="display:none;position:fixed;inset:0;z-index:50000;background:var(--dark);overflow-y:auto;padding:40px 60px;"></div>
+
+<footer>
+
+  <!-- Logo -->
+  <div class="footer-logo">
+    <img src="images/logo-base.png" alt="HARMONIA" style="height:40px;">
+  </div>
+
+  <!-- Tagline -->
+  <div class="footer-tagline">
+    <span style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,0.35);">
+      Editora discográfica de Cabo Verde &nbsp;·&nbsp; Produção · Edição · Distribuição &nbsp;·&nbsp; desde 1998
+    </span>
+  </div>
+
+  <!-- Adresses en 3 colonnes -->
+  <div class="footer-addresses" style="display:flex;justify-content:center;align-items:flex-start;gap:0;flex-wrap:wrap;">
+
+    <div style="flex:1;min-width:200px;max-width:260px;text-align:center;padding:0 32px;">
+      <div style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);margin-bottom:10px;">Sede — Mindelo</div>
+      <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.45);line-height:1.9;">
+        Harmonia LDA<br>
+        Ribeira de Julião, Mindelo<br>
+        CP 367 · São Vicente · Cabo Verde
+      </div>
+    </div>
+
+    <div style="width:1px;background:rgba(255,255,255,0.07);align-self:stretch;margin:0 8px;"></div>
+
+    <div style="flex:1;min-width:200px;max-width:260px;text-align:center;padding:0 32px;">
+      <div style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);margin-bottom:10px;">Escritório — Praia</div>
+      <div style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.45);line-height:1.9;">
+        Avenida Andrade Corvo · Plateau<br>
+        Praia · Santiago · Cabo Verde
+      </div>
+    </div>
+
+    <div style="width:1px;background:rgba(255,255,255,0.07);align-self:stretch;margin:0 8px;"></div>
+
+    <div style="flex:1;min-width:200px;max-width:260px;text-align:center;padding:0 32px;">
+      <div style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);margin-bottom:10px;">Contacto</div>
+      <div style="font-family:Arial,sans-serif;font-size:12px;line-height:1.9;">
+        <a href="tel:+2384310140" style="color:rgba(255,255,255,0.45);text-decoration:none;display:block;">+238 431 01 40</a>
+        <a href="mailto:harmonia.producao@gmail.com" style="color:var(--accent2);text-decoration:none;display:block;">harmonia.producao@gmail.com</a>
+        <span style="color:rgba(255,255,255,0.3);">NIF : 200140825</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Copyright -->
+  <div class="footer-copy" data-i18n="footer_copy">© 2025 Harmonia LDA — Todos os direitos reservados</div>
+
+  <!-- Liens légaux -->
+  <div class="footer-legal">
+    <a href="#" onclick="openLegal('mentions',event)" data-i18n="legal_mentions">Mentions légales</a>
+    <a href="#" onclick="openLegal('privacy',event)" data-i18n="legal_privacy">Confidentialité</a>
+    <a href="#" onclick="openLegal('cgv',event)" data-i18n="legal_cgv">CGV</a>
+    <a href="#" onclick="openLegal('cgu',event)" data-i18n="legal_cgu">CGU</a>
+    <a href="#" onclick="openLegal('cookies',event)" data-i18n="legal_cookies">Cookies</a>
+  </div>
+
+</footer>
+
+
+
+<!-- PLAYER BAR -->
+<div id="player-bar">
+  <div class="player-info">
+    <div>
+      <div class="player-title" id="bar-title">—</div>
+      <div class="player-artist" id="bar-artist">—</div>
+    </div>
+  </div>
+  <div class="player-controls">
+    <button class="ctrl-btn" onclick="prevTrack()">
+      <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+    </button>
+    <button class="play-main" id="main-play-btn" onclick="togglePlay()">
+      <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="ctrl-btn" onclick="nextTrack()">
+      <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+    </button>
+  </div>
+  <div class="player-progress">
+    <span class="time-label" id="bar-current">0:00</span>
+    <div class="progress-bar" onclick="seekTo(event)">
+      <div class="progress-fill" id="bar-fill"></div>
+    </div>
+    <span class="time-label" id="bar-total">0:00</span>
+  </div>
+  <audio id="audio-el"></audio>
+</div>
+
+<!-- MODAL ARTISTE -->
+<div class="modal-overlay"<div class="artist-modal-overlay" id="artist-modal">
+  <div class="artist-modal-inner">
+    <div class="artist-modal-photo" id="modal-photo-wrap">
+      <img id="modal-img" src="" alt="" loading="lazy">
+    </div>
+    <div class="artist-modal-content">
+      <button class="modal-close-btn" onclick="closeModal()">✕ FERMER</button>
+      <div class="modal-label">HARMONIA — Roster</div>
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-origin-tag" id="modal-origin"></div>
+      <div class="modal-style-tag" id="modal-style"></div>
+      <hr class="modal-divider">
+      <div class="modal-bio-text" id="modal-bio"></div>
+      <div class="modal-social-row" id="modal-social"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CURRENT USER BAR -->
+<div id="current-user-bar"></div>
+
+
+<!-- MOT DE PASSE OUBLIÉ -->
+<div class="pwd-modal-overlay" id="forgot-modal">
+  <div class="pwd-modal-box">
+    <button class="pwd-modal-close" onclick="closeForgot()">✕</button>
+    <div class="pwd-modal-title" data-i18n="forgot_title">Mot de passe</div>
+    <div class="pwd-modal-sub" data-i18n="forgot_sub">Réinitialisation</div>
+    <div class="pwd-err" id="forgot-err"></div>
+    <div class="pwd-ok" id="forgot-ok" data-i18n="forgot_ok">Mot de passe mis à jour.</div>
+    <div class="admin-field">
+      <label>Votre identifiant</label>
+      <input type="text" id="forgot-login" placeholder="login">
+    </div>
+    <div class="admin-field">
+      <label>Nouveau mot de passe</label>
+      <input type="password" id="forgot-new" placeholder="Nouveau mot de passe">
+    </div>
+    <div class="admin-field">
+      <label>Confirmer le mot de passe</label>
+      <input type="password" id="forgot-confirm" placeholder="Confirmer" onkeydown="if(event.key==='Enter')submitForgot()">
+    </div>
+    <div style="margin-top:8px;font-family:Arial;font-size:10px;letter-spacing:1px;color:var(--gray);">
+      ⓘ Votre demande sera transmise à l'administrateur si votre identifiant n'est pas reconnu.
+    </div>
+    <button class="admin-btn" style="margin-top:24px;" onclick="submitForgot()" data-i18n="forgot_btn">Réinitialiser</button>
+  </div>
+</div>
+
+<!-- CHANGER MOT DE PASSE (admin) -->
+<div class="pwd-modal-overlay" id="change-pwd-modal">
+  <div class="pwd-modal-box">
+    <button class="pwd-modal-close" onclick="closeChangePwd()">✕</button>
+    <div class="pwd-modal-title" data-i18n="change_title">Changer le</div>
+    <div class="pwd-modal-sub" data-i18n="change_sub">Mot de passe</div>
+    <div class="pwd-err" id="change-err"></div>
+    <div class="pwd-ok" id="change-ok" data-i18n="change_ok">Mot de passe modifié avec succès.</div>
+    <div class="admin-field">
+      <label>Ancien mot de passe</label>
+      <input type="password" id="change-old" placeholder="••••••••">
+    </div>
+    <div class="admin-field">
+      <label>Nouveau mot de passe</label>
+      <input type="password" id="change-new" placeholder="Nouveau mot de passe">
+    </div>
+    <div class="admin-field">
+      <label>Confirmer</label>
+      <input type="password" id="change-confirm" placeholder="Confirmer" onkeydown="if(event.key==='Enter')submitChangePwd()">
+    </div>
+    <button class="admin-btn" style="margin-top:24px;" onclick="submitChangePwd()" data-i18n="change_btn">Modifier le mot de passe</button>
+  </div>
+</div>
+
+
+
+<!-- ADMIN OVERLAY -->
+<div id="admin-overlay">
+  <!-- LOGIN -->
+    <div id="admin-login" class="admin-login">
+    <div class="admin-login-box">
+      <div class="admin-login-title" style="display:flex;align-items:center;justify-content:center;margin-bottom:8px;"><img src="images/logo-base.png" alt="HARMONIA" style="height:44px;margin-bottom:8px;"></div>
+      <div class="admin-login-sub" data-i18n="admin_sub">Espace HARMONIA</div>
+      <!-- Onglets -->
+      <div class="auth-tabs">
+        <button class="auth-tab auth-tab-active" id="auth-tab-login" onclick="_toggleAuthMode('login')">Connexion</button>
+        <button class="auth-tab" id="auth-tab-register" onclick="_toggleAuthMode('register')">Créer un compte</button>
+      </div>
+      <!-- Formulaire connexion -->
+      <div id="auth-login-form">
+        <div class="admin-err" id="login-err">Email ou mot de passe incorrect</div>
+        <div class="admin-field">
+          <label>Adresse email</label>
+          <input type="email" id="login-email" placeholder="votre@email.com" autocomplete="email">
+        </div>
+        <div class="admin-field">
+          <label data-i18n="admin_pass">Mot de passe</label>
+          <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <button class="admin-btn" onclick="doLogin()" data-i18n="admin_login_btn">Se connecter</button>
+        <div style="margin-top:16px;text-align:center;">
+          <a href="#" onclick="closeAdmin(event)" style="font-family:Arial;font-size:10px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;" data-i18n="back_site">← Retour au site</a>
+        </div>
+      </div>
+      <!-- Formulaire inscription -->
+      <div id="auth-register-form" style="display:none;">
+        <div class="admin-err" id="register-err"></div>
+        <div class="admin-field">
+          <label>Nom complet</label>
+          <input type="text" id="reg-name" placeholder="Votre nom" autocomplete="name">
+        </div>
+        <div class="admin-field">
+          <label>Adresse email</label>
+          <input type="email" id="reg-email" placeholder="votre@email.com" autocomplete="email">
+        </div>
+        <div class="admin-field">
+          <label>Mot de passe</label>
+          <input type="password" id="reg-pass" placeholder="6 caractères minimum" autocomplete="new-password">
+        </div>
+        <div class="admin-field">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" id="reg-pass2" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
+        </div>
+        <button class="admin-btn" onclick="doRegister()">Créer mon compte</button>
+        <div style="margin-top:16px;text-align:center;">
+          <a href="#" onclick="closeAdmin(event)" style="font-family:Arial;font-size:10px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;">← Retour au site</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- PANEL -->
+  <div class="admin-panel" id="admin-panel">
+    <div class="admin-sidebar">
+      <div class="admin-sidebar-logo" style="padding:8px 0;"><img src="images/logo-base.png" alt="HARMONIA" style="height:36px;"></div>
+      <div class="admin-nav-item active" onclick="showAdminPage('dashboard')">&#9632; <span data-i18n="admin_dashboard">Dashboard</span></div>
+      <div class="admin-nav-item" onclick="showAdminPage('artists-admin')">&#9632; Artistes</div>
+      <div class="admin-nav-item" onclick="showAdminPage('music-admin')">&#9632; Musiques</div>
+      <div class="admin-nav-item" onclick="showAdminPage('albums-admin')">&#9632; Albums</div>
+      <div class="admin-nav-item" onclick="showAdminPage('news-admin')">&#9632; Actualités</div>
+      <div class="admin-nav-item" onclick="showAdminPage('orders-admin')">&#9632; Commandes</div>
+      <div class="admin-nav-item" onclick="showAdminPage('music-categories')">&#9632; Catégories Musique</div>
+      <div class="admin-nav-item" onclick="showAdminPage('shop-products')">&#9632; Produits Shop</div>
+      <div class="admin-nav-item" onclick="showAdminPage('shop-events')">&#9632; Événements</div>
+      <div class="admin-nav-item" onclick="showAdminPage('payment-links')">&#9632; Liens Paiement</div>
+      <div class="admin-nav-item" onclick="showAdminPage('customers-admin')">&#9632; Clients</div>
+            <div class="admin-nav-item" onclick="showAdminPage('users-admin')">&#9632; Utilisateurs</div>
+      <div class="admin-nav-item" id="admin-modules-nav-item" onclick="showAdminPage('modules-admin')" style="display:none;">&#9632; &#9881; Modules</div>
+      <button class="admin-preview-btn" id="preview-toggle-btn" onclick="togglePreviewMode()">
+        <span class="preview-icon">&#128065;</span>
+        <span id="preview-btn-label">Voir le site</span>
+      </button>
+      <div class="admin-logout">
+        <button onclick="openChangePwd()" style="background:none;border:1px solid rgba(255,255,255,0.1);color:var(--gray);padding:10px 20px;font-family:Arial;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;width:100%;margin-bottom:8px;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--gray)'">Changer mot de passe</button>
+        <button onclick="doLogout()">Déconnexion</button>
+      </div>
+    </div>
+    <div class="admin-main">
+
+      <!-- DASHBOARD -->
+      <div class="admin-page active" id="page-dashboard">
+        <div class="admin-page-title">Dashboard</div>
+        <div class="admin-page-sub">Vue d'ensemble — HARMONIA Production</div>
+        <div class="admin-divider"></div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="stat-artists">6</div>
+            <div class="stat-label">Artistes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-tracks">0</div>
+            <div class="stat-label">Morceaux</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-albums">0</div>
+            <div class="stat-label">Albums</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-news">3</div>
+            <div class="stat-label">Actualités</div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Accès rapide</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="admin-btn-sm" onclick="showAdminPage('music-admin')">+ Ajouter un morceau</button>
+            <button class="admin-btn-sm" onclick="showAdminPage('news-admin')">+ Ajouter une actualité</button>
+            <button class="admin-btn-sm" onclick="showAdminPage('albums-admin')">+ Ajouter un album</button>
+            <button class="admin-btn-sm" onclick="showAdminPage('artists-admin')">+ Gérer les artistes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARTISTES ADMIN -->
+      <div class="admin-page" id="page-artists-admin">
+        <div class="admin-page-title">Artistes</div>
+        <div class="admin-page-sub">Gérer le roster HARMONIA</div>
+        <div class="admin-divider"></div>
+        <div class="admin-success" id="artists-success">Artiste enregistré avec succès.</div>
+        <div class="admin-card">
+          <div class="admin-card-title">Ajouter / Modifier un artiste</div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Nom de l'artiste</label>
+              <input type="text" id="a-name" placeholder="Nom complet">
+            </div>
+            <div class="admin-field">
+              <label>Origine / Pays</label>
+              <input type="text" id="a-origin" placeholder="Ex: Cabo Verde">
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>Biographie courte</label>
+            <textarea id="a-bio-short" rows="2" placeholder="Résumé (affiché sur la carte)"></textarea>
+          </div>
+          <div class="admin-field">
+            <label>Biographie longue</label>
+            <textarea id="a-bio-long" rows="5" placeholder="Biographie complète (modale)"></textarea>
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Instagram</label>
+              <input type="text" id="a-insta" placeholder="@handle">
+            </div>
+            <div class="admin-field">
+              <label>Spotify / Streaming</label>
+              <input type="text" id="a-spotify" placeholder="URL Spotify">
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>Photo (URL ou base64)</label>
+            <div class="file-upload-zone">
+              <input type="file" id="a-photo-file" accept="image/*" onchange="handleArtistPhoto(this)">
+              <div class="file-upload-text">Glisser une photo ou cliquer pour parcourir</div>
+              <div class="file-name-preview" id="a-photo-preview"></div>
+            </div>
+          </div>
+          <div class="admin-submit-row">
+            <button class="admin-btn-ghost" onclick="resetArtistForm()">Réinitialiser</button>
+            <button class="admin-btn-sm" onclick="saveArtist()">Enregistrer l'artiste</button>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Artistes enregistrés</div>
+          <div id="artists-admin-list"></div>
+        </div>
+
+        <div class="admin-card" id="disco-admin-section" style="display:none;">
+          <div class="admin-card-title">Discographie de <span id="disco-artist-name"></span></div>
+          <div id="disco-list"></div>
+          <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:16px;">
+            <div class="admin-card-title" style="font-size:11px;">Ajouter un album</div>
+            <div class="admin-form-row">
+              <div><label class="admin-label">Titre</label><input class="admin-input" id="disco-title" type="text" placeholder="Nom de l'album"></div>
+              <div><label class="admin-label">Année</label><input class="admin-input" id="disco-year" type="number" placeholder="2024"></div>
+            </div>
+            <div><label class="admin-label">Description</label><textarea class="admin-input" id="disco-desc" rows="2" placeholder="Courte description..."></textarea></div>
+            <div><label class="admin-label">Lien Spotify</label><input class="admin-input" id="disco-spotify" type="url" placeholder="https://open.spotify.com/..."></div>
+            <div style="margin-top:8px;"><label class="admin-label">Pochette (image)</label><input type="file" accept="image/*" id="disco-cover-input" onchange="previewUpload(this,'disco-cover-preview')" style="background:none;border:none;color:var(--white);padding:0;"></div>
+            <img id="disco-cover-preview" class="admin-upload-preview" alt="">
+            <button class="admin-btn-primary" style="margin-top:12px;" onclick="addDiscoAlbum()">Ajouter cet album</button>
+          </div>
+        </div>
+
+        <div class="admin-card" id="yt-admin-section" style="display:none;">
+          <div class="admin-card-title">Vidéos YouTube de <span id="yt-artist-name"></span></div>
+          <div id="yt-list"></div>
+          <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:16px;">
+            <div class="admin-card-title" style="font-size:11px;">Ajouter une vidéo</div>
+            <div class="admin-form-row">
+              <div><label class="admin-label">ID YouTube</label><input class="admin-input" id="yt-id-input" type="text" placeholder="ex: D6vBMXSFbfg"></div>
+              <div><label class="admin-label">Titre</label><input class="admin-input" id="yt-title-input" type="text" placeholder="Titre de la vidéo"></div>
+            </div>
+            <button class="admin-btn-primary" onclick="addArtistYT()">Ajouter cette vidéo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MUSIC ADMIN -->
+      <div class="admin-page" id="page-music-admin">
+        <div class="admin-page-title">Musiques</div>
+        <div class="admin-page-sub">Gérer le catalogue audio</div>
+        <div class="admin-divider"></div>
+        <div class="admin-success" id="music-success">Morceau ajouté avec succès.</div>
+        <div class="admin-card">
+          <div class="admin-card-title">Ajouter un morceau</div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Titre du morceau</label>
+              <input type="text" id="t-title" placeholder="Titre">
+            </div>
+            <div class="admin-field">
+              <label>Artiste</label>
+              <select id="t-artist"></select>
+            </div>
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Album (optionnel)</label>
+              <input type="text" id="t-album" placeholder="Nom de l'album">
+            </div>
+            <div class="admin-field">
+              <label>Durée (ex: 3:42)</label>
+              <input type="text" id="t-duration" placeholder="3:42">
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>Fichier audio (MP3)</label>
+            <div class="file-upload-zone">
+              <input type="file" id="t-audio-file" accept="audio/*" onchange="handleAudioFile(this)">
+              <div class="file-upload-text">Glisser un MP3 ou cliquer pour parcourir</div>
+              <div class="file-name-preview" id="t-audio-preview"></div>
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>URL Spotify / externe (alternatif au fichier)</label>
+            <input type="text" id="t-url" placeholder="https://open.spotify.com/...">
+          </div>
+          <div class="admin-field">
+            <label>Image de couverture</label>
+            <div class="file-upload-zone">
+              <input type="file" id="t-cover-file" accept="image/*" onchange="handleTrackCover(this)">
+              <div class="file-upload-text">Glisser une image ou cliquer</div>
+              <div class="file-name-preview" id="t-cover-preview"></div>
+            </div>
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label class="admin-label">Style musical</label>
+              <input class="admin-input" id="track-style" type="text" placeholder="ex: Morna, Funaná, Urban...">
+            </div>
+            <div class="admin-field">
+              <label class="admin-label">Catégorie</label>
+              <select class="admin-input" id="track-category">
+                <option value="traditional">Traditional Music</option>
+                <option value="urban">Urban Music</option>
+              </select>
+            </div>
+          </div>
+          <div class="admin-submit-row">
+            <button class="admin-btn-ghost" onclick="resetTrackForm()">Réinitialiser</button>
+            <button class="admin-btn-sm" onclick="saveTrack()">Ajouter au catalogue</button>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Catalogue actuel</div>
+          <div id="music-admin-list"></div>
+        </div>
+      </div>
+
+      <!-- ALBUMS ADMIN -->
+      <div class="admin-page" id="page-albums-admin">
+        <div class="admin-page-title">Albums</div>
+        <div class="admin-page-sub">Gérer la discographie</div>
+        <div class="admin-divider"></div>
+        <div class="admin-success" id="albums-success">Album enregistré avec succès.</div>
+        <div class="admin-card">
+          <div class="admin-card-title">Ajouter un album</div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Titre de l'album</label>
+              <input type="text" id="al-title" placeholder="Titre">
+            </div>
+            <div class="admin-field">
+              <label>Artiste</label>
+              <select id="al-artist"></select>
+            </div>
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Année de sortie</label>
+              <input type="text" id="al-year" placeholder="2025">
+            </div>
+            <div class="admin-field">
+              <label>Label</label>
+              <input type="text" id="al-label" placeholder="Label / Distributeur">
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>Description</label>
+            <textarea id="al-desc" rows="3" placeholder="Présentation de l'album"></textarea>
+          </div>
+          <div class="admin-field">
+            <label>Pochette (image)</label>
+            <div class="file-upload-zone">
+              <input type="file" id="al-cover-file" accept="image/*" onchange="handleAlbumCover(this)">
+              <div class="file-upload-text">Glisser une pochette ou cliquer</div>
+              <div class="file-name-preview" id="al-cover-preview"></div>
+            </div>
+          </div>
+          <div class="admin-field">
+            <label class="admin-label">Catégorie</label>
+            <select class="admin-input" id="album-category">
+              <option value="traditional">Traditional Music</option>
+              <option value="urban">Urban Music</option>
+            </select>
+          </div>
+          <div class="admin-submit-row">
+            <button class="admin-btn-ghost" onclick="resetAlbumForm()">Réinitialiser</button>
+            <button class="admin-btn-sm" onclick="saveAlbum()">Enregistrer l'album</button>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Discographie</div>
+          <div id="albums-admin-list"></div>
+        </div>
+      </div>
+
+      <!-- NEWS ADMIN -->
+      <div class="admin-page" id="page-news-admin">
+        <div class="admin-page-title">Actualités</div>
+        <div class="admin-page-sub">Gérer les articles et news</div>
+        <div class="admin-divider"></div>
+        <div class="admin-success" id="news-success">Article publié avec succès.</div>
+        <div class="admin-card">
+          <div class="admin-card-title">Publier un article</div>
+          <div class="admin-field">
+            <label>Titre de l'article</label>
+            <input type="text" id="n-title" placeholder="Titre">
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Artiste concerné</label>
+              <select id="n-artist"></select>
+            </div>
+            <div class="admin-field">
+              <label>Date de publication</label>
+              <input type="date" id="n-date">
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>Résumé (affiché en carte)</label>
+            <textarea id="n-excerpt" rows="2" placeholder="Courte description..."></textarea>
+          </div>
+          <div class="admin-field">
+            <label>Contenu complet</label>
+            <textarea id="n-content" rows="6" placeholder="Article complet..."></textarea>
+          </div>
+          <div class="admin-field">
+            <label>Image de couverture</label>
+            <div class="file-upload-zone">
+              <input type="file" id="n-img-file" accept="image/*" onchange="handleNewsImg(this)">
+              <div class="file-upload-text">Glisser une image ou cliquer</div>
+              <div class="file-name-preview" id="n-img-preview"></div>
+            </div>
+          </div>
+          <div class="admin-submit-row">
+            <button class="admin-btn-ghost" onclick="resetNewsForm()">Réinitialiser</button>
+            <button class="admin-btn-sm" onclick="saveNews()">Publier l'article</button>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Articles publiés</div>
+          <div id="news-admin-list"></div>
+        </div>
+      </div>
+
+
+      <!-- USERS ADMIN -->
+      <div class="admin-page" id="page-users-admin">
+        <div class="admin-page-title">Utilisateurs</div>
+        <div class="admin-page-sub">Gestion des accès et droits — AdminArt</div>
+        <div class="admin-divider"></div>
+        <div class="admin-success" id="users-success">Utilisateur enregistré.</div>
+        <div id="users-superadmin-only" style="display:none;">
+          <div class="admin-card">
+            <div class="admin-card-title">Créer un utilisateur</div>
+            <div class="admin-field" style="margin-bottom:12px;">
+              <label>Adresse email <span style="color:var(--accent2);">*</span></label>
+              <input type="email" id="u-email" placeholder="utilisateur@email.com">
+            </div>
+            <div class="admin-grid-2">
+              <div class="admin-field">
+                <label>Identifiant (optionnel)</label>
+                <input type="text" id="u-login" placeholder="login">
+              </div>
+              <div class="admin-field">
+                <label>Mot de passe</label>
+                <input type="password" id="u-pass" placeholder="••••••••">
+              </div>
+            </div>
+            <div class="admin-grid-2">
+              <div class="admin-field">
+                <label>Prénom / Nom</label>
+                <input type="text" id="u-name" placeholder="Prénom Nom">
+              </div>
+              <div class="admin-field">
+                <label>Rôle prédéfini</label>
+                <select id="u-role" onchange="applyRoleTemplate()">
+                  <option value="custom">Personnalisé</option>
+                  <option value="editor">Éditeur — tous droits sauf admin</option>
+                  <option value="contributor">Contributeur — ajout uniquement</option>
+                  <option value="moderator">Modérateur — édition + suppression</option>
+                  <option value="readonly">Lecteur — consultation seule</option>
+                  <option value="membre">Membre — compte visiteur</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin: 24px 0 16px; font-family:Arial; font-size:10px; letter-spacing:3px; color:var(--gray); text-transform:uppercase; border-bottom:1px solid rgba(31,158,92,0.15); padding-bottom:12px;">
+              Permissions granulaires
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table id="perm-table" style="width:100%; border-collapse:collapse; font-family:Arial; font-size:11px;">
+                <thead>
+                  <tr style="color:var(--gray); letter-spacing:2px; text-transform:uppercase;">
+                    <th style="text-align:left; padding:10px 0; width:140px;">Section</th>
+                    <th style="padding:10px 16px; text-align:center;">Voir</th>
+                    <th style="padding:10px 16px; text-align:center;">Ajouter</th>
+                    <th style="padding:10px 16px; text-align:center;">Modifier</th>
+                    <th style="padding:10px 16px; text-align:center;">Supprimer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-top:1px solid rgba(31,158,92,0.1);">
+                    <td style="padding:10px 0; color:var(--lightgray);">Artistes</td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="view" checked></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="add"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="edit"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="delete"></td>
+                  </tr>
+                  <tr style="border-top:1px solid rgba(31,158,92,0.1);">
+                    <td style="padding:10px 0; color:var(--lightgray);">Musiques</td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="view" checked></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="add"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="edit"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="delete"></td>
+                  </tr>
+                  <tr style="border-top:1px solid rgba(31,158,92,0.1);">
+                    <td style="padding:10px 0; color:var(--lightgray);">Albums</td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="view" checked></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="add"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="edit"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="delete"></td>
+                  </tr>
+                  <tr style="border-top:1px solid rgba(31,158,92,0.1);">
+                    <td style="padding:10px 0; color:var(--lightgray);">Actualités</td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="view" checked></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="add"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="edit"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="delete"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="admin-submit-row">
+              <button class="admin-btn-ghost" onclick="resetUserForm()">Réinitialiser</button>
+              <button class="admin-btn-sm" onclick="saveUser()">Créer l'utilisateur</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="users-readonly-notice" style="display:none;">
+          <div class="admin-card">
+            <div style="color:var(--gray);font-family:Arial;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-align:center;padding:20px;">
+              Accès réservé au Super-Administrateur
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-title">Utilisateurs enregistrés</div>
+          <div id="users-admin-list"></div>
+        </div>
+      </div>
+
+
+      <!-- ORDERS ADMIN -->
+      <div class="admin-page" id="page-orders-admin">
+        <div class="admin-page-title">Commandes</div>
+        <div class="admin-page-sub">Suivi et gestion des commandes boutique</div>
+        <div class="admin-divider"></div>
+        <div class="eco-stats-grid">
+          <div class="stat-card-eco"><div class="stat-card-value" id="ostat-ca">0 €</div><div class="stat-card-label">CA Total</div></div>
+          <div class="stat-card-eco"><div class="stat-card-value" id="ostat-total">0</div><div class="stat-card-label">Commandes</div></div>
+          <div class="stat-card-eco"><div class="stat-card-value" id="ostat-avg">0 €</div><div class="stat-card-label">Panier Moyen</div></div>
+          <div class="stat-card-eco"><div class="stat-card-value" id="ostat-month">0</div><div class="stat-card-label">Ce Mois</div></div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <span>Liste des commandes</span>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <select id="orders-status-filter" onchange="refreshAdminOrders()" style="background:var(--navy2);border:1px solid rgba(31,158,92,0.2);color:var(--white);padding:8px 12px;font-family:Arial;font-size:11px;letter-spacing:1px;cursor:pointer;">
+                <option value="all">Tous les statuts</option>
+                <option value="pending">En attente</option>
+                <option value="shipped">Expédié</option>
+                <option value="cancelled">Annulé</option>
+              </select>
+              <button onclick="exportOrdersCSV()" style="background:none;border:1px solid rgba(31,158,92,0.3);color:var(--accent2);padding:8px 16px;font-family:Arial;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">Exporter CSV</button>
+            </div>
+          </div>
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>N° Commande</th>
+                  <th>Date</th>
+                  <th>Client</th>
+                  <th>Articles</th>
+                  <th style="text-align:right;">Total</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-table-body"></tbody>
+            </table>
+            <div id="orders-empty" class="orders-empty" style="display:none;">Aucune commande pour le moment.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: PRODUITS SHOP -->
+      <div class="admin-page" id="page-shop-products">
+        <div class="admin-page-title">Produits Shop</div>
+        <div class="admin-page-sub">Gestion du catalogue produits</div>
+        <div class="admin-divider"></div>
+        <div class="shop-admin-grid">
+          <div class="admin-card">
+            <div class="admin-card-title" id="prod-form-title">Ajouter un produit</div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Nom du produit</label>
+                <input class="admin-input" id="prod-name" type="text" placeholder="Titre de l'album...">
+              </div>
+              <div>
+                <label class="admin-label">Artiste</label>
+                <select class="admin-input" id="prod-artist"></select>
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Type</label>
+                <select class="admin-input" id="prod-type">
+                  <option value="cd">CD</option>
+                  <option value="digital">Digital</option>
+                  <option value="vinyle">Vinyle</option>
+                </select>
+              </div>
+              <div>
+                <label class="admin-label">Prix (€)</label>
+                <input class="admin-input" id="prod-price" type="number" step="0.01" min="0" placeholder="18.90">
+              </div>
+              <div class="admin-field">
+                <label class="admin-label">Lien Stripe (Payment Link)</label>
+                <input class="admin-input" id="prod-stripe-link" type="url" placeholder="https://buy.stripe.com/...">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Stock</label>
+                <input class="admin-input" id="prod-stock" type="number" min="0" placeholder="10">
+              </div>
+              <div>
+                <label class="admin-label">Image produit</label>
+                <input type="file" accept="image/*" id="prod-img-input" onchange="previewUpload(this,'prod-img-preview')" style="background:var(--navy2);border:1px solid rgba(31,158,92,0.2);color:var(--gray);padding:8px;width:100%;font-family:Arial;font-size:11px;">
+              </div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Description courte</label>
+              <textarea class="admin-input" id="prod-desc" rows="3" placeholder="Description..."></textarea>
+            </div>
+            <img id="prod-img-preview" class="admin-upload-preview" alt="">
+            <input type="hidden" id="prod-edit-id" value="">
+            <div style="display:flex;gap:10px;margin-top:16px;">
+              <button class="admin-btn-primary" onclick="saveProd()">Ajouter le produit</button>
+              <button class="admin-btn-secondary" onclick="resetProdForm()" style="display:none;" id="prod-cancel-btn">Annuler</button>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Aperçu image</div>
+            <div style="text-align:center;padding:40px 0;color:var(--gray);font-family:Arial;font-size:11px;" id="prod-img-hint">Sélectionnez une image pour prévisualiser</div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Catalogue produits (<span id="prod-count">0</span>)</div>
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead><tr><th>Photo</th><th>Artiste</th><th>Titre</th><th>Type</th><th style="text-align:right;">Prix</th><th>Stock</th><th>Actions</th></tr></thead>
+              <tbody id="prod-table-body"></tbody>
+            </table>
+            <div id="prod-empty" style="text-align:center;padding:32px;color:var(--gray);font-family:Arial;font-size:12px;display:none;">Aucun produit.</div>
+          </div>
+        </div>
+      </div>
+
+      
+      <!-- PAGE: CATÉGORIES MUSIQUE -->
+      <div class="admin-page" id="page-music-categories">
+        <div class="admin-page-title">Catégories Musique</div>
+        <div class="admin-page-sub">Créez et gérez les catégories du catalogue</div>
+        <div class="admin-divider"></div>
+        <div class="shop-admin-grid">
+          <div class="admin-card">
+            <div class="admin-card-title">Ajouter une catégorie</div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Identifiant (sans espace)</label>
+              <input class="admin-input" id="cat-id" type="text" placeholder="ex: jazz, pop, folk">
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Nom affiché</label>
+              <input class="admin-input" id="cat-label" type="text" placeholder="ex: Jazz &amp; Soul">
+            </div>
+            <button class="admin-btn-primary" onclick="addMusicCategory()">Créer la catégorie</button>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Catégories existantes (<span id="cat-count">0</span>)</div>
+            <div id="cat-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: ÉVÉNEMENTS -->
+      <div class="admin-page" id="page-shop-events">
+        <div class="admin-page-title">Événements</div>
+        <div class="admin-page-sub">Gestion des concerts et événements</div>
+        <div class="admin-divider"></div>
+        <div class="shop-admin-grid">
+          <div class="admin-card">
+            <div class="admin-card-title" id="evt-form-title">Créer un événement</div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Artiste</label>
+                <select class="admin-input" id="evt-artist"></select>
+              </div>
+              <div>
+                <label class="admin-label">Venue (salle)</label>
+                <input class="admin-input" id="evt-venue" type="text" placeholder="Olympia...">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Ville</label>
+                <input class="admin-input" id="evt-city" type="text" placeholder="Paris">
+              </div>
+              <div>
+                <label class="admin-label">Pays</label>
+                <input class="admin-input" id="evt-country" type="text" placeholder="France">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Date</label>
+                <input class="admin-input" id="evt-date" type="date">
+              </div>
+              <div>
+                <label class="admin-label">Heure</label>
+                <input class="admin-input" id="evt-time" type="time" value="20:00">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Prix Standard (€)</label>
+                <input class="admin-input" id="evt-price" type="number" step="0.01" min="0" placeholder="35">
+              </div>
+              <div>
+                <label class="admin-label">Prix VIP (€)</label>
+                <input class="admin-input" id="evt-vip" type="number" step="0.01" min="0" placeholder="65">
+              </div>
+              <div class="admin-field">
+                <label class="admin-label">Lien Stripe Billets (Payment Link)</label>
+                <input class="admin-input" id="evt-stripe-link" type="url" placeholder="https://buy.stripe.com/...">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Capacité totale</label>
+                <input class="admin-input" id="evt-capacity" type="number" min="1" placeholder="300">
+              </div>
+              <div>
+                <label class="admin-label">Photo événement</label>
+                <input type="file" accept="image/*" id="evt-img-input" onchange="previewUpload(this,'evt-img-preview')" style="background:var(--navy2);border:1px solid rgba(31,158,92,0.2);color:var(--gray);padding:8px;width:100%;font-family:Arial;font-size:11px;">
+              </div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Description</label>
+              <textarea class="admin-input" id="evt-desc" rows="3" placeholder="Description de l'événement..."></textarea>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Statut</label>
+              <select class="admin-input" id="evt-status">
+                <option value="active">Actif</option>
+                <option value="cancelled">Annulé</option>
+                <option value="rescheduled">Reprogrammé</option>
+                <option value="extended">Prolongé</option>
+              </select>
+            </div>
+            <img id="evt-img-preview" class="admin-upload-preview" alt="">
+            <input type="hidden" id="evt-edit-id" value="">
+            <div style="display:flex;gap:10px;margin-top:16px;">
+              <button class="admin-btn-primary" onclick="saveEvt()">Créer l'événement</button>
+              <button class="admin-btn-secondary" onclick="resetEvtForm()" style="display:none;" id="evt-cancel-btn">Annuler</button>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Statistiques événements</div>
+            <div class="eco-stats-grid" style="grid-template-columns:1fr 1fr;">
+              <div class="stat-card-eco"><div class="stat-card-value" id="evt-stat-total">0</div><div class="stat-card-label">Total</div></div>
+              <div class="stat-card-eco"><div class="stat-card-value" id="evt-stat-active">0</div><div class="stat-card-label">Actifs</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Liste des événements (<span id="evt-count">0</span>)</div>
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead><tr><th>Date</th><th>Artiste</th><th>Venue</th><th>Ville</th><th style="text-align:right;">Standard</th><th style="text-align:right;">VIP</th><th>Places</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody id="evt-table-body"></tbody>
+            </table>
+            <div id="evt-empty" style="text-align:center;padding:32px;color:var(--gray);font-family:Arial;font-size:12px;display:none;">Aucun événement.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: LIENS PAIEMENT -->
+      <div class="admin-page" id="page-payment-links">
+        <div class="admin-page-title">Liens Paiement</div>
+        <div class="admin-page-sub">Générer et envoyer des liens de paiement personnalisés</div>
+        <div class="admin-divider"></div>
+        <div class="shop-admin-grid">
+          <div class="admin-card">
+            <div class="admin-card-title">Générer un lien</div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Article</label>
+              <select class="admin-input" id="plink-item" onchange="fillPLinkPrice()">
+                <option value="">— Sélectionner —</option>
+              </select>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Quantité</label>
+                <input class="admin-input" id="plink-qty" type="number" min="1" value="1" onchange="updatePLinkTotal()">
+              </div>
+              <div>
+                <label class="admin-label">Prix unitaire (€)</label>
+                <input class="admin-input" id="plink-price" type="number" step="0.01" min="0" onchange="updatePLinkTotal()">
+              </div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Total : <span id="plink-total" style="color:var(--accent2);">0,00 €</span></label>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Email destinataire</label>
+              <input class="admin-input" id="plink-email" type="email" placeholder="client@email.com">
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Message personnalisé</label>
+              <textarea class="admin-input" id="plink-msg" rows="4" placeholder="Bonjour, veuillez trouver ci-dessous votre lien de paiement..."></textarea>
+            </div>
+            <button class="admin-btn-primary" onclick="generatePaymentLink()">Générer &amp; Envoyer le lien</button>
+            <div id="plink-result" style="display:none;">
+              <div class="payment-link-box" id="plink-url"></div>
+              <button onclick="copyPLink()" style="margin-top:10px;background:none;border:1px solid rgba(31,158,92,0.3);color:var(--accent2);padding:8px 20px;font-family:Arial;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;width:100%;">Copier le lien</button>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Guide d'utilisation</div>
+            <div style="font-family:Arial;font-size:12px;color:var(--gray);line-height:1.8;">
+              <p>1. Sélectionnez un produit ou événement</p>
+              <p>2. Ajustez la quantité et le prix si nécessaire</p>
+              <p>3. Entrez l'email du destinataire</p>
+              <p>4. Personnalisez le message</p>
+              <p>5. Cliquez "Générer &amp; Envoyer" — votre client de messagerie s'ouvrira avec le lien pré-rempli</p>
+              <p style="color:var(--accent2);margin-top:16px;">Les liens générés sont conservés dans l'historique ci-dessous.</p>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Historique des liens (<span id="plink-count">0</span>)</div>
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead><tr><th>Date</th><th>Destinataire</th><th>Article</th><th style="text-align:right;">Montant</th><th>Lien</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody id="plink-table-body"></tbody>
+            </table>
+            <div id="plink-empty" style="text-align:center;padding:32px;color:var(--gray);font-family:Arial;font-size:12px;display:none;">Aucun lien généré.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: CLIENTS -->
+      <div class="admin-page" id="page-customers-admin">
+        <div class="admin-page-title">Clients</div>
+        <div class="admin-page-sub">Base de données clients</div>
+        <div class="admin-divider"></div>
+        <div class="shop-admin-grid">
+          <div class="admin-card">
+            <div class="admin-card-title">Ajouter un client</div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Prénom</label>
+                <input class="admin-input" id="cust-firstname" type="text" placeholder="Jean">
+              </div>
+              <div>
+                <label class="admin-label">Nom</label>
+                <input class="admin-input" id="cust-lastname" type="text" placeholder="Dupont">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Email</label>
+                <input class="admin-input" id="cust-email" type="email" placeholder="jean@email.com">
+              </div>
+              <div>
+                <label class="admin-label">Pays</label>
+                <input class="admin-input" id="cust-country" type="text" placeholder="France">
+              </div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Téléphone (optionnel)</label>
+              <input class="admin-input" id="cust-phone" type="tel" placeholder="+33 6 00 00 00 00">
+            </div>
+            <button class="admin-btn-primary" id="cust-save-btn" onclick="saveCustomer()">Ajouter le client</button>
+            <button class="admin-btn-secondary" id="cust-cancel-btn" style="display:none;margin-left:8px;" onclick="resetCustForm()">Annuler</button>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Statistiques clients</div>
+            <div class="eco-stats-grid" style="grid-template-columns:1fr 1fr;">
+              <div class="stat-card-eco"><div class="stat-card-value" id="cust-stat-total">0</div><div class="stat-card-label">Total clients</div></div>
+              <div class="stat-card-eco"><div class="stat-card-value" id="cust-stat-orders">0</div><div class="stat-card-label">Avec commandes</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <span>Liste clients (<span id="cust-count">0</span>)</span>
+            <button onclick="exportCustomersCSV()" style="background:none;border:1px solid rgba(31,158,92,0.3);color:var(--accent2);padding:8px 16px;font-family:Arial;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">Exporter CSV</button>
+          </div>
+          <input class="customer-search" id="cust-search" type="text" placeholder="Rechercher par nom ou email..." oninput="renderCustomers()">
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead><tr><th>Nom</th><th>Email</th><th>Pays</th><th>Commandes</th><th style="text-align:right;">Total dépensé</th><th>Inscription</th><th>Actions</th></tr></thead>
+              <tbody id="cust-table-body"></tbody>
+            </table>
+            <div id="cust-empty" style="text-align:center;padding:32px;color:var(--gray);font-family:Arial;font-size:12px;display:none;">Aucun client.</div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- MODULES ADMIN — superadmin only -->
+      <div class="admin-page" id="page-modules-admin">
+        <div class="admin-page-title">&#9881; Gestion des Modules</div>
+        <div class="admin-page-sub">Activer ou désactiver les sections du site — Super Admin uniquement</div>
+        <div class="admin-divider"></div>
+        <div id="modules-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:24px;"></div>
+      </div>
+
+    </div><!-- /admin-main -->
+  </div><!-- /admin-panel -->
+</div><!-- /admin-overlay -->
+
+
+<div id="vinyl-transition"></div>
+<!-- ========== COOKIE BANNER ========== -->
+<div id="cookie-banner" style="display:none;">
+  <p>
+    Ce site utilise des cookies strictement nécessaires à son fonctionnement. Aucune donnée n'est transmise à des tiers à des fins publicitaires.
+    <a href="#" onclick="openLegal('cookies',event)">En savoir plus</a>
+  </p>
+  <div class="cookie-btns">
+    <button class="cookie-accept" onclick="cookieAccept()">Accepter</button>
+    <button class="cookie-refuse" onclick="cookieRefuse()">Refuser</button>
+  </div>
+</div>
+
+<!-- ========== MODAL MENTIONS LÉGALES ========== -->
+<div class="legal-overlay" id="legal-mentions">
+  <div class="legal-box">
+    <button class="legal-close" onclick="closeLegal('mentions')">✕ FERMER</button>
+    <div class="legal-title">Documents légaux</div>
+    <h1 class="legal-h1">Mentions Légales</h1>
+
+    <h2>Éditeur du site</h2>
+    <p><strong>Harmonia LDA</strong><br>
+    Editora discográfica de Cabo Verde — Produção · Edição · Distribuição da música das ilhas desde 1998<br><br>
+    <strong>Sede :</strong> Ribeira de Julião, Mindelo — CP 367 · São Vicente · Cabo Verde<br>
+    <strong>Escritório da Praia :</strong> Avenida Andrade Corvo · Plateau · Praia · Santiago · Cabo Verde<br>
+    <strong>NIF :</strong> 200140825<br>
+    <strong>Tél :</strong> <a href="tel:+2384310140">+238 431 01 40</a><br>
+    <strong>Responsable de publication :</strong> José da Silva<br>
+    <strong>Contact :</strong> <a href="mailto:harmonia.producao@gmail.com">harmonia.producao@gmail.com</a></p>
+
+    <h2>Hébergement</h2>
+    <p>Ce site est hébergé par :<br>
+    [Nom de l'hébergeur — à compléter]<br>
+    [Adresse de l'hébergeur]<br>
+    [Contact hébergeur]<br>
+    <em>Conformément à l'article 6 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN), les coordonnées complètes de l'hébergeur sont disponibles sur simple demande à <a href="mailto:harmonia.producao@gmail.com">harmonia.producao@gmail.com</a></em></p>
+
+    <h2>Propriété intellectuelle</h2>
+    <p>L'ensemble des contenus présents sur ce site (textes, photographies, images, sons, vidéos, logos, marques) est la propriété exclusive de HARMONIA Production ou de ses partenaires et est protégé par les lois françaises et internationales relatives à la propriété intellectuelle.</p>
+    <p>Toute reproduction, représentation, modification, publication ou adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite sans l'autorisation écrite préalable de HARMONIA Production.</p>
+
+    <h2>Droit applicable</h2>
+    <p>Le présent site est soumis au droit français. En cas de litige, et à défaut de résolution amiable, les juridictions françaises compétentes seront saisies. Conformément aux dispositions de l'article L. 214-1 du Code de la propriété intellectuelle et de la Convention de Berne pour la protection des œuvres littéraires et artistiques, les droits des artistes et producteurs sont protégés à l'international.</p>
+
+    <h2>Limitation de responsabilité</h2>
+    <p>HARMONIA Production s'efforce de maintenir les informations publiées sur ce site aussi exactes et à jour que possible. Cependant, HARMONIA Production ne peut garantir l'exactitude, la complétude ou l'actualité des informations diffusées. En conséquence, HARMONIA Production décline toute responsabilité pour toute imprécision, inexactitude ou omission portant sur des informations disponibles sur ce site.</p>
+
+    <h2>Liens hypertextes</h2>
+    <p>Ce site peut contenir des liens vers des sites tiers. HARMONIA Production n'exerce aucun contrôle sur ces sites et décline toute responsabilité quant à leur contenu ou à leur politique de confidentialité.</p>
+
+    <div class="legal-date">Dernière mise à jour : Mai 2025</div>
+  </div>
+</div>
+
+<!-- ========== MODAL POLITIQUE DE CONFIDENTIALITÉ ========== -->
+<div class="legal-overlay" id="legal-privacy">
+  <div class="legal-box">
+    <button class="legal-close" onclick="closeLegal('privacy')">✕ FERMER</button>
+    <div class="legal-title">Documents légaux</div>
+    <h1 class="legal-h1">Politique de Confidentialité</h1>
+
+    <h2>1. Responsable du traitement</h2>
+    <p><strong>Harmonia LDA</strong><br>
+    Maison de production musicale<br>
+    Siège social : Praia, Cabo Verde<br>
+    Responsable : José da Silva<br>
+    Contact RGPD : <a href="mailto:harmonia.producao@gmail.com">harmonia.producao@gmail.com</a></p>
+    <p>HARMONIA Production est responsable du traitement de vos données personnelles au sens du Règlement Général sur la Protection des Données (RGPD – UE 2016/679) et de la loi Informatique et Libertés n° 78-17 du 6 janvier 1978 modifiée.</p>
+
+    <h2>2. Délégué à la Protection des Données (DPO)</h2>
+    <p>Pour toute question relative à la protection de vos données personnelles, vous pouvez contacter notre référent RGPD à l'adresse suivante : <a href="mailto:harmonia.producao@gmail.com">harmonia.producao@gmail.com</a></p>
+
+    <h2>3. Données collectées et base légale</h2>
+    <p>HARMONIA Production collecte vos données dans les situations suivantes :</p>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin:12px 0;">
+      <thead><tr style="background:rgba(31,158,92,0.15);">
+        <th style="padding:8px;text-align:left;border:1px solid rgba(255,255,255,0.1);">Traitement</th>
+        <th style="padding:8px;text-align:left;border:1px solid rgba(255,255,255,0.1);">Données</th>
+        <th style="padding:8px;text-align:left;border:1px solid rgba(255,255,255,0.1);">Base légale (art. 6 RGPD)</th>
+        <th style="padding:8px;text-align:left;border:1px solid rgba(255,255,255,0.1);">Durée de conservation</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Formulaire de contact / booking</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Nom, organisation, message</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Consentement (6.1.a)</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">3 ans après dernier contact</td></tr>
+        <tr><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Commande (CD, digital, billets)</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Nom, email, adresse, données de paiement (tokenisées)</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Exécution du contrat (6.1.b)</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">5 ans (obligation comptable)</td></tr>
+        <tr><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Abonnement streaming</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Email, données de connexion</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Exécution du contrat (6.1.b)</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Durée de l'abonnement + 3 ans</td></tr>
+        <tr><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Newsletter / communication</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Email</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Consentement (6.1.a)</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Jusqu'au désabonnement + 3 ans</td></tr>
+        <tr><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Obligations légales et comptables</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Données de facturation</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">Obligation légale (6.1.c)</td><td style="padding:8px;border:1px solid rgba(255,255,255,0.1);">10 ans (Code de commerce)</td></tr>
+      </tbody>
+    </table>
+    <p>Aucune donnée sensible (santé, opinions politiques, données biométriques, etc.) n'est collectée.</p>
+
+    <h2>4. Destinataires des données</h2>
+    <p>Vos données sont destinées exclusivement à l'équipe HARMONIA Production. Elles ne sont jamais vendues, louées ou cédées à des tiers à des fins commerciales. Elles peuvent être transmises à des prestataires techniques (hébergement, messagerie, paiement) liés par des clauses contractuelles conformes au RGPD.</p>
+
+    <h2>5. Transferts hors Union Européenne</h2>
+    <p>HARMONIA Production a son siège au <strong>Cabo Verde</strong>. À ce jour, le Cabo Verde ne fait pas l'objet d'une décision d'adéquation de la Commission Européenne au sens de l'article 45 du RGPD. En conséquence, tout transfert de données vers nos serveurs ou partenaires basés au Cabo Verde est encadré par les <strong>clauses contractuelles types (CCT) adoptées par la Commission Européenne</strong> (décision 2021/914), conformément à l'article 46 du RGPD.</p>
+    <p>Pour les prestataires basés aux États-Unis (notamment Stripe pour le paiement), les transferts sont couverts par les clauses contractuelles types ou, le cas échéant, par le cadre EU-US Data Privacy Framework. Pour les prestataires basés au Brésil, les transferts sont couverts par les clauses contractuelles types.</p>
+    <p>Sur demande, HARMONIA Production peut vous fournir une copie des garanties mises en place : <a href="mailto:harmonia.producao@gmail.com">harmonia.producao@gmail.com</a></p>
+
+    <h2>6. Vos droits</h2>
+    <p>Conformément au RGPD, vous disposez des droits suivants :</p>
+    <ul>
+      <li><strong>Droit d'accès</strong> (art. 15) : obtenir une copie de vos données</li>
+      <li><strong>Droit de rectification</strong> (art. 16) : corriger des données inexactes</li>
+      <li><strong>Droit à l'effacement</strong> (art. 17) : "droit à l'oubli", sous réserve des obligations légales</li>
+      <li><strong>Droit à la limitation du traitement</strong> (art. 18)</li>
+      <li><strong>Droit à la portabilité</strong> (art. 20) : recevoir vos données dans un format structuré</li>
+      <li><strong>Droit d'opposition</strong> (art. 21) : vous opposer à un traitement fondé sur l'intérêt légitime</li>
+      <li><strong>Droit de retirer votre consentement</strong> à tout moment, sans effet rétroactif</li>
+    </ul>
+    <p>Pour exercer ces droits, contactez-nous à : <a href="mailto:harmonia.producao@gmail.com">harmonia.producao@gmail.com</a><br>
+    Nous répondrons dans un délai d'un mois (art. 12 RGPD). En cas de réponse insatisfaisante, vous avez le droit d'introduire une réclamation auprès de la <strong>CNIL</strong> (<a href="https://www.cnil.fr" target="_blank">www.cnil.fr</a>) ou de l'autorité de contrôle compétente dans votre pays de résidence.</p>
+
+    <h2>7. Cookies</h2>
+    <p>Pour toute information sur les cookies utilisés par ce site, veuillez consulter notre <a href="#" onclick="closeLegal('privacy'); openLegal('cookies', event)">Politique de Gestion des Cookies</a>.</p>
+
+    <h2>8. Sécurité</h2>
+    <p>HARMONIA Production met en œuvre des mesures techniques et organisationnelles appropriées pour protéger vos données contre tout accès non autorisé, perte, altération ou divulgation, conformément à l'article 32 du RGPD. Les données de paiement sont traitées exclusivement par nos prestataires certifiés PCI-DSS (Stripe, PayPal) — aucune donnée bancaire n'est stockée sur nos serveurs.</p>
+
+    <div class="legal-date">Dernière mise à jour : Juin 2025 — Conforme RGPD (UE 2016/679)</div>
+  </div>
+</div>
+
+<!-- ========== MODAL CGU ========== -->
+<div class="legal-overlay" id="legal-cgu">
+  <div class="legal-box">
+    <button class="legal-close" onclick="closeLegal('cgu')">✕ FERMER</button>
+    <div class="legal-title">Documents légaux</div>
+    <h1 class="legal-h1">Conditions Générales d'Utilisation</h1>
+
+    <h2>Objet</h2>
+    <p>Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation du site internet de HARMONIA Production. Tout accès au site implique l'acceptation sans réserve des présentes CGU.</p>
+
+    <h2>Accès au site</h2>
+    <p>Le site est accessible gratuitement à tout utilisateur disposant d'un accès à Internet. HARMONIA Production se réserve le droit de modifier, suspendre ou interrompre l'accès au site à tout moment et sans préavis, notamment pour des raisons de maintenance ou de mise à jour.</p>
+
+    <h2>Contenu du site</h2>
+    <p>Les informations et contenus présents sur ce site sont fournis à titre indicatif. HARMONIA Production fait ses meilleurs efforts pour que les contenus soient exacts et mis à jour régulièrement. Cependant, nous ne saurions garantir l'absence d'erreurs ou d'omissions.</p>
+
+    <h2>Propriété intellectuelle</h2>
+    <p>L'ensemble des éléments du site — extraits musicaux, photographies, biographies, logos, mises en page — est protégé par le droit d'auteur et les droits voisins (droits des producteurs de phonogrammes et droits des artistes-interprètes) conformément au Code de la Propriété Intellectuelle français et aux conventions internationales (Convention de Berne, Convention de Rome, Traités OMPI).</p>
+    <p>Toute exploitation non autorisée constitue une contrefaçon passible de sanctions civiles et pénales.</p>
+
+    <h2>Comportement de l'utilisateur</h2>
+    <p>L'utilisateur s'engage à :</p>
+    <ul>
+      <li>Ne pas utiliser le site à des fins illicites ou contraires aux présentes CGU</li>
+      <li>Ne pas tenter d'accéder frauduleusement aux sections réservées</li>
+      <li>Ne pas diffuser de contenus illicites, diffamatoires ou portant atteinte aux droits des tiers</li>
+      <li>Respecter les droits de propriété intellectuelle de HARMONIA Production et de ses artistes</li>
+    </ul>
+
+    <h2>Droits des artistes</h2>
+    <p>Les extraits musicaux disponibles sur ce site sont diffusés avec l'accord des artistes et de HARMONIA Production. Ils sont destinés exclusivement à un usage d'écoute privée et de promotion. Toute reproduction, téléchargement non autorisé ou diffusion publique est strictement interdite.</p>
+
+    <h2>Droit applicable et juridiction</h2>
+    <p>Les présentes CGU sont soumises au droit français. En cas de litige, les parties rechercheront une solution amiable. À défaut, le litige sera soumis aux juridictions compétentes du ressort du siège social de HARMONIA Production.</p>
+
+    <div class="legal-date">Dernière mise à jour : Mai 2025</div>
+  </div>
+</div>
+
+<!-- ========== MODAL CGV ========== -->
+<div class="legal-overlay" id="legal-cgv">
+  <div class="legal-box">
+    <button class="legal-close" onclick="closeLegal('cgv')">✕ FERMER</button>
+    <div class="legal-title">Documents légaux</div>
+    <h1 class="legal-h1">Conditions Générales de Vente</h1>
+
+    <h2>Article 1 — Identité du vendeur</h2>
+    <p><strong>Harmonia LDA</strong><br>
+    Maison de production musicale<br>
+    Siège social : Praia, Cabo Verde<br>
+    Numéro d'enregistrement : [Numéro CNPS / enregistrement commercial Cabo Verde — à compléter]<br>
+    Responsable : José da Silva<br>
+    Contact : <a href="mailto:harmonia.producao@gmail.com">harmonia.producao@gmail.com</a><br>
+    Les présentes Conditions Générales de Vente (CGV) sont établies conformément aux articles L. 111-1 et suivants du Code de la consommation français et aux directives européennes 2011/83/UE et 2019/2161/UE relatives aux droits des consommateurs.</p>
+
+    <h2>Article 2 — Produits et services</h2>
+    <p>HARMONIA Production commercialise les produits et services suivants :</p>
+    <ul>
+      <li><strong>Albums physiques (CD)</strong> : envoi postal, délai de livraison 5 à 10 jours ouvrés selon la destination</li>
+      <li><strong>Albums digitaux</strong> : livraison par email sous 24 heures après confirmation du paiement</li>
+      <li><strong>Billets de concert</strong> : envoi électronique immédiat après confirmation du paiement</li>
+      <li><strong>Abonnement streaming</strong> : accès immédiat à la bibliothèque musicale HARMONIA, formule mensuelle ou annuelle, résiliable à tout moment sans frais</li>
+    </ul>
+    <p>Les caractéristiques essentielles de chaque produit sont présentées sur la page de commande. HARMONIA Production s'engage à ne proposer à la vente que des produits disponibles.</p>
+
+    <h2>Article 3 — Prix</h2>
+    <p>Les prix sont indiqués en euros (<strong>TTC</strong>), toutes taxes comprises. HARMONIA Production se réserve le droit de modifier ses prix à tout moment. Toutefois, le prix applicable est celui affiché au moment de la validation de la commande. En cas de vente vers des pays hors zone euro, des frais de conversion bancaire peuvent s'appliquer selon les conditions de votre établissement bancaire.</p>
+
+    <h2>Article 4 — Commande</h2>
+    <p>La commande est validée après :</p>
+    <ul>
+      <li>Saisie des informations de livraison et de facturation</li>
+      <li>Acceptation des présentes CGV</li>
+      <li>Paiement complet et confirmation de la transaction</li>
+    </ul>
+    <p>Un email de confirmation récapitulatif est automatiquement envoyé à l'adresse fournie lors de la commande. HARMONIA Production se réserve le droit d'annuler toute commande présentant des signes de fraude ou passée en violation des présentes CGV, après en avoir informé le client.</p>
+
+    <h2>Article 5 — Paiement</h2>
+    <p>Les paiements sont acceptés par :</p>
+    <ul>
+      <li>Carte bancaire (Visa, Mastercard, American Express) — traitement sécurisé via <strong>Stripe</strong> (certifié PCI-DSS niveau 1)</li>
+      <li>PayPal</li>
+      <li>Virement bancaire (sur demande pour les commandes supérieures à 200 €)</li>
+    </ul>
+    <p><strong>Aucune donnée bancaire n'est stockée sur les serveurs HARMONIA Production.</strong> Toutes les transactions sont chiffrées (SSL/TLS) et traitées exclusivement par nos prestataires de paiement certifiés.</p>
+
+    <h2>Article 6 — Livraison (produits physiques)</h2>
+    <p>La livraison des produits physiques (CD) est disponible dans le monde entier. Les frais de livraison sont calculés en fonction de la destination et du poids du colis, et sont indiqués au moment de la commande.</p>
+    <ul>
+      <li><strong>Europe</strong> : délai moyen 5 à 10 jours ouvrés</li>
+      <li><strong>Reste du monde</strong> : délai moyen 10 à 20 jours ouvrés</li>
+    </ul>
+    <p>Ces délais sont donnés à titre indicatif. HARMONIA Production ne saurait être tenu responsable des retards imputables aux services postaux ou aux autorités douanières. En cas de perte ou de dommage constaté à la livraison, le client doit contacter <a href="mailto:harmonia.producao@gmail.com">harmonia.producao@gmail.com</a> dans les 7 jours suivant la réception.</p>
+
+    <h2>Article 7 — Droit de rétractation</h2>
+    <p>Conformément aux articles L. 221-18 et suivants du Code de la consommation, le consommateur dispose d'un délai de <strong>14 jours calendaires</strong> à compter de la réception du bien pour exercer son droit de rétractation, sans motif à fournir.</p>
+    <p>Les <strong>exceptions légales</strong> suivantes s'appliquent (art. L. 221-28 Code de la consommation) :</p>
+    <ul>
+      <li><strong>Contenus numériques téléchargés</strong> (albums digitaux) : le droit de rétractation est exclu dès lors que le téléchargement a commencé avec l'accord exprès du consommateur et renonciation au droit de rétractation</li>
+      <li><strong>Billets de concert</strong> : le droit de rétractation est exclu pour les prestations de services de loisirs fournis à une date ou une période déterminée</li>
+    </ul>
+    <p>Pour exercer votre droit de rétractation sur les produits éligibles (CD physiques), contactez-nous à <a href="mailto:harmonia.producao@gmail.com">harmonia.producao@gmail.com</a> dans le délai de 14 jours. Le retour du produit est à la charge du client.</p>
+
+    <h2>Article 8 — Remboursement</h2>
+    <p>En cas de rétractation valablement exercée, HARMONIA Production procède au remboursement intégral du prix payé (hors frais de retour) dans un délai de <strong>14 jours</strong> à compter de la réception du bien retourné ou de la preuve d'expédition. Le remboursement est effectué par le même moyen de paiement que celui utilisé lors de la commande, sauf accord contraire exprès du client.</p>
+
+    <h2>Article 9 — Propriété intellectuelle</h2>
+    <p>L'ensemble des contenus musicaux distribués par HARMONIA Production (enregistrements, compositions, paroles, pochettes) est protégé par le droit d'auteur et les droits voisins conformément au Code de la Propriété Intellectuelle français, à la Convention de Berne et aux traités OMPI. Tout achat confère un droit d'usage strictement <strong>personnel et non commercial</strong>. Sont strictement interdits :</p>
+    <ul>
+      <li>La reproduction ou la diffusion publique non autorisée</li>
+      <li>La mise à disposition sur des réseaux de partage</li>
+      <li>Toute exploitation commerciale sans autorisation écrite préalable de HARMONIA Production</li>
+    </ul>
+
+    <h2>Article 10 — Responsabilité</h2>
+    <p>HARMONIA Production s'engage à mettre tout en œuvre pour assurer la disponibilité et la qualité de ses produits et services. Toutefois, sa responsabilité ne saurait être engagée pour :</p>
+    <ul>
+      <li>Les préjudices indirects, immatériels ou consécutifs</li>
+      <li>Les interruptions de service dues à des causes extérieures (maintenance, force majeure)</li>
+      <li>Les retards de livraison imputables aux services postaux</li>
+    </ul>
+    <p>Constituent des cas de <strong>force majeure</strong> exonérant HARMONIA Production de toute responsabilité : grèves, catastrophes naturelles, pandémies, restrictions gouvernementales ou tout autre événement imprévisible et irrésistible.</p>
+
+    <h2>Article 11 — Données personnelles</h2>
+    <p>Les données collectées lors d'une commande (nom, adresse, email, données de paiement tokenisées) sont nécessaires à l'exécution du contrat et conservées pendant <strong>5 ans</strong> conformément aux obligations comptables légales (art. L. 123-22 Code de commerce), et jusqu'à 10 ans pour les pièces comptables. Pour l'exercice de vos droits, consultez notre <a href="#" onclick="closeLegal('cgv'); openLegal('privacy', event)">Politique de Confidentialité</a>.</p>
+
+    <h2>Article 12 — Médiation et règlement des litiges</h2>
+    <p>En cas de litige, le client est invité à contacter en priorité le service client HARMONIA Production à <a href="mailto:harmonia.producao@gmail.com">harmonia.producao@gmail.com</a>. À défaut de résolution amiable dans un délai de 30 jours, le consommateur résidant en Union Européenne peut recourir à la médiation de la consommation :</p>
+    <ul>
+      <li>Plateforme européenne de règlement en ligne des litiges (RLL) : <a href="https://ec.europa.eu/consumers/odr" target="_blank">ec.europa.eu/consumers/odr</a></li>
+      <li>Médiateur de la consommation : <a href="https://www.mediation-conso.fr" target="_blank">www.mediation-conso.fr</a></li>
+    </ul>
+
+    <h2>Article 13 — Droit applicable et juridiction compétente</h2>
+    <p>Les présentes CGV sont soumises au <strong>droit français</strong>. En cas de litige judiciaire non résolu par médiation, le tribunal compétent sera celui du domicile du défendeur ou, pour les litiges de consommation, le tribunal du lieu de résidence du consommateur. Pour les professionnels, le tribunal de commerce de <strong>Paris</strong> (siège européen de HARMONIA Production) sera seul compétent.</p>
+
+    <div class="legal-date">Dernière mise à jour : Juin 2025 — Conformes art. L. 111-1 et s. Code de la consommation</div>
+  </div>
+</div>
+
+<!-- ========== MODAL POLITIQUE COOKIES ========== -->
+<div class="legal-overlay" id="legal-cookies">
+  <div class="legal-box">
+    <button class="legal-close" onclick="closeLegal('cookies')">✕ FERMER</button>
+    <div class="legal-title">Documents légaux</div>
+    <h1 class="legal-h1">Politique de Gestion des Cookies</h1>
+
+    <h2>Qu'est-ce qu'un cookie ?</h2>
+    <p>Un cookie est un petit fichier texte déposé sur votre terminal (ordinateur, tablette, smartphone) lors de la visite d'un site internet. Les cookies permettent de mémoriser des informations relatives à votre navigation.</p>
+
+    <h2>Cookies utilisés sur ce site</h2>
+    <p>Ce site utilise exclusivement des <strong>cookies fonctionnels strictement nécessaires</strong> à son fonctionnement :</p>
+    <ul>
+      <li><strong>harmonia_lang</strong> : mémorise votre préférence de langue (durée : session + 1 an)</li>
+      <li><strong>harmonia_data</strong> : stockage local des données de contenu (localStorage, non transmis à des tiers)</li>
+      <li><strong>harmonia_cookie</strong> : mémorise votre choix de consentement aux cookies (durée : 13 mois)</li>
+    </ul>
+    <p>Ce site <strong>n'utilise pas</strong> de cookies publicitaires, de tracking comportemental, ni de cookies de réseaux sociaux tiers.</p>
+
+    <h2>Base légale</h2>
+    <p>Conformément à la directive ePrivacy (2002/58/CE) et aux recommandations de la CNIL, les cookies strictement nécessaires au fonctionnement du site sont déposés sans consentement préalable. Pour tout autre type de cookie, votre consentement est requis.</p>
+
+    <h2>Gestion de vos préférences</h2>
+    <p>Vous pouvez à tout moment modifier vos préférences en matière de cookies :</p>
+    <ul>
+      <li>Via les paramètres de votre navigateur (suppression / blocage des cookies)</li>
+      <li>En cliquant sur le bouton ci-dessous pour réinitialiser votre consentement</li>
+    </ul>
+    <p><button class="cookie-refuse" style="margin-top:8px;" onclick="resetCookieConsent()">Réinitialiser mes préférences cookies</button></p>
+    <p style="margin-top:12px;font-size:12px;">Note : désactiver certains cookies peut affecter le fonctionnement du site (mémorisation de la langue, par exemple).</p>
+
+    <h2>Pour en savoir plus</h2>
+    <p>Pour plus d'informations sur les cookies et vos droits, consultez le site de la CNIL : <a href="https://www.cnil.fr/fr/cookies-et-autres-traceurs" target="_blank">www.cnil.fr</a></p>
+
+    <div class="legal-date">Dernière mise à jour : Mai 2025 — Conforme directive ePrivacy et RGPD</div>
+  </div>
+</div>
+
+<script src="harmonia-shared.js?v=35"></script>
+<script>
+// ===== RENDU DES ARTISTES PAR CATÉGORIE =====
+function renderArtistCard(a) {
+  var img = (typeof artistImg === 'function') ? artistImg(a) : (a.photo || '');
+  var photoHtml = img
+    ? '<img src="' + img + '" alt="' + (a.name||'') + '" loading="lazy">'
+    : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--accent2);">♪</div>';
+  var clickAct = a.pageLink ? 'window.location.href=\'' + a.pageLink + '\'' : 'openArtistPage(' + a.id + ')';
+  return '<div class="artist-card" data-item-type="artist" data-item-id="' + a.id + '" onclick="' + clickAct + '" style="cursor:pointer;">'
+    + photoHtml
+    + '<div class="artist-overlay">'
+    +   '<div class="artist-name" style="text-align:center;">' + (a.name||'') + '</div>'
+    +   '<div class="artist-origin" style="text-align:center;">' + (a.origin||'') + '</div>'
+    +   '<div class="artist-style" style="text-align:center;">' + (a.style||'') + '</div>'
+    +   '<button class="artist-more" data-i18n="artist_more" style="margin:8px auto 0;display:block;">Découvrir →</button>'
+    + '</div>'
+    + '</div>';
+}
+
+function renderArtistsByCategory() {
+  var DB = (typeof loadData === 'function') ? loadData() : null;
+  if (!DB || !DB.artists) return;
+
+  var gridTrad  = document.getElementById('artists-grid-traditional');
+  var gridUrban = document.getElementById('artists-grid-urban');
+  if (!gridTrad || !gridUrban) return;
+
+  var editMode = typeof _editModeActive !== 'undefined' && _editModeActive;
+  var trad  = DB.artists.filter(function(a) { return !a.category || a.category === 'traditional'; })
+                        .sort(function(a,b) { return (a.id||0) - (b.id||0); });
+  var urban = DB.artists.filter(function(a) { return a.category === 'urban'; });
+
+  if (!editMode) {
+    trad  = trad.filter(function(a)  { return typeof isItemActive !== 'function' || isItemActive('artist', a.id); });
+    urban = urban.filter(function(a) { return typeof isItemActive !== 'function' || isItemActive('artist', a.id); });
+  }
+
+  gridTrad.innerHTML  = trad.length  ? trad.map(renderArtistCard).join('')  : '<p style="color:var(--gray);font-family:Arial;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:40px 0;text-align:center;">Artistes à venir</p>';
+  gridUrban.innerHTML = urban.length ? urban.map(renderArtistCard).join('') : '<p style="color:var(--gray);font-family:Arial;font-size:12px;letter-spacing:2px;text-transform:uppercase;padding:40px 0;text-align:center;">Artistes à venir</p>';
+
+  if (editMode && typeof _injectItemToggles === 'function') {
+    setTimeout(_injectItemToggles, 50);
+  }
+}
+
+function showArtistCat(cat, btn) {
+  document.querySelectorAll('.artists-cat-panel').forEach(function(p) { p.style.display = 'none'; });
+  document.querySelectorAll('.artists-cat-btn').forEach(function(b) { b.classList.remove('active-cat'); });
+  var panel = document.getElementById('artists-cat-' + cat);
+  if (panel) panel.style.display = '';
+  if (btn) btn.classList.add('active-cat');
+}
+
+// Backup langue + rendu au chargement
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    var lang = sessionStorage.getItem('harmonia_lang') || 'pt';
+    if (typeof setLang === 'function') setLang(lang);
+  } catch(e) {}
+  renderArtistsByCategory();
+  // Ouvrir fiche artiste depuis param ?artist=ID (ex: résultat de recherche)
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var artistId = params.get('artist');
+    if (artistId && typeof openArtistPage === 'function') {
+      setTimeout(function() { openArtistPage(parseInt(artistId, 10)); }, 400);
+    }
+  } catch(e) {}
+});
+</script>
+</body>
+</html>

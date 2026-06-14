@@ -1,0 +1,103 @@
+<!-- PLAYER BAR -->
+<div id="player-bar">
+  <div class="player-info">
+    <div>
+      <div class="player-title" id="bar-title">—</div>
+      <div class="player-artist" id="bar-artist">—</div>
+    </div>
+  </div>
+  <div class="player-controls">
+    <button class="ctrl-btn" onclick="prevTrack()">
+      <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+    </button>
+    <button class="play-main" id="main-play-btn" onclick="togglePlay()">
+      <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="ctrl-btn" onclick="nextTrack()">
+      <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+    </button>
+  </div>
+  <div class="player-progress">
+    <span class="time-label" id="bar-current">0:00</span>
+    <div class="progress-bar" onclick="seekTo(event)">
+      <div class="progress-fill" id="bar-fill"></div>
+    </div>
+    <span class="time-label" id="bar-total">0:00</span>
+  </div>
+  <audio id="audio-el"></audio>
+</div>
+
+<!-- MODAL ARTISTE -->
+<div class="modal-overlay"<div class="artist-modal-overlay" id="artist-modal">
+  <div class="artist-modal-inner">
+    <div class="artist-modal-photo" id="modal-photo-wrap">
+      <img id="modal-img" src="" alt="" loading="lazy">
+    </div>
+    <div class="artist-modal-content">
+      <button class="modal-close-btn" onclick="closeModal()">✕ FERMER</button>
+      <div class="modal-label">HARMONIA — Roster</div>
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-origin-tag" id="modal-origin"></div>
+      <div class="modal-style-tag" id="modal-style"></div>
+      <hr class="modal-divider">
+      <div class="modal-bio-text" id="modal-bio"></div>
+      <div class="modal-social-row" id="modal-social"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CURRENT USER BAR -->
+<div id="current-user-bar"></div>
+
+
+<!-- MOT DE PASSE OUBLIÉ -->
+<div class="pwd-modal-overlay" id="forgot-modal">
+  <div class="pwd-modal-box">
+    <button class="pwd-modal-close" onclick="closeForgot()">✕</button>
+    <div class="pwd-modal-title" data-i18n="forgot_title">Mot de passe</div>
+    <div class="pwd-modal-sub" data-i18n="forgot_sub">Réinitialisation</div>
+    <div class="pwd-err" id="forgot-err"></div>
+    <div class="pwd-ok" id="forgot-ok" data-i18n="forgot_ok">Mot de passe mis à jour.</div>
+    <div class="admin-field">
+      <label>Votre identifiant</label>
+      <input type="text" id="forgot-login" placeholder="login">
+    </div>
+    <div class="admin-field">
+      <label>Nouveau mot de passe</label>
+      <input type="password" id="forgot-new" placeholder="Nouveau mot de passe">
+    </div>
+    <div class="admin-field">
+      <label>Confirmer le mot de passe</label>
+      <input type="password" id="forgot-confirm" placeholder="Confirmer" onkeydown="if(event.key==='Enter')submitForgot()">
+    </div>
+    <div style="margin-top:8px;font-family:Arial;font-size:10px;letter-spacing:1px;color:var(--gray);">
+      ⓘ Votre demande sera transmise à l'administrateur si votre identifiant n'est pas reconnu.
+    </div>
+    <button class="admin-btn" style="margin-top:24px;" onclick="submitForgot()" data-i18n="forgot_btn">Réinitialiser</button>
+  </div>
+</div>
+
+<!-- CHANGER MOT DE PASSE (admin) -->
+<div class="pwd-modal-overlay" id="change-pwd-modal">
+  <div class="pwd-modal-box">
+    <button class="pwd-modal-close" onclick="closeChangePwd()">✕</button>
+    <div class="pwd-modal-title" data-i18n="change_title">Changer le</div>
+    <div class="pwd-modal-sub" data-i18n="change_sub">Mot de passe</div>
+    <div class="pwd-err" id="change-err"></div>
+    <div class="pwd-ok" id="change-ok" data-i18n="change_ok">Mot de passe modifié avec succès.</div>
+    <div class="admin-field">
+      <label>Ancien mot de passe</label>
+      <input type="password" id="change-old" placeholder="••••••••">
+    </div>
+    <div class="admin-field">
+      <label>Nouveau mot de passe</label>
+      <input type="password" id="change-new" placeholder="Nouveau mot de passe">
+    </div>
+    <div class="admin-field">
+      <label>Confirmer</label>
+      <input type="password" id="change-confirm" placeholder="Confirmer" onkeydown="if(event.key==='Enter')submitChangePwd()">
+    </div>
+    <button class="admin-btn" style="margin-top:24px;" onclick="submitChangePwd()" data-i18n="change_btn">Modifier le mot de passe</button>
+  </div>
+</div>
+

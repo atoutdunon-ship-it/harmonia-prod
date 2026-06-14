@@ -1,0 +1,4104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administration — HARMONIA</title>
+<link rel="stylesheet" href="harmonia-shared.css?v=35">
+<style>
+/* ── Variables autonomes — charte Navy / Blanc / Noir ── */
+:root {
+  /* Sidebar (dark navy) */
+  --sidebar-bg:    #0a1628;
+  --sidebar-bg2:   #0d1f3c;
+  --sidebar-border:rgba(255,255,255,0.07);
+
+  /* Main content (white) */
+  --main-bg:       #ffffff;
+  --main-bg2:      #0a1628;
+  --main-border:   #0a1628;
+  --main-text:     #000000;
+  --main-text2:    #000000;
+  --main-label:    #000000;
+
+  /* Login */
+  --login-bg:      #0a1628;
+
+  /* Tokens communs */
+  --dark:   #0a1628;
+  --navy:   #0a1628;
+  --navy2:  #0d1f3c;
+  --navy3:  #111d3c;
+  --accent: #0a1628;
+  --accent2:#1a4d8a;   /* bleu navy moyen — badges actifs, toggle */
+  --white:  #ffffff;
+  --gray:   #6b7a99;
+  --red:    #d63031;
+  --orange: #e17055;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  background: var(--sidebar-bg); color: var(--main-text);
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────
+   LOGIN — visible par défaut, aucun JS requis
+───────────────────────────────────────────── */
+#page-login {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--login-bg); z-index: 200;
+}
+#page-login.hidden { display: none !important; }
+
+.login-box {
+  background: var(--sidebar-bg2);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 48px;
+  width: 100%; max-width: 420px;
+  color: var(--white);
+}
+.login-logo { text-align: center; margin-bottom: 32px; }
+.login-logo img { height: 48px; }
+.login-title {
+  font-family: Georgia, serif; font-size: 22px;
+  text-align: center; margin-bottom: 4px; color: var(--white);
+}
+.login-sub {
+  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(255,255,255,0.45); text-align: center; margin-bottom: 32px;
+}
+.login-box .a-field label { color: rgba(255,255,255,0.5); }
+.login-box .a-field input {
+  background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: #fff;
+}
+.login-box .a-field input:focus { border-color: rgba(255,255,255,0.4); }
+.login-box .a-btn-primary { background: var(--white); color: var(--sidebar-bg); }
+.login-box .a-btn-primary:hover { background: #e8edf5; }
+.login-box a { color: rgba(255,255,255,0.4) !important; }
+.login-box a:hover { color: rgba(255,255,255,0.7) !important; }
+.login-err {
+  background: rgba(214,48,49,0.12);
+  border-left: 3px solid var(--red);
+  color: #ff9898;
+  padding: 10px 14px; font-size: 11px;
+  margin-bottom: 16px; display: none;
+}
+.login-err.show { display: block; }
+
+/* ─────────────────────────────────────────────
+   PANEL ADMIN — caché par défaut
+───────────────────────────────────────────── */
+#page-admin {
+  position: fixed; inset: 0;
+  display: none; flex-direction: row;
+  background: var(--main-bg); z-index: 100;
+  font-size: 106%;
+  zoom: 1.06;
+}
+#page-admin.visible { display: flex; }
+
+/* ─────────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────────── */
+#admin-sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--sidebar-bg);
+  border-right: 1px solid rgba(255,255,255,0.05);
+  display: flex; flex-direction: column;
+  height: 100vh; overflow-y: auto;
+}
+.sb-logo {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+.sb-logo img { height: 30px; }
+
+/* Barre utilisateur sidebar */
+#sb-user-bar {
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.sb-uname {
+  font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--white);
+  font-weight: bold;
+}
+.sb-urole {
+  font-size: 8px; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,0.5);
+  margin-top: 2px;
+}
+.sb-logout-bar {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+.sb-logout {
+  font-size: 9px; letter-spacing: 1px;
+  text-transform: uppercase; color: rgba(255,255,255,0.35);
+  cursor: pointer;
+}
+.sb-logout:hover { color: rgba(255,255,255,0.9); }
+
+/* Nav groups et items */
+.snav-group {
+  padding: 20px 20px 6px;
+  font-size: 8px; letter-spacing: 3px;
+  text-transform: uppercase; color: rgba(255,255,255,0.22);
+}
+.snav {
+  padding: 10px 20px;
+  font-size: 10px; letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, letter-spacing 0.15s ease;
+  display: flex; align-items: center; gap: 6px;
+}
+.snav:hover {
+  color: var(--white);
+  background: rgba(255,255,255,0.12);
+  border-left-color: rgba(255,255,255,0.5);
+  letter-spacing: 1.5px;
+  transition: all 0.15s ease;
+}
+.snav.active {
+  color: var(--white);
+  border-left-color: var(--white);
+  background: rgba(255,255,255,0.14);
+  font-weight: bold;
+}
+
+/* Pied de sidebar */
+.sb-footer {
+  margin-top: auto;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  flex-shrink: 0;
+}
+.sb-footer a {
+  font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: rgba(255,255,255,0.35);
+  text-decoration: none;
+}
+.sb-footer a:hover { color: rgba(255,255,255,0.8); }
+
+/* ─────────────────────────────────────────────
+   MAIN CONTENT
+───────────────────────────────────────────── */
+#admin-main {
+  flex: 1; height: 100vh; overflow-y: auto;
+  padding: 0;
+  background: var(--main-bg);
+  color: #000000 !important;
+  display: flex; flex-direction: column;
+}
+#admin-content {
+  flex: 1; padding: 32px 40px; overflow-y: auto;
+}
+
+/* Barre navigation haut */
+#admin-nav-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 40px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(10,22,40,0.1);
+  flex-shrink: 0;
+  position: sticky; top: 0; z-index: 100;
+}
+.nav-arrow-btn {
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: 1.5px solid rgba(10,22,40,0.2);
+  cursor: pointer; font-size: 14px; line-height: 1;
+  color: #0a1628 !important;
+  transition: all 0.15s; flex-shrink: 0;
+  font-family: Arial, sans-serif;
+}
+.nav-arrow-btn:hover:not(:disabled) {
+  background: #0a1628; color: #ffffff !important;
+  border-color: #0a1628;
+}
+.nav-arrow-btn:disabled {
+  opacity: 0.25; cursor: default;
+}
+#nav-breadcrumb {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: #000000 !important; margin-left: 8px;
+}
+
+/* ── Forcer TOUT le texte en noir dans la zone principale ── */
+#admin-main * { color: #000000 !important; }
+
+/* ── Tous les blocs formulaire : fond blanc, texte noir ── */
+#admin-main .crud-add-form { background: #ffffff !important; border: 1.5px solid #0a1628 !important; }
+#admin-main form, #admin-main .a-field { color: #000000 !important; }
+
+/* ── Formulaire utilisateurs ── */
+#users-form-card, #users-form-card * { color: #000000 !important; }
+#users-form-card input, #users-form-card select, #users-form-card textarea {
+  background: #ffffff !important; border: 1px solid rgba(10,22,40,0.3) !important; color: #000000 !important;
+}
+#users-form-card label { color: #000000 !important; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; }
+#users-form-card .a-btn-primary, #users-form-card .a-btn-primary * { color: #ffffff !important; }
+#perm-table th { color: #000000 !important; border-bottom: 1.5px solid #0a1628 !important; padding: 8px 12px; }
+#perm-table td { color: #000000 !important; border-bottom: 1px solid rgba(10,22,40,0.15) !important; padding: 8px 12px; }
+#perm-table tr:hover td { background: #f4f6fa !important; }
+
+/* ── Cadres navy : texte blanc ── */
+#admin-main .stat-card,
+#admin-main .stat-card *,
+#admin-main .a-card,
+#admin-main .a-card *,
+#admin-main .ticket-card,
+#admin-main .ticket-card *,
+#admin-main .crud-add-form,
+#admin-main .crud-add-form * { color: #ffffff !important; }
+
+/* Formulaires : fond blanc, tout en noir */
+#admin-main .crud-add-form,
+#admin-main .crud-add-form * { color: #000000 !important; }
+
+#admin-main .crud-add-form input,
+#admin-main .crud-add-form select,
+#admin-main .crud-add-form textarea {
+  color: #000000 !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(10,22,40,0.3) !important;
+}
+#admin-main .crud-add-form label { color: #000000 !important; }
+
+#admin-main .crud-add-form .a-btn-primary,
+#admin-main .crud-add-form .a-btn-primary * {
+  color: #ffffff !important;
+  background: #0a1628 !important;
+}
+#admin-main .crud-add-form .a-btn-secondary {
+  border-color: #0a1628 !important;
+  color: #000000 !important;
+  background: #ffffff !important;
+}
+
+/* Inputs dans cadres navy (stat-card, a-card) */
+#admin-main .a-card input,
+#admin-main .a-card select,
+#admin-main .a-card textarea {
+  color: #000000 !important;
+  background: #ffffff !important;
+  border-color: rgba(255,255,255,0.3) !important;
+}
+
+/* Exceptions : texte blanc sur fond sombre/coloré */
+#admin-main .a-btn-primary,
+#admin-main .a-btn-primary * { color: #ffffff !important; }
+#admin-main .badge-green,
+#admin-main .badge-green *   { color: #ffffff !important; }
+#admin-main .nav-badge       { color: #ffffff !important; }
+
+/* Boutons action dans les tableaux (fond navy) */
+#admin-main .a-table-wrap button,
+#admin-main .a-table-wrap button * {
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.35) !important;
+}
+#admin-main .a-table-wrap button[style*="d63031"] {
+  border-color: #d63031 !important;
+}
+
+/* Modal commandes — statuts actifs (plus spécifique que #order-modal-box *) */
+#order-modal-box .ord-status-btn.active,
+#order-modal-box .ord-status-btn.active * { color: #ffffff !important; }
+#order-modal-box .ord-status-btn.danger-btn,
+#order-modal-box .ord-status-btn.danger-btn * { color: #d63031 !important; }
+#order-modal-box .ord-status-btn.danger-btn.active,
+#order-modal-box .ord-status-btn.danger-btn.active * { color: #ffffff !important; }
+#order-modal-box .a-btn-primary,
+#order-modal-box .a-btn-primary * { color: #ffffff !important; }
+#order-modal-box .a-btn-danger,
+#order-modal-box .a-btn-danger * { color: #ffffff !important; }
+
+/* Onglets filtre commandes — actif = texte blanc sur fond navy */
+#admin-main .order-filter-tab.active,
+#admin-main .order-filter-tab.active * { color: #ffffff !important; }
+
+/* Onglets filtre tickets — actif = texte blanc */
+#admin-main .ticket-filter-tab.active,
+#admin-main .ticket-filter-tab.active * { color: #ffffff !important; }
+
+/* Exceptions : messages statut */
+#admin-main .a-msg.ok,  #admin-main .a-msg.ok *  { color: #1a7a45 !important; }
+#admin-main .a-msg.err, #admin-main .a-msg.err *  { color: #d63031 !important; }
+
+/* Exceptions : badges urgence / statut tickets
+   Spécificité (1,2,0) > règle ticket-card * (1,1,1) */
+#admin-main .ticket-card .ticket-cat,
+#admin-main .ticket-card .ticket-cat *   { color: #000000 !important; }
+
+#admin-main .ticket-card .urg-normal,
+#admin-main .ticket-card .urg-normal *   { color: #4a4a4a !important; }
+#admin-main .ticket-card .urg-urgent,
+#admin-main .ticket-card .urg-urgent *   { color: #e17055 !important; }
+#admin-main .ticket-card .urg-critique,
+#admin-main .ticket-card .urg-critique * { color: #d63031 !important; }
+
+#admin-main .ticket-card .tst-ouvert,
+#admin-main .ticket-card .tst-ouvert *   { color: #0a1628 !important; }
+#admin-main .ticket-card .tst-en-cours,
+#admin-main .ticket-card .tst-en-cours * { color: #e17055 !important; }
+#admin-main .ticket-card .tst-resolu,
+#admin-main .ticket-card .tst-resolu *   { color: #4a4a4a !important; }
+#admin-main .badge-red,   #admin-main .badge-red *   { color: #d63031 !important; }
+#admin-main .badge-orange,#admin-main .badge-orange * { color: #e17055 !important; }
+
+/* Sections — masquées par défaut */
+.admin-section { display: none; }
+.admin-section.active { display: block; }
+
+/* En-tête de page */
+.page-title {
+  font-family: Georgia, serif; font-size: 24px;
+  margin: 0 0 4px; color: #000000;
+}
+.page-sub {
+  font-size: 9px; letter-spacing: 3px;
+  text-transform: uppercase; color: #000000;
+  margin-bottom: 32px;
+}
+
+/* ─────────────────────────────────────────────
+   STATS DASHBOARD
+───────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px; margin-bottom: 32px;
+}
+.stat-card {
+  background: #0a1628;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  padding: 24px;
+}
+.stat-val {
+  font-family: Georgia, serif; font-size: 36px;
+  color: #000000;
+}
+.stat-label {
+  font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: #000000;
+  margin-top: 4px;
+}
+
+/* ─────────────────────────────────────────────
+   TABLEAUX
+───────────────────────────────────────────── */
+/* Wrapper tableau avec fond navy */
+.a-table-wrap {
+  background: #0a1628;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  overflow-x: auto; margin-bottom: 24px;
+}
+#admin-main .a-table-wrap,
+#admin-main .a-table-wrap * { color: #ffffff !important; }
+#admin-main .a-table-wrap input,
+#admin-main .a-table-wrap select { color: #000000 !important; background: #fff !important; }
+#admin-main .a-table-wrap tr:hover td { background: rgba(255,255,255,0.06) !important; }
+
+.a-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.a-table th {
+  font-size: 8px; letter-spacing: 3px; text-transform: uppercase;
+  color: rgba(255,255,255,0.6); padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  text-align: left;
+}
+.a-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  vertical-align: middle; color: #ffffff;
+}
+.a-table tr:hover td { background: rgba(255,255,255,0.05); }
+
+/* ─────────────────────────────────────────────
+   FORMULAIRES
+───────────────────────────────────────────── */
+.a-field { margin-bottom: 16px; }
+.a-field label {
+  display: block;
+  font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; color: #000000;
+  margin-bottom: 6px;
+}
+.a-field input,
+.a-field select,
+.a-field textarea {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid rgba(10,22,40,0.3);
+  color: var(--main-text);
+  padding: 10px 14px;
+  font-size: 13px; font-family: Arial, sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.a-field input:focus,
+.a-field select:focus,
+.a-field textarea:focus {
+  border-color: var(--sidebar-bg);
+}
+.a-field select option { background: #ffffff; color: var(--main-text); }
+.a-grid-2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+
+/* ─────────────────────────────────────────────
+   BOUTONS
+───────────────────────────────────────────── */
+.a-btn {
+  padding: 10px 24px;
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  cursor: pointer; border: none; font-family: Arial, sans-serif;
+  transition: all 0.2s;
+}
+.a-btn-primary { background: var(--sidebar-bg); color: var(--white); }
+.a-btn-primary:hover { background: var(--sidebar-bg2); }
+.a-btn-secondary {
+  background: #ffffff;
+  border: 1.5px solid #0a1628;
+  color: #0a1628;
+}
+.a-btn-secondary:hover { background: #dce8f8; }
+.a-btn-sm {
+  padding: 6px 12px; font-size: 8px; letter-spacing: 2px;
+  text-transform: uppercase; cursor: pointer;
+  font-family: Arial, sans-serif; transition: all 0.2s;
+  border: none;
+}
+.a-btn-danger {
+  background: transparent;
+  border: 1px solid rgba(224,80,80,0.4);
+  color: var(--red);
+  padding: 5px 10px; font-size: 8px; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer;
+  font-family: Arial, sans-serif; transition: all 0.2s;
+}
+.a-btn-danger:hover { background: rgba(224,80,80,0.1); }
+.a-btn-edit {
+  background: transparent;
+  border: 1px solid rgba(10,22,40,0.3);
+  color: var(--main-text);
+  padding: 5px 10px; font-size: 8px; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer;
+  font-family: Arial, sans-serif; transition: all 0.2s;
+}
+.a-btn-edit:hover { background: var(--main-bg2); }
+
+/* ─────────────────────────────────────────────
+   BADGES
+───────────────────────────────────────────── */
+.badge {
+  display: inline-block; padding: 2px 8px;
+  font-size: 8px; letter-spacing: 2px; text-transform: uppercase;
+}
+.badge-green  { background: var(--sidebar-bg); color: var(--white); }
+.badge-gray   { background: #e8edf5; color: var(--main-label); }
+.badge-red    { background: rgba(214,48,49,0.1); color: var(--red); }
+.badge-orange { background: rgba(225,112,85,0.12); color: var(--orange); }
+
+/* Badge sidebar notification */
+.nav-badge {
+  background: var(--red); color: #fff;
+  font-size: 8px; font-weight: bold;
+  border-radius: 8px; padding: 1px 6px;
+  display: none;
+}
+.nav-badge.show { display: inline-block; }
+
+/* ─────────────────────────────────────────────
+   MESSAGES INLINE
+───────────────────────────────────────────── */
+.a-msg {
+  padding: 12px 16px; font-size: 11px; letter-spacing: 1px;
+  margin-bottom: 16px; display: none;
+}
+.a-msg.ok {
+  background: #eaf5ef;
+  border-left: 3px solid #1a7a45;
+  color: #1a7a45;
+}
+.a-msg.err {
+  background: #fde8e8;
+  border-left: 3px solid var(--red);
+  color: var(--red);
+}
+.a-msg.show { display: block; }
+
+/* ─────────────────────────────────────────────
+   CARD CONTAINER
+───────────────────────────────────────────── */
+.a-card {
+  background: #0a1628;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  padding: 24px; margin-bottom: 24px;
+}
+.a-card-title {
+  font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: #000000;
+  margin-bottom: 20px;
+}
+
+/* ─────────────────────────────────────────────
+   TOGGLE MODULE
+───────────────────────────────────────────── */
+.mod-toggle {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(10,22,40,0.12);
+}
+.mod-toggle:last-child { border-bottom: none; }
+.toggle-sw {
+  width: 36px; height: 20px;
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 10px; position: relative;
+  cursor: pointer; transition: background 0.2s, border-color 0.2s; flex-shrink: 0;
+}
+.toggle-sw.on { background: #ffffff; border-color: #ffffff; }
+.toggle-sw::after {
+  content: '';
+  position: absolute; top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%; background: rgba(255,255,255,0.7);
+  transition: left 0.2s, background 0.2s;
+}
+.toggle-sw.on::after { left: 18px; background: #0a1628; }
+
+/* ─────────────────────────────────────────────
+   TICKETS — STYLE SYSTÈME
+───────────────────────────────────────────── */
+.ticket-card {
+  background: #0a1628;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  padding: 16px 20px; margin-bottom: 12px;
+  display: flex; gap: 16px; align-items: flex-start;
+}
+.ticket-urgency-bar {
+  flex-shrink: 0; width: 5px; align-self: stretch;
+  border-radius: 3px;
+}
+.tub-normal   { background: rgba(255,255,255,0.3); }
+.tub-urgent   { background: var(--orange); }
+.tub-critique { background: var(--red); }
+
+.ticket-body { flex: 1; min-width: 0; }
+.ticket-header {
+  display: flex; align-items: center;
+  gap: 8px; flex-wrap: wrap; margin-bottom: 6px;
+}
+.ticket-cat {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--main-label); background: #e8edf5;
+  padding: 3px 8px;
+}
+.ticket-urg {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 3px 8px;
+}
+.urg-normal  { color: var(--main-label); background: #e8edf5; }
+.urg-urgent  { color: var(--orange); background: rgba(225,112,85,0.1); }
+.urg-critique{ color: var(--red); background: rgba(214,48,49,0.08); }
+
+.ticket-status {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 3px 8px; margin-left: auto;
+}
+.tst-ouvert   { color: var(--sidebar-bg); background: #dce7f5; }
+.tst-en-cours { color: var(--orange); background: rgba(225,112,85,0.1); }
+.tst-resolu   { color: var(--main-label); background: #e8edf5; }
+
+.ticket-meta {
+  font-size: 11px; color: #000000; margin-bottom: 6px;
+}
+.ticket-meta strong { color: #000000; }
+.ticket-desc {
+  font-family: Georgia, serif; font-size: 13px;
+  color: #000000; line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; margin-bottom: 10px;
+}
+.ticket-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.ticket-action-btn {
+  background: none; border: 1px solid rgba(10,22,40,0.3);
+  color: var(--main-label);
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 6px 14px; cursor: pointer; font-family: Arial, sans-serif;
+  transition: all 0.2s;
+}
+.ticket-action-btn:hover { border-color: var(--sidebar-bg); color: var(--sidebar-bg); }
+.ticket-action-btn.btn-encours { border-color: rgba(225,112,85,0.4); color: var(--orange); }
+.ticket-action-btn.btn-resolu  { border-color: rgba(26,77,138,0.4); color: var(--sidebar-bg); }
+.ticket-resolved {
+  font-size: 10px; color: var(--main-label);
+  margin-top: 6px; font-style: italic;
+}
+.ticket-thumb {
+  width: 64px; height: 64px; object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0; align-self: center;
+}
+.ticket-empty {
+  text-align: center; padding: 48px 0;
+  font-size: 12px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gray);
+}
+
+/* Tabs filtre tickets */
+.ticket-filter-tabs {
+  display: flex; gap: 0; margin-bottom: 24px;
+  border-bottom: 1px solid var(--main-border);
+}
+.ticket-filter-tab {
+  background: none; border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--main-label);
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 10px 18px; cursor: pointer; font-family: Arial, sans-serif;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: -1px;
+}
+.ticket-filter-tab.active { color: var(--sidebar-bg); border-bottom-color: var(--sidebar-bg); }
+.ticket-filter-tab:hover { color: var(--main-text); }
+
+/* Urgence boutons assistance */
+.urgency-row { display: flex; gap: 8px; margin-top: 4px; }
+.urgency-btn {
+  flex: 1; padding: 10px 8px;
+  background: transparent;
+  border: 1px solid var(--main-border);
+  color: var(--main-text);
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  cursor: pointer; font-family: Arial, sans-serif;
+  transition: border-color 0.2s, color 0.2s;
+}
+.urgency-btn.ub-normal  { border-color: var(--sidebar-bg); color: var(--sidebar-bg); }
+.urgency-btn.ub-urgent  { border-color: var(--orange); color: var(--orange); }
+.urgency-btn.ub-critique{ border-color: var(--red); color: var(--red); }
+
+/* ─────────────────────────────────────────────
+   TABLEAU USERS — surcharge perm-table
+───────────────────────────────────────────── */
+#perm-table th, #perm-table td {
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+}
+#perm-table th {
+  color: var(--main-label); letter-spacing: 2px;
+  text-transform: uppercase; text-align: center;
+  padding: 10px 16px;
+}
+#perm-table td:first-child { text-align: left; padding: 10px 0; }
+#perm-table tr { border-top: 1px solid rgba(10,22,40,0.1); }
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE — ADMIN PANEL
+───────────────────────────────────────────── */
+
+/* Bouton hamburger (masqué desktop) */
+#sidebar-toggle {
+  display: none;
+  background: none; border: 1.5px solid rgba(10,22,40,0.25);
+  width: 32px; height: 32px; cursor: pointer;
+  flex-shrink: 0; flex-direction: column;
+  align-items: center; justify-content: center; gap: 5px;
+}
+#sidebar-toggle span {
+  display: block; width: 16px; height: 1.5px;
+  background: #0a1628; transition: all 0.2s;
+}
+
+/* Overlay sidebar mobile */
+#sidebar-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 200;
+}
+#sidebar-overlay.open { display: block; }
+
+/* Bouton fermer sidebar mobile */
+#sidebar-close {
+  display: none; position: absolute; top: 14px; right: 14px;
+  background: none; border: none; color: rgba(255,255,255,0.5);
+  font-size: 20px; cursor: pointer; line-height: 1; padding: 4px;
+}
+
+/* ── Tablette (≤ 900px) ── */
+@media (max-width: 900px) {
+  #page-admin { font-size: 100%; zoom: 1; }
+  #admin-sidebar { width: 200px; }
+  #admin-nav-bar { padding: 10px 20px; }
+  #admin-content { padding: 24px 20px; }
+  .stats-grid    { grid-template-columns: repeat(2,1fr); }
+  .a-grid-2      { grid-template-columns: 1fr; }
+  .a-grid-3      { grid-template-columns: 1fr; }
+  #edit-modal-box  { width: calc(100vw - 40px); padding: 28px 20px; }
+  #order-modal-box { width: calc(100vw - 40px); padding: 28px 20px; }
+}
+
+/* ── Mobile (≤ 640px) — sidebar drawer ── */
+@media (max-width: 640px) {
+  #page-admin { font-size: 100%; zoom: 1; }
+
+  /* Sidebar devient un drawer */
+  #admin-sidebar {
+    position: fixed; left: -240px; top: 0; bottom: 0;
+    width: 240px; z-index: 300;
+    transition: left 0.28s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+  }
+  #admin-sidebar.open { left: 0; }
+  #sidebar-toggle { display: flex; }
+  #sidebar-close  { display: block; }
+
+  /* Main prend toute la largeur */
+  #admin-main { width: 100%; }
+  #admin-nav-bar { padding: 8px 16px; gap: 6px; }
+  #admin-content { padding: 20px 16px; }
+
+  /* Stats : 2 colonnes → 1 sur très petit */
+  .stats-grid { grid-template-columns: repeat(2,1fr); gap: 12px; }
+
+  /* Toutes les grilles → 1 colonne */
+  .a-grid-2, .a-grid-3 { grid-template-columns: 1fr !important; }
+  .stats-grid .stat-card { padding: 16px; }
+
+  /* Tableaux scrollables */
+  .a-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .a-table { min-width: 520px; }
+
+  /* Modals : plein écran mobile */
+  #edit-modal  { align-items: flex-end; }
+  #order-modal { align-items: flex-end; }
+  #edit-modal-box {
+    width: 100vw; max-height: 92vh;
+    padding: 24px 16px; border-left: none; border-right: none; border-bottom: none;
+  }
+  #order-modal-box {
+    width: 100vw; max-height: 92vh;
+    padding: 24px 16px; border-left: none; border-right: none; border-bottom: none;
+  }
+
+  /* Formulaires : champs full width */
+  .a-field { width: 100% !important; }
+  .crud-add-form { padding: 16px; }
+
+  /* Cards dashboard */
+  .a-card { padding: 16px; }
+  .a-card-title { font-size: 9px; }
+
+  /* Boutons accès rapide */
+  .a-btn { padding: 10px 16px; font-size: 9px; }
+
+  /* Nav bar interne */
+  #nav-breadcrumb { display: none; }
+
+  /* Page title */
+  .page-title { font-size: 18px !important; letter-spacing: 3px !important; }
+  .page-sub   { font-size: 11px; }
+
+  /* Onglets filtres scroll horizontal */
+  .order-filter-tabs,
+  .ticket-filter-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .order-filter-tab,
+  .ticket-filter-tab { white-space: nowrap; flex-shrink: 0; }
+
+  /* Status flow commande */
+  .ord-status-flow { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .ord-status-btn  { white-space: nowrap; flex-shrink: 0; }
+
+  /* Modules toggles */
+  .mod-toggle { flex-wrap: nowrap; }
+
+  /* Login page */
+  .login-box { padding: 32px 20px; width: calc(100vw - 32px); }
+
+  /* Grille ordre modal */
+  #order-modal-box .ord-items-table { font-size: 11px; }
+  .ord-add-item-row { flex-wrap: wrap; }
+  .ord-add-item-row .qty-field,
+  .ord-add-item-row .price-field { width: 80px; }
+}
+
+/* ── Très petit mobile (≤ 380px) ── */
+@media (max-width: 380px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  #admin-nav-bar { padding: 8px 12px; }
+  #admin-content { padding: 16px 12px; }
+  .a-table { min-width: 420px; }
+}
+
+/* ─────────────────────────────────────────────
+   COMPATIBILITÉ harmonia-shared.css
+   (les classes suivantes sont utilisées par shared.js
+    mais leur rendu est remplacé par nos classes ci-dessus)
+───────────────────────────────────────────── */
+.admin-login        { display: none !important; }
+#admin-login-wrapper{ display: none !important; }
+#admin-panel-wrapper{ display: none !important; }
+#admin-drawer-tab   { display: none !important; }
+.admin-preview-btn  { display: none !important; }
+
+/* ─────────────────────────────────────────────
+   CRUD — MODAL D'ÉDITION
+───────────────────────────────────────────── */
+#edit-modal {
+  display: none;
+  position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,0.5);
+  align-items: center; justify-content: center;
+}
+#edit-modal.open { display: flex; }
+
+#edit-modal-box {
+  background: #ffffff;
+  width: 640px; max-height: 85vh;
+  overflow-y: auto; padding: 40px;
+  position: relative;
+  border: 1.5px solid #0a1628;
+}
+
+#edit-modal-title {
+  font-family: Georgia, serif; font-size: 20px;
+  color: #000000 !important; margin-bottom: 24px;
+}
+
+/* ── Modale : forcer tout le texte en noir, fond blanc ── */
+#edit-modal-box,
+#edit-modal-box * {
+  color: #000000 !important;
+}
+#edit-modal-box input,
+#edit-modal-box select,
+#edit-modal-box textarea {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid rgba(10,22,40,0.3) !important;
+}
+#edit-modal-box label {
+  color: #000000 !important;
+}
+#edit-modal-box .a-btn-primary,
+#edit-modal-box .a-btn-primary * {
+  color: #ffffff !important;
+  background: #0a1628 !important;
+}
+#edit-modal-box .a-btn-secondary {
+  color: #0a1628 !important;
+  border-color: #0a1628 !important;
+  background: #ffffff !important;
+}
+
+/* ─────────────────────────────────────────────
+   COMMANDES — MODAL DÉDIÉ
+───────────────────────────────────────────── */
+#order-modal {
+  display: none;
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.55);
+  align-items: center; justify-content: center;
+}
+#order-modal.open { display: flex; }
+#order-modal-box {
+  background: #ffffff;
+  width: 700px; max-height: 88vh;
+  overflow-y: auto; padding: 40px;
+  position: relative;
+  border: 1.5px solid #0a1628;
+}
+#order-modal-box, #order-modal-box * { color: #000000 !important; }
+#order-modal-box input, #order-modal-box select, #order-modal-box textarea {
+  background: #ffffff !important; color: #000000 !important;
+  border: 1px solid rgba(10,22,40,0.3) !important;
+}
+#order-modal-box label { color: #000000 !important; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+#order-modal-box .a-btn-primary, #order-modal-box .a-btn-primary * { color: #ffffff !important; background: #0a1628 !important; }
+#order-modal-box .a-btn-secondary { color: #0a1628 !important; border-color: #0a1628 !important; background: #ffffff !important; }
+#order-modal-box .a-btn-danger { color: #ffffff !important; background: #d63031 !important; border: none !important; }
+
+.ord-status-flow {
+  display: flex; gap: 8px; flex-wrap: wrap; margin: 20px 0;
+}
+.ord-status-btn {
+  padding: 7px 16px; font-size: 9px; letter-spacing: 2px;
+  text-transform: uppercase; cursor: pointer;
+  border: 1.5px solid rgba(10,22,40,0.25); background: #ffffff;
+  transition: all 0.15s;
+}
+.ord-status-btn.active { border-color: #0a1628; background: #0a1628; color: #ffffff !important; }
+.ord-status-btn.danger-btn { border-color: #d63031 !important; color: #d63031 !important; }
+.ord-status-btn.danger-btn.active { background: #d63031 !important; color: #ffffff !important; }
+
+.ord-items-table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+.ord-items-table th { font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: #000000 !important; border-bottom: 1px solid rgba(10,22,40,0.15);
+  padding: 6px 8px; text-align: left; }
+.ord-items-table td { padding: 8px; font-size: 12px; border-bottom: 1px solid rgba(10,22,40,0.07); }
+.ord-items-table tfoot td { font-weight: 700; border-top: 1.5px solid #0a1628; border-bottom: none; }
+
+.order-filter-tabs { display: flex; gap: 0; margin-bottom: 20px; flex-wrap: wrap; }
+.order-filter-tab {
+  padding: 8px 20px; font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  background: #ffffff; border: 1px solid rgba(10,22,40,0.2); cursor: pointer;
+  color: #000000; transition: all 0.15s; margin-right: -1px;
+}
+.order-filter-tab.active { background: #0a1628; color: #ffffff; border-color: #0a1628; z-index: 1; }
+
+.ord-add-item-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.ord-add-item-row input { flex: 1; }
+.ord-add-item-row .qty-field { width: 60px; flex: none; }
+.ord-add-item-row .price-field { width: 90px; flex: none; }
+
+/* Formulaire d'ajout compact en haut de section */
+.crud-add-form {
+  background: #ffffff;
+  border: 1.5px solid #0a1628;
+  padding: 20px 24px; margin-bottom: 24px;
+}
+.crud-add-form-title {
+  font-size: 9px; letter-spacing: 3px;
+  text-transform: uppercase; color: #000000;
+  margin-bottom: 16px; font-weight: bold;
+}
+.crud-add-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 12px; margin-bottom: 12px;
+}
+.crud-add-grid .a-field { margin-bottom: 0; }
+.crud-add-grid .a-field input,
+.crud-add-grid .a-field select {
+  padding: 7px 10px; font-size: 12px;
+}
+.crud-add-grid .a-field label {
+  font-size: 8px; margin-bottom: 4px;
+}
+
+/* Boutons action dans tableau */
+.a-btn-crud-edit {
+  background: transparent;
+  border: 1px solid rgba(10,22,40,0.35);
+  color: #000000;
+  padding: 4px 10px; font-size: 8px; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer;
+  font-family: Arial, sans-serif; transition: all 0.2s;
+  margin-right: 4px;
+}
+.a-btn-crud-edit:hover { background: #dce8f8; border-color: #0a1628; }
+
+.a-btn-crud-del {
+  background: transparent;
+  border: 1px solid rgba(214,48,49,0.35);
+  color: #d63031;
+  padding: 4px 10px; font-size: 8px; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer;
+  font-family: Arial, sans-serif; transition: all 0.2s;
+}
+.a-btn-crud-del:hover { background: rgba(214,48,49,0.08); }
+
+/* Cellule éditable inline — curseur indiquant la fonctionnalité */
+td.editable { cursor: text; }
+td.editable:hover { background: #eaf1fb !important; }
+
+/* Image preview dans modal */
+.modal-img-preview {
+  max-width: 100%; max-height: 120px;
+  border: 1px solid rgba(10,22,40,0.2);
+  margin-top: 8px; display: none;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE LOGIN — visible par défaut (aucun JS requis)
+════════════════════════════════════════════════════ -->
+<div id="page-login">
+  <div class="login-box">
+
+    <div class="login-logo">
+      <img src="images/logo-base.png" alt="HARMONIA">
+    </div>
+    <div class="login-title">Administration</div>
+    <div class="login-sub">Espace réservé</div>
+
+    <div class="login-err" id="login-err">Identifiants incorrects</div>
+
+    <div class="a-field">
+      <label>Identifiant ou email</label>
+      <input type="text" id="login-email"
+             placeholder="PROD ou prod@harmonia.cv"
+             autocomplete="username"
+             onkeydown="if(event.key==='Enter')adminLogin()">
+    </div>
+    <div class="a-field">
+      <label>Mot de passe</label>
+      <input type="password" id="login-pass"
+             placeholder="••••••••"
+             autocomplete="current-password"
+             onkeydown="if(event.key==='Enter')adminLogin()">
+    </div>
+
+    <button class="a-btn a-btn-primary" style="width:100%;padding:14px;"
+            onclick="adminLogin()">
+      Se connecter
+    </button>
+
+    <div style="text-align:center;margin-top:20px;">
+      <a href="artistes.html"
+         style="font-size:9px;letter-spacing:2px;text-transform:uppercase;
+                color:#000000;text-decoration:none;">
+        &larr; Retour au site
+      </a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     PAGE ADMIN — cachée jusqu'à auth
+════════════════════════════════════════════════════ -->
+<div id="page-admin">
+
+  <!-- ── SIDEBAR ── -->
+  <!-- Overlay fond sidebar mobile -->
+  <div id="sidebar-overlay" onclick="_closeSidebar()"></div>
+
+  <div id="admin-sidebar">
+    <button id="sidebar-close" onclick="_closeSidebar()" aria-label="Fermer">&#10005;</button>
+
+    <div class="sb-logo">
+      <img src="images/logo-base.png" alt="HARMONIA">
+    </div>
+
+    <!-- Utilisateur connecté -->
+    <div id="sb-user-bar">
+      <div>
+        <div class="sb-uname" id="sb-name">—</div>
+        <div class="sb-urole" id="sb-role">—</div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="snav-group">Vue d'ensemble</div>
+    <div class="snav active" data-sec="dashboard"
+         onclick="switchSection('dashboard',this)">Dashboard</div>
+
+    <div class="snav-group">Contenu</div>
+    <div class="snav" data-sec="artistes"
+         onclick="switchSection('artistes',this)">Artistes</div>
+    <div class="snav" data-sec="albums"
+         onclick="switchSection('albums',this)">Albums</div>
+    <div class="snav" data-sec="tracks"
+         onclick="switchSection('tracks',this)">Musique</div>
+    <div class="snav" data-sec="news"
+         onclick="switchSection('news',this)">Actualités</div>
+    <div class="snav" data-sec="events"
+         onclick="switchSection('events',this)">Événements</div>
+
+    <div class="snav-group">Boutique</div>
+    <div class="snav" data-sec="produits"
+         onclick="switchSection('produits',this)">Produits</div>
+    <div class="snav" data-sec="commandes"
+         onclick="switchSection('commandes',this)">Commandes</div>
+
+    <div class="snav-group">Système</div>
+    <div class="snav" id="snav-users" data-sec="users"
+         onclick="switchSection('users',this)">Utilisateurs</div>
+    <div class="snav" data-sec="modules"
+         onclick="switchSection('modules',this)">Modules</div>
+
+    <div class="snav-group" id="snav-support-group">Support</div>
+    <div class="snav" id="snav-assistance" data-sec="assistance"
+         onclick="switchSection('assistance',this)">Assistance</div>
+    <div class="snav" id="snav-tickets" data-sec="tickets"
+         onclick="switchSection('tickets',this)">
+      Tickets
+      <span class="nav-badge" id="ticket-badge-count"></span>
+    </div>
+
+    <div class="sb-footer">
+      <a href="artistes.html">&larr; Site public</a>
+    </div>
+
+    <!-- Quitter — ancré en bas -->
+    <div class="sb-logout-bar">
+      <span class="sb-logout" onclick="adminLogout()">Quitter</span>
+    </div>
+
+  </div><!-- /sidebar -->
+
+
+  <!-- ── MAIN ── -->
+  <div id="admin-main">
+
+    <!-- Barre navigation interne -->
+    <div id="admin-nav-bar">
+      <button id="sidebar-toggle" onclick="_toggleSidebar()" title="Menu" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <button class="nav-arrow-btn" id="nav-btn-back"    onclick="_navBack()"    disabled title="Page précédente">&#8592;</button>
+      <button class="nav-arrow-btn" id="nav-btn-forward" onclick="_navForward()" disabled title="Page suivante">&#8594;</button>
+      <span id="nav-breadcrumb">Dashboard</span>
+    </div>
+
+    <div id="admin-content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="admin-section active" id="sec-dashboard">
+      <div class="page-title">Dashboard</div>
+      <div class="page-sub">Vue d'ensemble — HARMONIA Production</div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="stat-artists">—</div>
+          <div class="stat-label">Artistes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-albums">—</div>
+          <div class="stat-label">Albums</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-tracks">—</div>
+          <div class="stat-label">Titres</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="stat-news">—</div>
+          <div class="stat-label">Actualités</div>
+        </div>
+      </div>
+
+      <div class="a-card">
+        <div class="a-card-title">Accès rapide</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
+                  onclick="switchSection('artistes')">Gérer artistes</button>
+          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
+                  onclick="switchSection('albums')">Gérer albums</button>
+          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
+                  onclick="switchSection('events')">Événements</button>
+          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
+                  onclick="switchSection('produits')">Boutique</button>
+          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
+                  onclick="switchSection('commandes')">Commandes</button>
+          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
+                  onclick="switchSection('users')">Utilisateurs</button>
+          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
+                  onclick="switchSection('modules')">Modules</button>
+        </div>
+      </div>
+    </div><!-- /dashboard -->
+
+
+    <!-- ── ARTISTES ── -->
+    <div class="admin-section" id="sec-artistes">
+      <div class="page-title">Artistes</div>
+      <div class="page-sub">Gestion du roster HARMONIA</div>
+      <div class="a-msg" id="art-msg"></div>
+      <div id="artistes-list"></div>
+    </div>
+
+
+    <!-- ── ALBUMS ── -->
+    <div class="admin-section" id="sec-albums">
+      <div class="page-title">Albums</div>
+      <div class="page-sub">Catalogue discographique</div>
+      <div class="a-msg" id="alb-msg"></div>
+      <div id="albums-list"></div>
+    </div>
+
+
+    <!-- ── TRACKS ── -->
+    <div class="admin-section" id="sec-tracks">
+      <div class="page-title">Musique</div>
+      <div class="page-sub">Titres du catalogue</div>
+      <div id="tracks-list"></div>
+    </div>
+
+
+    <!-- ── NEWS ── -->
+    <div class="admin-section" id="sec-news">
+      <div class="page-title">Actualités</div>
+      <div class="page-sub">Articles et communications</div>
+      <div class="a-msg" id="news-msg"></div>
+      <div id="news-list"></div>
+    </div>
+
+
+    <!-- ── EVENTS ── -->
+    <div class="admin-section" id="sec-events">
+      <div class="page-title">Événements</div>
+      <div class="page-sub">Concerts et événements</div>
+      <div class="a-msg" id="evt-msg"></div>
+      <div id="events-list"></div>
+    </div>
+
+
+    <!-- ── PRODUITS ── -->
+    <div class="admin-section" id="sec-produits">
+      <div class="page-title">Produits boutique</div>
+      <div class="page-sub">Catalogue des produits en vente</div>
+      <div id="produits-list"></div>
+    </div>
+
+
+    <!-- ── COMMANDES ── -->
+    <div class="admin-section" id="sec-commandes">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="page-title" style="margin-bottom:0;">Commandes</div>
+        <button class="a-btn a-btn-primary" onclick="_orderCreate()">+ Nouvelle commande</button>
+      </div>
+      <div class="page-sub">Historique des achats</div>
+      <div class="order-filter-tabs" id="order-filter-tabs">
+        <button class="order-filter-tab active" onclick="_filterOrders('tous',this)">Toutes</button>
+        <button class="order-filter-tab" onclick="_filterOrders('Confirmée',this)">Confirmées</button>
+        <button class="order-filter-tab" onclick="_filterOrders('En préparation',this)">En préparation</button>
+        <button class="order-filter-tab" onclick="_filterOrders('Expédiée',this)">Expédiées</button>
+        <button class="order-filter-tab" onclick="_filterOrders('Livrée',this)">Livrées</button>
+        <button class="order-filter-tab" onclick="_filterOrders('Annulée',this)">Annulées</button>
+      </div>
+      <div id="commandes-list"></div>
+    </div>
+
+
+    <!-- ── UTILISATEURS ── -->
+    <div class="admin-section" id="sec-users">
+      <div class="page-title">Utilisateurs</div>
+      <div class="page-sub">Comptes et droits d'accès</div>
+      <div class="a-msg" id="users-msg"></div>
+
+      <!-- Formulaire création -->
+      <div id="users-form-card" style="background:#ffffff;border:1.5px solid #0a1628;padding:24px;margin-bottom:24px;">
+        <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#000000;font-weight:bold;margin-bottom:20px;" id="users-form-title">Créer un utilisateur</div>
+        <div class="a-grid-2">
+          <div class="a-field">
+            <label>Nom complet</label>
+            <input type="text" id="u-name" placeholder="Prénom Nom">
+          </div>
+          <div class="a-field">
+            <label>Email</label>
+            <input type="email" id="u-email" placeholder="user@harmonia.cv">
+          </div>
+          <div class="a-field">
+            <label>Identifiant (optionnel)</label>
+            <input type="text" id="u-login" placeholder="login">
+          </div>
+          <div class="a-field">
+            <label>Mot de passe <span id="u-pass-hint" style="font-size:9px;letter-spacing:0;text-transform:none;opacity:.6;display:none;">(laisser vide = inchangé)</span></label>
+            <input type="password" id="u-pass" placeholder="••••••••">
+          </div>
+        </div>
+        <div class="a-field" style="max-width:300px;">
+          <label>Rôle</label>
+          <select id="u-role" onchange="applyRoleTemplate()">
+            <option value="readonly">Lecture seule</option>
+            <option value="contributor">Contributeur</option>
+            <option value="editor">Éditeur</option>
+            <option value="moderator">Modérateur</option>
+            <option value="administrateur">Administrateur</option>
+            <option value="membre">Membre</option>
+          </select>
+        </div>
+
+        <!-- Permissions granulaires -->
+        <div style="margin:20px 0 12px;font-size:10px;letter-spacing:3px;
+                    text-transform:uppercase;color:#000000;
+                    border-bottom:1.5px solid #0a1628;padding-bottom:12px;">
+          Permissions granulaires
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="perm-table" style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th style="text-align:left;width:140px;">Section</th>
+                <th>Voir</th><th>Ajouter</th>
+                <th>Modifier</th><th>Supprimer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:#000000;">Artistes</td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="view" checked></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="add"></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="edit"></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="delete"></td>
+              </tr>
+              <tr>
+                <td style="color:#000000;">Musiques</td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="view" checked></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="add"></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="edit"></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="delete"></td>
+              </tr>
+              <tr>
+                <td style="color:#000000;">Albums</td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="view" checked></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="add"></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="edit"></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="delete"></td>
+              </tr>
+              <tr>
+                <td style="color:#000000;">Actualités</td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="view" checked></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="add"></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="edit"></td>
+                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="delete"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:20px;">
+          <button class="a-btn a-btn-primary" onclick="saveUser()">
+            Créer l'utilisateur
+          </button>
+          <button class="a-btn a-btn-secondary" id="users-cancel-btn"
+                  onclick="resetUserFormAdmin()" style="display:none;">
+            Annuler
+          </button>
+        </div>
+      </div>
+
+      <!-- Liste utilisateurs -->
+      <div class="a-table-wrap">
+        <div class="a-card-title" style="padding:16px 20px 0;">Utilisateurs enregistrés</div>
+        <table class="a-table">
+          <thead>
+            <tr>
+              <th>Nom</th><th>Email / Login</th>
+              <th>Rôle</th><th>Créé le</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+    </div><!-- /users -->
+
+
+    <!-- ── MODULES ── -->
+    <div class="admin-section" id="sec-modules">
+      <div class="page-title">Modules</div>
+      <div class="page-sub">Activer ou désactiver les sections du site</div>
+      <div class="a-card" style="max-width:600px;">
+        <div id="modules-grid-custom"></div>
+      </div>
+    </div>
+
+
+    <!-- ── ASSISTANCE (non-superadmin) ── -->
+    <div class="admin-section" id="sec-assistance">
+      <div class="page-title">Assistance</div>
+      <div class="page-sub">Soumettre une demande au webmaster</div>
+
+      <div style="max-width:640px;">
+        <div class="a-card crud-add-form" style="background:#ffffff;border:1.5px solid #0a1628;">
+          <div class="a-card-title">Nouvelle demande</div>
+
+          <!-- Méta auteur -->
+          <div style="display:flex;gap:24px;font-size:11px;color:#000000;
+                      letter-spacing:1px;margin-bottom:20px;padding:10px 14px;
+                      background:var(--main-bg2);border-left:2px solid var(--main-border);">
+            <div>Auteur : <span id="assist-author" style="color:var(--main-text);font-weight:bold;">—</span></div>
+            <div>Rôle : <span id="assist-role" style="color:var(--main-text);font-weight:bold;">—</span></div>
+            <div>Date : <span id="assist-date" style="color:var(--main-text);">—</span></div>
+          </div>
+
+          <div class="a-field">
+            <label>Urgence</label>
+            <div class="urgency-row">
+              <button type="button" class="urgency-btn ub-normal" id="urgency-normal"
+                      onclick="selectUrgencyAdmin('normal')">Normal</button>
+              <button type="button" class="urgency-btn" id="urgency-urgent"
+                      onclick="selectUrgencyAdmin('urgent')">Urgent</button>
+              <button type="button" class="urgency-btn" id="urgency-critique"
+                      onclick="selectUrgencyAdmin('critique')">Critique</button>
+            </div>
+          </div>
+          <div class="a-field">
+            <label>Catégorie</label>
+            <select id="assist-cat">
+              <option value="bug">Bug technique</option>
+              <option value="contenu">Modification contenu</option>
+              <option value="fonctionnalite">Nouvelle fonctionnalité</option>
+              <option value="acces">Accès et droits</option>
+            </select>
+          </div>
+          <div class="a-field">
+            <label>Description</label>
+            <textarea id="assist-desc" rows="6"
+                      placeholder="Décrivez votre demande en détail..."
+                      style="resize:vertical;"></textarea>
+          </div>
+          <div class="a-field">
+            <label>Pièce jointe (image — redimensionnée automatiquement)</label>
+            <input type="file" id="assist-file" accept="image/*"
+                   onchange="handleAssistFile(this)"
+                   style="background:transparent;border:none;padding:0;
+                          color:#000000;font-size:11px;">
+            <img id="assist-preview"
+                 style="max-height:80px;margin-top:8px;display:none;
+                        border:1px solid rgba(255,255,255,0.1);" alt="">
+          </div>
+
+          <div class="a-msg" id="assist-msg"></div>
+          <div style="display:flex;gap:12px;">
+            <button class="a-btn a-btn-primary" onclick="submitAssistance()">
+              Envoyer la demande
+            </button>
+            <button class="a-btn a-btn-secondary" onclick="resetAssistForm()">
+              Réinitialiser
+            </button>
+          </div>
+        </div>
+
+        <!-- Mes demandes -->
+        <div class="a-card">
+          <div class="a-card-title">Mes demandes</div>
+          <div id="my-tickets-list"></div>
+        </div>
+      </div>
+    </div><!-- /assistance -->
+
+
+    <!-- ── TICKETS (superadmin) ── -->
+    <div class="admin-section" id="sec-tickets">
+      <div class="page-title">Tickets d'assistance</div>
+      <div class="page-sub">Demandes reçues des administrateurs</div>
+
+      <div class="ticket-filter-tabs">
+        <button class="ticket-filter-tab active"
+                onclick="renderTicketsAdmin('tous',this)">Tous</button>
+        <button class="ticket-filter-tab"
+                onclick="renderTicketsAdmin('ouvert',this)">Ouverts</button>
+        <button class="ticket-filter-tab"
+                onclick="renderTicketsAdmin('en-cours',this)">En cours</button>
+        <button class="ticket-filter-tab"
+                onclick="renderTicketsAdmin('resolu',this)">Résolus</button>
+      </div>
+      <div id="tickets-admin-list"></div>
+    </div><!-- /tickets -->
+
+    </div><!-- /admin-content -->
+  </div><!-- /admin-main -->
+</div><!-- /page-admin -->
+
+
+<!-- ═══════════════════════════════════════════════════
+     MODALE CRUD GÉNÉRIQUE
+════════════════════════════════════════════════════ -->
+<div id="edit-modal">
+  <div id="edit-modal-box">
+    <div id="edit-modal-title"></div>
+    <div id="edit-modal-body"></div>
+    <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end;">
+      <button class="a-btn a-btn-secondary" onclick="closeEditModal()">Annuler</button>
+      <button class="a-btn a-btn-primary" id="edit-modal-save" onclick="saveEditModal()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     MODALE COMMANDES
+════════════════════════════════════════════════════ -->
+<div id="order-modal">
+  <div id="order-modal-box">
+    <div id="order-modal-title" style="font-family:Georgia,serif;font-size:20px;margin-bottom:24px;color:#000;"></div>
+    <div id="order-modal-body"></div>
+    <div id="order-modal-footer" style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end;flex-wrap:wrap;"></div>
+  </div>
+</div>
+
+
+<!-- ─────────────────────────────────────────────
+     Callbacks définis AVANT harmonia-shared.js
+     (restoreSession() de shared.js s'exécute
+      immédiatement et cherche ces fonctions)
+───────────────────────────────────────────── -->
+<script>
+(function() {
+  function showPanel() {
+    document.getElementById('page-login').classList.add('hidden');
+    var pa = document.getElementById('page-admin');
+    pa.classList.add('visible');
+    // Déléguer les initialisations à afterSharedInit
+    // via setTimeout pour laisser le DOM peint
+    setTimeout(function() { _initAdminPanel(); }, 0);
+  }
+  function showLogin() {
+    document.getElementById('page-login').classList.remove('hidden');
+    document.getElementById('page-admin').classList.remove('visible');
+  }
+  window._adminPageShowPanel = showPanel;
+  window._adminPageShowLogin = showLogin;
+})();
+</script>
+
+<script src="harmonia-shared.js?v=35"></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// ADMIN.HTML — Script principal (unique bloc après shared.js)
+// ═══════════════════════════════════════════════════════════
+
+// ── Variables globales admin ──────────────────────────────
+var _assistUrgency   = 'normal';
+var _assistAttach    = null;
+var _editingUserId   = null;
+
+// ── Initialisation du panel après connexion ───────────────
+function _initAdminPanel() {
+  // Barre utilisateur
+  if (typeof currentUser !== 'undefined' && currentUser) {
+    document.getElementById('sb-name').textContent =
+      currentUser.name || currentUser.login || '—';
+    document.getElementById('sb-role').textContent =
+      currentUser.role || '—';
+  }
+  // Droits navigation
+  _applySidebarRights();
+  // Stats dashboard
+  _refreshDashboard();
+  // Rendu modules
+  _renderModulesCustom();
+  // Données exemple
+  _seedOrderExample();
+  _seedTicketExample();
+  // Badge tickets
+  _refreshTicketBadge();
+  // Préparer l'assistance
+  _refreshAssistMeta();
+}
+
+// ── Connexion manuelle (formulaire login) ─────────────────
+function adminLogin() {
+  var loginVal = (document.getElementById('login-email').value || '').trim().toLowerCase();
+  var passVal  = document.getElementById('login-pass').value || '';
+  var errEl    = document.getElementById('login-err');
+
+  if (typeof DB === 'undefined' || !DB.users) {
+    errEl.classList.add('show'); return;
+  }
+  var user = DB.users.find(function(u) {
+    var emailMatch = u.email && u.email.toLowerCase() === loginVal;
+    var loginMatch = u.login && u.login.toLowerCase() === loginVal;
+    return (emailMatch || loginMatch) && u.pass === passVal;
+  });
+
+  if (!user || user.role === 'membre') {
+    errEl.classList.add('show'); return;
+  }
+  errEl.classList.remove('show');
+
+  // Positionner currentUser (variable de shared.js)
+  if (typeof currentUser !== 'undefined') currentUser = user;
+
+  // Persister la session
+  try {
+    sessionStorage.setItem('harmonia_user', JSON.stringify({
+      id:          user.id,
+      login:       user.login,
+      email:       user.email,
+      name:        user.name,
+      role:        user.role,
+      permissions: user.permissions
+    }));
+  } catch(e) {}
+
+  if (typeof window._adminPageShowPanel === 'function') {
+    window._adminPageShowPanel();
+  }
+}
+
+// ── Déconnexion ───────────────────────────────────────────
+function adminLogout() {
+  if (typeof currentUser !== 'undefined') currentUser = null;
+  try { sessionStorage.removeItem('harmonia_user'); } catch(e) {}
+  if (typeof window._adminPageShowLogin === 'function') {
+    window._adminPageShowLogin();
+  }
+}
+
+// ── Restauration session après chargement shared.js ───────
+(function tryRestoreSession() {
+  try {
+    // Cas 1 : currentUser déjà positionné par shared.js restoreSession()
+    if (typeof currentUser !== 'undefined' && currentUser
+        && currentUser.role && currentUser.role !== 'membre') {
+      window._adminPageShowPanel(); return;
+    }
+    // Cas 2 : relire sessionStorage directement
+    var raw = null;
+    try { raw = sessionStorage.getItem('harmonia_user'); } catch(e) {}
+    if (!raw) return;
+    var u = JSON.parse(raw);
+    if (!u || !u.role || u.role === 'membre') return;
+    if (typeof currentUser !== 'undefined' && !currentUser) currentUser = u;
+    window._adminPageShowPanel();
+  } catch(e) {}
+})();
+
+// ── Écoute événements login/logout de shared.js ───────────
+document.addEventListener('harmonia:login', function(e) {
+  if (e.detail && e.detail.role && e.detail.role !== 'membre') {
+    window._adminPageShowPanel();
+  }
+});
+document.addEventListener('harmonia:logout', function() {
+  window._adminPageShowLogin();
+});
+
+// ── Navigation sections ───────────────────────────────────
+// ── Sidebar mobile drawer ─────────────────────────────────
+function _toggleSidebar() {
+  var sb  = document.getElementById('admin-sidebar');
+  var ov  = document.getElementById('sidebar-overlay');
+  var open = sb.classList.toggle('open');
+  if (open) ov.classList.add('open');
+  else       ov.classList.remove('open');
+}
+function _closeSidebar() {
+  document.getElementById('admin-sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ── Historique navigation interne ────────────────────────
+var _navHistory = ['dashboard'];
+var _navIndex   = 0;
+var _navPushing = false; // flag pour éviter double-push depuis back/forward
+
+var _NAV_LABELS = {
+  dashboard:'Dashboard', artistes:'Artistes', albums:'Albums',
+  tracks:'Musique', news:'Actualités', events:'Événements',
+  produits:'Boutique', commandes:'Commandes', users:'Utilisateurs',
+  modules:'Modules', assistance:'Assistance', tickets:'Tickets'
+};
+
+function _navUpdateUI() {
+  var btnBack    = document.getElementById('nav-btn-back');
+  var btnForward = document.getElementById('nav-btn-forward');
+  var crumb      = document.getElementById('nav-breadcrumb');
+  if (btnBack)    btnBack.disabled    = (_navIndex <= 0);
+  if (btnForward) btnForward.disabled = (_navIndex >= _navHistory.length - 1);
+  if (crumb)      crumb.textContent   = _NAV_LABELS[_navHistory[_navIndex]] || _navHistory[_navIndex];
+}
+
+function _navBack() {
+  if (_navIndex <= 0) return;
+  _navIndex--;
+  _navPushing = true;
+  switchSection(_navHistory[_navIndex]);
+  _navPushing = false;
+  _navUpdateUI();
+}
+
+function _navForward() {
+  if (_navIndex >= _navHistory.length - 1) return;
+  _navIndex++;
+  _navPushing = true;
+  switchSection(_navHistory[_navIndex]);
+  _navPushing = false;
+  _navUpdateUI();
+}
+
+function switchSection(name, navEl) {
+  // Masquer toutes les sections
+  document.querySelectorAll('.admin-section').forEach(function(s) {
+    s.classList.remove('active');
+  });
+  // Retirer active de tous les nav items
+  document.querySelectorAll('.snav').forEach(function(n) {
+    n.classList.remove('active');
+  });
+  // Activer la section cible
+  var sec = document.getElementById('sec-' + name);
+  if (sec) sec.classList.add('active');
+  // Activer le nav item
+  if (navEl) {
+    navEl.classList.add('active');
+  } else {
+    var found = document.querySelector('.snav[data-sec="' + name + '"]');
+    if (found) found.classList.add('active');
+  }
+  // Fermer sidebar drawer sur mobile
+  _closeSidebar();
+  // Historique : push seulement si navigation utilisateur (pas back/forward)
+  if (!_navPushing) {
+    if (_navHistory[_navIndex] !== name) {
+      // Tronquer le futur si on navigue depuis un état intermédiaire
+      _navHistory = _navHistory.slice(0, _navIndex + 1);
+      _navHistory.push(name);
+      _navIndex = _navHistory.length - 1;
+    }
+    _navUpdateUI();
+  }
+  // Render spécifique à la section
+  var renders = {
+    dashboard:  _refreshDashboard,
+    artistes:   _renderArtistes,
+    albums:     _renderAlbums,
+    tracks:     _renderTracks,
+    news:       _renderNews,
+    events:     _renderEvents,
+    produits:   _renderProduits,
+    commandes:  _renderCommandes,
+    users:      _renderUsers,
+    modules:    _renderModulesCustom,
+    assistance: function() { _refreshAssistMeta(); _renderMyTickets(); },
+    tickets:    function() { renderTicketsAdmin('tous'); _refreshTicketBadge(); }
+  };
+  if (renders[name]) renders[name]();
+}
+
+// ── Droits sidebar ────────────────────────────────────────
+function _applySidebarRights() {
+  if (typeof currentUser === 'undefined' || !currentUser) return;
+  var role     = currentUser.role;
+  var isSA     = role === 'superadmin';
+  var isAdmin  = isSA || role === 'administrateur';
+
+  // Gestion utilisateurs : admin+
+  var usersNav = document.getElementById('snav-users');
+  if (usersNav) usersNav.style.display = isAdmin ? '' : 'none';
+
+  // Tickets : superadmin seulement
+  var ticketsNav = document.getElementById('snav-tickets');
+  if (ticketsNav) ticketsNav.style.display = isSA ? '' : 'none';
+
+  // Assistance : tout sauf superadmin
+  var assistNav = document.getElementById('snav-assistance');
+  if (assistNav) assistNav.style.display = isSA ? 'none' : '';
+}
+
+// ── Dashboard stats ───────────────────────────────────────
+function _refreshDashboard() {
+  if (typeof DB === 'undefined') return;
+  _setStatEl('stat-artists', (DB.artists || []).length);
+  _setStatEl('stat-albums',  (DB.albums  || []).length);
+  _setStatEl('stat-tracks',  (DB.tracks  || []).length);
+  _setStatEl('stat-news',    (DB.news    || []).length);
+}
+function _setStatEl(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+// ── Utilitaire : échappement HTML ─────────────────────────
+function _esc(s) {
+  return String(s || '').replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Utilitaire : message temporaire ──────────────────────
+function _showMsg(elId, text, type) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  el.textContent  = text;
+  el.className    = 'a-msg ' + type + ' show';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(function() { el.classList.remove('show'); }, 4000);
+}
+
+// ─────────────────────────────────────────────────────────
+// ARTISTES
+// ─────────────────────────────────────────────────────────
+function _renderArtistes() {
+  var el = document.getElementById('artistes-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.artists || [];
+  if (!list.length) {
+    el.innerHTML = '<p style="color:#000000">Aucun artiste.</p>'; return;
+  }
+  el.innerHTML = '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th>Nom</th><th>Style</th><th>Origine</th>'
+    + '<th>Catégorie</th><th>Actions</th>'
+    + '</tr></thead><tbody>'
+    + list.map(function(a) {
+        var active = _isActive('artist', a.id);
+        return '<tr>'
+          + '<td style="font-family:Georgia,serif;">' + _esc(a.name) + '</td>'
+          + '<td style="color:#000000;font-size:11px;">' + _esc(a.style || '') + '</td>'
+          + '<td style="color:#000000;font-size:11px;">' + _esc(a.origin || '') + '</td>'
+          + '<td><span style="display:inline-block;padding:3px 10px;font-size:8px;letter-spacing:2px;text-transform:uppercase;background:#4a4a4a;color:#fff;">' + _esc(a.category || '') + '</span></td>'
+          + '<td style="display:flex;gap:6px;">'
+          + '<button class="a-btn-sm ' + (active ? 'a-btn-danger' : 'a-btn-edit') + '"'
+          + ' onclick="_toggleActive(\'artist\',' + a.id + ')">'
+          + (active ? 'Désactiver' : 'Activer') + '</button>'
+          + '</td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table></div>';
+}
+
+// ─────────────────────────────────────────────────────────
+// ALBUMS
+// ─────────────────────────────────────────────────────────
+function _renderAlbums() {
+  var el = document.getElementById('albums-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.albums || [];
+  if (!list.length) {
+    el.innerHTML = '<p style="color:#000000">Aucun album.</p>'; return;
+  }
+  el.innerHTML = '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th>Titre</th><th>Artiste</th><th>Année</th>'
+    + '<th>Genre</th><th>Label</th><th>Titres</th><th>Actions</th>'
+    + '</tr></thead><tbody>'
+    + list.map(function(a) {
+        var active = _isActive('album', a.id);
+        return '<tr>'
+          + '<td style="font-family:Georgia,serif;">' + _esc(a.title || '') + '</td>'
+          + '<td style="color:#000000;">' + _esc(a.artist || '') + '</td>'
+          + '<td style="color:#000000;font-size:11px;">' + (a.year || '—') + '</td>'
+          + '<td style="color:#000000;font-size:11px;">' + _esc(a.genre || '') + '</td>'
+          + '<td style="color:#000000;font-size:10px;">' + _esc(a.label || '') + '</td>'
+          + '<td style="color:#000000;text-align:center;">' + (a.tracks || '—') + '</td>'
+          + '<td>'
+          + '<button class="a-btn-sm ' + (active ? 'a-btn-danger' : 'a-btn-edit') + '"'
+          + ' onclick="_toggleActive(\'album\',' + a.id + ')">'
+          + (active ? 'Désactiver' : 'Activer') + '</button>'
+          + '</td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table></div>';
+}
+
+// ─────────────────────────────────────────────────────────
+// TRACKS
+// ─────────────────────────────────────────────────────────
+function _renderTracks() {
+  var el = document.getElementById('tracks-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.tracks || [];
+  if (!list.length) {
+    el.innerHTML = '<p style="color:#000000">Aucun titre.</p>'; return;
+  }
+  el.innerHTML = '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th>Titre</th><th>Artiste</th><th>Album</th>'
+    + '<th>Durée</th><th>Style</th><th>Catégorie</th>'
+    + '</tr></thead><tbody>'
+    + list.map(function(t) {
+        return '<tr>'
+          + '<td>' + _esc(t.title || '') + '</td>'
+          + '<td style="color:#000000;">' + _esc(t.artist || '') + '</td>'
+          + '<td style="color:#000000;font-size:11px;">' + _esc(t.album || '') + '</td>'
+          + '<td style="color:#000000;">' + _esc(t.duration || '') + '</td>'
+          + '<td style="color:#000000;font-size:11px;">' + _esc(t.style || '') + '</td>'
+          + '<td><span class="badge ' + (t.category === 'urban' ? 'badge-orange' : 'badge-green') + '">'
+          + _esc(t.category || 'traditional') + '</span></td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table></div>';
+}
+
+// ─────────────────────────────────────────────────────────
+// NEWS — titre multilingue (objet {fr, en, pt, es} ou string)
+// ─────────────────────────────────────────────────────────
+function _newsTitle(n) {
+  if (!n.title) return '';
+  if (typeof n.title === 'object') return n.title.fr || n.title.en || '';
+  return String(n.title);
+}
+function _renderNews() {
+  var el = document.getElementById('news-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.news || [];
+  if (!list.length) {
+    el.innerHTML = '<p style="color:#000000">Aucune actualité.</p>'; return;
+  }
+  el.innerHTML = '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th>Titre</th><th>Artiste</th><th>Date</th><th>Actions</th>'
+    + '</tr></thead><tbody>'
+    + list.map(function(n) {
+        var active = _isActive('news', n.id);
+        return '<tr>'
+          + '<td style="font-family:Georgia,serif;">' + _esc(_newsTitle(n)) + '</td>'
+          + '<td style="color:#000000;">' + _esc(n.artist || '') + '</td>'
+          + '<td style="color:#000000;font-size:11px;">' + _esc(n.date || '') + '</td>'
+          + '<td>'
+          + '<button class="a-btn-sm ' + (active ? 'a-btn-danger' : 'a-btn-edit') + '"'
+          + ' onclick="_toggleActive(\'news\',' + n.id + ')">'
+          + (active ? 'Dépublier' : 'Publier') + '</button>'
+          + '</td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table></div>';
+}
+
+// ─────────────────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────────────────
+function _renderEvents() {
+  var el = document.getElementById('events-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.events || [];
+  if (!list.length) {
+    el.innerHTML = '<p style="color:#000000">Aucun événement.</p>'; return;
+  }
+  var statusLabels = {
+    active:'Actif', cancelled:'Annulé',
+    rescheduled:'Reprogrammé', extended:'Prolongé'
+  };
+  var statusBadges = {
+    active:'badge-green', cancelled:'badge-red',
+    rescheduled:'badge-orange', extended:'badge-orange'
+  };
+  el.innerHTML = '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th>Artiste</th><th>Venue</th><th>Ville</th>'
+    + '<th>Date</th><th>Standard</th><th>VIP</th><th>Statut</th>'
+    + '</tr></thead><tbody>'
+    + list.map(function(e) {
+        var st = e.status || 'active';
+        return '<tr>'
+          + '<td style="font-family:Georgia,serif;">' + _esc(e.artist || '') + '</td>'
+          + '<td style="color:#000000;font-size:12px;">' + _esc(e.venue || '') + '</td>'
+          + '<td style="color:#000000;font-size:12px;">' + _esc(e.city || '') + '</td>'
+          + '<td style="color:#000000;font-size:11px;">' + _esc(e.date || '') + '</td>'
+          + '<td style="color:#000000;">' + (e.price ? e.price + '€' : '—') + '</td>'
+          + '<td style="color:#000000;">' + (e.vip ? e.vip + '€' : '—') + '</td>'
+          + '<td><span class="badge ' + (statusBadges[st] || 'badge-gray') + '">'
+          + (statusLabels[st] || st) + '</span></td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table></div>';
+}
+
+// ─────────────────────────────────────────────────────────
+// PRODUITS
+// ─────────────────────────────────────────────────────────
+function _renderProduits() {
+  var el = document.getElementById('produits-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.products || [];
+  if (!list.length) {
+    el.innerHTML = '<p style="color:#000000">Aucun produit.</p>'; return;
+  }
+  el.innerHTML = '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th>Nom</th><th>Artiste</th><th>Type</th>'
+    + '<th>Prix</th><th>Stock</th>'
+    + '</tr></thead><tbody>'
+    + list.map(function(p) {
+        return '<tr>'
+          + '<td style="font-family:Georgia,serif;">' + _esc(p.name || '') + '</td>'
+          + '<td style="color:#000000;">' + _esc(p.artist || '') + '</td>'
+          + '<td><span style="display:inline-block;padding:3px 10px;font-size:8px;letter-spacing:2px;text-transform:uppercase;background:#4a4a4a;color:#fff;">' + _esc(p.type || '—') + '</span></td>'
+          + '<td>' + (p.price ? parseFloat(p.price).toFixed(2) + '€' : '—') + '</td>'
+          + '<td style="color:#000000;text-align:center;">'
+          + (p.stock === 999 ? '&infin;' : (p.stock !== undefined ? p.stock : '—'))
+          + '</td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table></div>';
+}
+
+// ─────────────────────────────────────────────────────────
+// COMMANDES — SYSTÈME COMPLET
+// ─────────────────────────────────────────────────────────
+var _ORD_STATUS_LIST  = ['Confirmée','En préparation','Expédiée','Livrée','Annulée'];
+var _ORD_STATUS_COLOR = {
+  'Confirmée':     '#2ecc71',
+  'En préparation':'#e17055',
+  'Expédiée':      '#1a4d8a',
+  'Livrée':        '#27ae60',
+  'Annulée':       '#d63031'
+};
+var _ordersFilter = 'tous';
+
+function _loadOrders() {
+  try { return JSON.parse(localStorage.getItem('harmonia_orders') || '[]'); }
+  catch(e) { return []; }
+}
+function _saveOrders(list) {
+  try { localStorage.setItem('harmonia_orders', JSON.stringify(list)); } catch(e) {}
+}
+function _orderNextId() {
+  var orders = _loadOrders();
+  var year = new Date().getFullYear();
+  var max = orders.reduce(function(acc, o) {
+    var m = String(o.id || '').match(/(\d+)$/);
+    return m ? Math.max(acc, parseInt(m[1])) : acc;
+  }, 0);
+  return 'HRM-' + year + '-' + String(max + 1).padStart(4, '0');
+}
+function _orderCalcTotal() {
+  var total = 0;
+  document.querySelectorAll('.om-item-price').forEach(function(el) {
+    var p = parseFloat(el.value) || 0;
+    var q = parseFloat(el.closest('.ord-add-item-row').querySelector('.om-item-qty').value) || 1;
+    total += p * q;
+  });
+  var te = document.getElementById('om-total');
+  if (te) te.value = total.toFixed(2);
+}
+
+function _filterOrders(filter, tabEl) {
+  _ordersFilter = filter;
+  document.querySelectorAll('.order-filter-tab').forEach(function(t) { t.classList.remove('active'); });
+  if (tabEl) tabEl.classList.add('active');
+  _renderCommandes();
+}
+
+function _renderCommandes() {
+  var el = document.getElementById('commandes-list');
+  if (!el) return;
+  var orders = _loadOrders();
+  orders.sort(function(a, b) { return (b.id || '') > (a.id || '') ? 1 : -1; });
+  var filtered = _ordersFilter === 'tous'
+    ? orders
+    : orders.filter(function(o) { return o.status === _ordersFilter; });
+
+  if (!filtered.length) {
+    el.innerHTML = '<p style="color:#000000;padding:24px 0;">Aucune commande'
+      + (_ordersFilter !== 'tous' ? ' pour ce statut.' : ' enregistrée.') + '</p>';
+    return;
+  }
+  el.innerHTML = '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th>Référence</th><th>Client</th><th>Articles</th>'
+    + '<th>Montant</th><th>Date</th><th>Statut</th><th>Actions</th>'
+    + '</tr></thead><tbody>'
+    + filtered.map(function(o) {
+        var itemsHtml = (o.items && o.items.length)
+          ? o.items.map(function(it) {
+              return '<span style="display:block;font-size:10px;">'
+                + _esc(it.name) + ' × ' + (it.qty || 1)
+                + (it.price ? ' — ' + Number(it.price).toFixed(2) + '€' : '') + '</span>';
+            }).join('')
+          : '<span style="font-size:10px;">—</span>';
+        var sc = _ORD_STATUS_COLOR[o.status] || '#6b7a99';
+        return '<tr>'
+          + '<td style="font-size:11px;font-family:Georgia,serif;white-space:nowrap;">'
+          +   '#' + _esc(o.id || '') + '</td>'
+          + '<td><div style="font-size:12px;font-weight:600;">' + _esc(o.name || '') + '</div>'
+          +   '<div style="font-size:10px;opacity:.75;">' + _esc(o.email || '') + '</div></td>'
+          + '<td>' + itemsHtml + '</td>'
+          + '<td style="white-space:nowrap;font-weight:700;">'
+          +   (o.total != null ? Number(o.total).toFixed(2) + '€' : '—') + '</td>'
+          + '<td style="font-size:11px;white-space:nowrap;">' + _esc(o.date || '') + '</td>'
+          + '<td><span style="display:inline-block;padding:3px 10px;font-size:8px;letter-spacing:2px;'
+          +   'text-transform:uppercase;background:' + sc + ';color:#fff;">'
+          +   _esc(o.status || '—') + '</span></td>'
+          + '<td style="white-space:nowrap;">'
+          +   '<button class="a-btn" style="font-size:10px;padding:4px 12px;margin-right:6px;'
+          +     'background:rgba(255,255,255,0.12);"'
+          +     ' onclick="_orderDetail(\'' + _esc(o.id) + '\')">Détail</button>'
+          +   (canDo('delete')
+              ? '<button class="a-btn" style="font-size:10px;padding:4px 12px;background:#d63031;"'
+                + ' onclick="_orderDelete(\'' + _esc(o.id) + '\')">Supprimer</button>'
+              : '')
+          + '</td>'
+          + '</tr>';
+      }).join('')
+    + '</tbody></table></div>';
+}
+
+// ── Détail / édition d'une commande ──────────────────────
+function _orderDetail(id) {
+  var orders = _loadOrders();
+  var o = orders.find(function(x) { return x.id === id; });
+  if (!o) return;
+  var canEdit = canDo('edit');
+
+  var itemsRows = (o.items || []).map(function(it) {
+    return '<tr>'
+      + '<td>' + _esc(it.name) + '</td>'
+      + '<td style="text-align:center;">' + (it.qty || 1) + '</td>'
+      + '<td style="text-align:right;">' + (it.price ? Number(it.price).toFixed(2) + '€' : '—') + '</td>'
+      + '<td style="text-align:right;font-weight:600;">'
+      +   (it.price ? (Number(it.price) * (it.qty || 1)).toFixed(2) + '€' : '—') + '</td>'
+      + '</tr>';
+  }).join('');
+
+  var statusBtns = _ORD_STATUS_LIST.map(function(s) {
+    var isActive = o.status === s;
+    var isDanger = s === 'Annulée';
+    return '<button class="ord-status-btn' + (isActive ? ' active' : '') + (isDanger ? ' danger-btn' : '') + '"'
+      + (canEdit ? ' onclick="_orderSetStatus(\'' + id + '\',\'' + s + '\')"' : ' disabled')
+      + '>' + s + '</button>';
+  }).join('');
+
+  document.getElementById('order-modal-title').textContent = 'Commande #' + id;
+  document.getElementById('order-modal-body').innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">'
+    + '<div>'
+    +   '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Client</div>'
+    +   '<div style="font-weight:700;font-size:14px;">' + _esc(o.name || '—') + '</div>'
+    +   '<div style="font-size:12px;">' + _esc(o.email || '') + '</div>'
+    +   (o.phone ? '<div style="font-size:12px;">' + _esc(o.phone) + '</div>' : '')
+    + '</div>'
+    + '<div>'
+    +   '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Livraison</div>'
+    +   '<div style="font-size:12px;line-height:1.8;">'
+    +     _esc(o.address || '—') + '<br>'
+    +     _esc((o.postal || '') + ' ' + (o.city || '')) + '<br>'
+    +     _esc(o.country || '')
+    +   '</div>'
+    + '</div>'
+    + '</div>'
+    + '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Articles</div>'
+    + '<table class="ord-items-table"><thead><tr>'
+    +   '<th>Article</th><th style="text-align:center;">Qté</th>'
+    +   '<th style="text-align:right;">P.U.</th><th style="text-align:right;">Total</th>'
+    + '</tr></thead><tbody>' + itemsRows + '</tbody>'
+    + '<tfoot><tr><td colspan="3">Total commande</td>'
+    +   '<td style="text-align:right;">' + Number(o.total || 0).toFixed(2) + '€</td>'
+    + '</tr></tfoot></table>'
+    + '<div style="margin:24px 0 8px;font-size:9px;letter-spacing:2px;text-transform:uppercase;">Statut</div>'
+    + '<div class="ord-status-flow">' + statusBtns + '</div>'
+    + '<div style="font-size:11px;margin-top:8px;">Date : ' + _esc(o.date || '—') + '</div>';
+
+  document.getElementById('order-modal-footer').innerHTML =
+    '<button class="a-btn a-btn-secondary" onclick="_orderModalClose()">Fermer</button>';
+  document.getElementById('order-modal').classList.add('open');
+}
+
+function _orderSetStatus(id, status) {
+  var orders = _loadOrders();
+  var o = orders.find(function(x) { return x.id === id; });
+  if (!o) return;
+  o.status = status;
+  _saveOrders(orders);
+  _orderDetail(id); // re-render modal
+  _renderCommandes();
+}
+
+// ── Création manuelle ─────────────────────────────────────
+function _orderCreate() {
+  var newId = _orderNextId();
+  document.getElementById('order-modal-title').textContent = 'Nouvelle commande';
+  document.getElementById('order-modal-body').innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">'
+    + _omField('om-name',   'Nom client', 'text', '')
+    + _omField('om-email',  'Email',      'email','')
+    + _omField('om-phone',  'Téléphone',  'text', '')
+    + _omField('om-date',   'Date',       'date', new Date().toISOString().slice(0,10))
+    + '</div>'
+    + '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Adresse de livraison</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">'
+    + _omField('om-address','Rue / Adresse', 'text','')
+    + _omField('om-postal', 'Code postal',   'text','')
+    + _omField('om-city',   'Ville',         'text','')
+    + _omField('om-country','Pays',          'text','Cap-Vert')
+    + '</div>'
+    + '<div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">Articles</div>'
+    + '<div id="om-items-list"><div class="ord-add-item-row">'
+    +   '<input class="om-item-name" placeholder="Nom article" style="flex:1;">'
+    +   '<input class="om-item-qty qty-field" type="number" value="1" min="1" placeholder="Qté" oninput="_orderCalcTotal()">'
+    +   '<input class="om-item-price price-field" type="number" step="0.01" placeholder="Prix" oninput="_orderCalcTotal()">'
+    +   '<button class="a-btn" style="padding:4px 10px;font-size:18px;line-height:1;" onclick="_omRemoveItem(this)">×</button>'
+    + '</div></div>'
+    + '<button class="a-btn" style="margin-top:8px;font-size:11px;" onclick="_omAddItem()">+ Article</button>'
+    + '<div style="display:flex;align-items:center;gap:12px;margin-top:20px;">'
+    +   '<label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;">Statut :</label>'
+    +   '<select id="om-status" style="padding:6px 12px;font-size:11px;">'
+    +   _ORD_STATUS_LIST.map(function(s) { return '<option>' + s + '</option>'; }).join('')
+    +   '</select>'
+    +   '<label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;">Total (€) :</label>'
+    +   '<input id="om-total" type="number" step="0.01" placeholder="0.00" style="width:100px;" oninput="">'
+    + '</div>';
+
+  document.getElementById('order-modal-footer').innerHTML =
+    '<button class="a-btn a-btn-secondary" onclick="_orderModalClose()">Annuler</button>'
+    + '<button class="a-btn a-btn-primary" onclick="_orderSave()">Enregistrer</button>';
+  document.getElementById('order-modal').classList.add('open');
+}
+
+function _omField(id, label, type, val) {
+  return '<div class="a-field">'
+    + '<label for="' + id + '">' + label + '</label>'
+    + '<input id="' + id + '" type="' + type + '" value="' + _esc(val) + '">'
+    + '</div>';
+}
+function _omAddItem() {
+  var row = document.createElement('div');
+  row.className = 'ord-add-item-row';
+  row.innerHTML = '<input class="om-item-name" placeholder="Nom article" style="flex:1;">'
+    + '<input class="om-item-qty qty-field" type="number" value="1" min="1" placeholder="Qté" oninput="_orderCalcTotal()">'
+    + '<input class="om-item-price price-field" type="number" step="0.01" placeholder="Prix" oninput="_orderCalcTotal()">'
+    + '<button class="a-btn" style="padding:4px 10px;font-size:18px;line-height:1;" onclick="_omRemoveItem(this)">×</button>';
+  document.getElementById('om-items-list').appendChild(row);
+}
+function _omRemoveItem(btn) {
+  var rows = document.querySelectorAll('#om-items-list .ord-add-item-row');
+  if (rows.length <= 1) return; // garder au moins 1 ligne
+  btn.closest('.ord-add-item-row').remove();
+  _orderCalcTotal();
+}
+function _omVal(id) {
+  var el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+function _orderSave() {
+  var items = [];
+  document.querySelectorAll('#om-items-list .ord-add-item-row').forEach(function(row) {
+    var name  = row.querySelector('.om-item-name').value.trim();
+    var qty   = parseFloat(row.querySelector('.om-item-qty').value) || 1;
+    var price = parseFloat(row.querySelector('.om-item-price').value) || 0;
+    if (name) items.push({ name: name, qty: qty, price: price });
+  });
+  var total = parseFloat(_omVal('om-total')) || items.reduce(function(a, it) { return a + it.price * it.qty; }, 0);
+  var order = {
+    id:      _orderNextId(),
+    name:    _omVal('om-name'),
+    email:   _omVal('om-email'),
+    phone:   _omVal('om-phone'),
+    address: _omVal('om-address'),
+    postal:  _omVal('om-postal'),
+    city:    _omVal('om-city'),
+    country: _omVal('om-country'),
+    date:    _omVal('om-date') || new Date().toISOString().slice(0,10),
+    status:  _omVal('om-status') || 'Confirmée',
+    total:   total,
+    items:   items
+  };
+  if (!order.name) { alert('Nom client requis.'); return; }
+  var orders = _loadOrders();
+  orders.push(order);
+  _saveOrders(orders);
+  _orderModalClose();
+  _renderCommandes();
+}
+
+// ── Suppression ──────────────────────────────────────────
+function _orderDelete(id) {
+  if (!confirm('Supprimer la commande #' + id + ' ? Cette action est irréversible.')) return;
+  var orders = _loadOrders().filter(function(o) { return o.id !== id; });
+  _saveOrders(orders);
+  _renderCommandes();
+}
+
+function _orderModalClose() {
+  document.getElementById('order-modal').classList.remove('open');
+}
+
+// ─────────────────────────────────────────────────────────
+// TOGGLE ACTIF / INACTIF (via shared.js itemStates)
+// ─────────────────────────────────────────────────────────
+function _isActive(type, id) {
+  if (typeof isItemActive === 'function') return isItemActive(type, id);
+  // Fallback local
+  var key = type + '_' + id;
+  var states = (typeof DB !== 'undefined' && DB.itemStates) ? DB.itemStates : {};
+  return states.hasOwnProperty(key) ? states[key] : true;
+}
+
+function _toggleActive(type, id) {
+  if (typeof toggleItemActive === 'function') {
+    toggleItemActive(type, id);
+    if (typeof saveData === 'function') saveData(DB);
+  } else {
+    // Fallback local
+    if (typeof DB === 'undefined') return;
+    if (!DB.itemStates) DB.itemStates = {};
+    var key = type + '_' + id;
+    DB.itemStates[key] = !_isActive(type, id);
+    if (typeof saveData === 'function') saveData(DB);
+  }
+  // Re-render la section concernée
+  var sectionMap = { artist:'artistes', album:'albums', news:'news', event:'events' };
+  var sec = sectionMap[type];
+  if (sec) {
+    var renders = {
+      artistes: _renderArtistes,
+      albums:   _renderAlbums,
+      news:     _renderNews,
+      events:   _renderEvents
+    };
+    if (renders[sec]) renders[sec]();
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+// UTILISATEURS
+// ─────────────────────────────────────────────────────────
+var _ROLE_LABELS = {
+  superadmin:'Super-Admin', administrateur:'Administrateur',
+  editor:'Éditeur', moderator:'Modérateur',
+  contributor:'Contributeur', readonly:'Lecture seule',
+  membre:'Membre', custom:'Personnalisé'
+};
+var _ROLE_BADGES = {
+  superadmin:'badge-green', administrateur:'badge-green',
+  editor:'badge-orange', moderator:'badge-orange',
+  contributor:'badge-orange', readonly:'badge-gray',
+  membre:'badge-gray', custom:'badge-gray'
+};
+
+function _renderUsers() {
+  var el = document.getElementById('users-tbody');
+  if (!el || typeof DB === 'undefined') return;
+  var users = DB.users || [];
+  el.innerHTML = users.map(function(u) {
+    var canDelete = !u.protected && (typeof currentUser !== 'undefined')
+                    && currentUser && currentUser.role === 'superadmin';
+    return '<tr>'
+      + '<td style="font-family:Georgia,serif;">' + _esc(u.name || '') + '</td>'
+      + '<td style="color:#000000;font-size:12px;">'
+      + _esc(u.email || u.login || '') + '</td>'
+      + '<td><span style="display:inline-block;padding:3px 10px;font-size:8px;letter-spacing:2px;text-transform:uppercase;background:#4a4a4a;color:#fff;">'
+      + (_ROLE_LABELS[u.role] || u.role) + '</span></td>'
+      + '<td style="color:#000000;font-size:11px;">'
+      + _esc((u.createdAt || '').substring(0, 10)) + '</td>'
+      + '<td style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'
+      + (currentUser && currentUser.role === 'superadmin'
+          ? '<button class="a-btn-edit" onclick="_editUser(' + u.id + ')" style="font-size:9px;padding:4px 10px;">Modifier</button>'
+          : '')
+      + (canDelete
+          ? '<button class="a-btn-danger" onclick="_deleteUser(' + u.id + ')">Supprimer</button>'
+          : (!u.protected ? '' : '<span style="color:#000000;font-size:9px;letter-spacing:1px;">Protégé</span>'))
+      + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+function _editUser(id) {
+  if (typeof currentUser === 'undefined' || !currentUser || currentUser.role !== 'superadmin') return;
+  var u = (DB.users || []).find(function(x) { return x.id === id; });
+  if (!u) return;
+
+  // Pré-remplir le formulaire
+  var set = function(elId, val) { var el = document.getElementById(elId); if (el) el.value = val || ''; };
+  set('u-name',  u.name  || '');
+  set('u-email', u.email || '');
+  set('u-login', u.login || '');
+  set('u-pass',  ''); // toujours vide — inchangé si laissé vide
+  set('u-role',  u.role  || 'readonly');
+
+  // Permissions
+  if (u.permissions) {
+    document.querySelectorAll('.perm-chk').forEach(function(c) {
+      c.checked = !!(u.permissions[c.dataset.action]);
+    });
+  }
+
+  // Indicateur mode édition
+  _editingUserId    = id;
+  window._editUserId = id; // variable attendue par saveUser() de shared.js
+
+  document.getElementById('users-form-title').textContent = 'Modifier — ' + (u.name || u.email);
+  document.getElementById('users-cancel-btn').style.display = 'inline-block';
+  var hint = document.getElementById('u-pass-hint');
+  if (hint) hint.style.display = 'inline';
+
+  // Scroll vers le formulaire
+  var card = document.getElementById('users-form-card');
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function resetUserFormAdmin() {
+  _editingUserId     = null;
+  window._editUserId = null;
+  document.getElementById('users-form-title').textContent = 'Créer un utilisateur';
+  document.getElementById('users-cancel-btn').style.display = 'none';
+  var hint = document.getElementById('u-pass-hint');
+  if (hint) hint.style.display = 'none';
+  ['u-name','u-email','u-login','u-pass'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('u-role').value = 'readonly';
+  document.querySelectorAll('.perm-chk').forEach(function(c) {
+    c.checked = c.dataset.action === 'view';
+  });
+}
+
+function _deleteUser(id) {
+  if (!confirm('Supprimer cet utilisateur définitivement ?')) return;
+  if (typeof DB === 'undefined') return;
+  DB.users = DB.users.filter(function(u) { return u.id !== id; });
+  if (typeof saveData === 'function') saveData(DB);
+  _renderUsers();
+  _refreshDashboard();
+}
+
+// saveUser() est fourni par harmonia-shared.js
+// On s'assure que renderUsersAdminList (appelé par shared) redirige vers notre rendu
+window.renderUsersAdminList = function() {
+  _renderUsers();
+  _refreshDashboard();
+};
+
+// ─────────────────────────────────────────────────────────
+// MODULES — notre rendu personnalisé
+// ─────────────────────────────────────────────────────────
+function _renderModulesCustom() {
+  var el = document.getElementById('modules-grid-custom');
+  if (!el || typeof DB === 'undefined') return;
+  if (!DB.modules) return;
+
+  var mods = DB.modules;
+  el.innerHTML = Object.keys(mods).map(function(key) {
+    var m   = mods[key];
+    var on  = m.enabled !== false;
+    var lbl = m.label || key;
+    return '<div class="mod-toggle">'
+      + '<div>'
+      + '<span style="font-size:12px;letter-spacing:1px;">' + _esc(lbl) + '</span>'
+      + '<span style="display:block;font-size:9px;letter-spacing:1px;margin-top:2px;'
+      + 'color:' + (on ? 'var(--main-text)' : 'var(--main-label)') + ';">'
+      + (on ? 'ACTIF' : 'DÉSACTIVÉ') + '</span>'
+      + '</div>'
+      + '<div class="toggle-sw ' + (on ? 'on' : '') + '"'
+      + ' onclick="_toggleModuleCustom(\'' + key + '\')"'
+      + ' title="' + (on ? 'Désactiver' : 'Activer') + '"></div>'
+      + '</div>';
+  }).join('');
+}
+
+function _toggleModuleCustom(key) {
+  // Utiliser toggleModule de shared.js si disponible (gère save + applyModules)
+  if (typeof toggleModule === 'function') {
+    toggleModule(key);
+  } else {
+    if (typeof DB === 'undefined' || !DB.modules || !DB.modules[key]) return;
+    DB.modules[key].enabled = !DB.modules[key].enabled;
+    if (typeof saveData === 'function') saveData(DB);
+  }
+  _renderModulesCustom();
+}
+
+// renderModulesAdmin est appelé par shared.js — on le rebranche ici
+window.renderModulesAdmin = function() { _renderModulesCustom(); };
+
+// ─────────────────────────────────────────────────────────
+// ASSISTANCE
+// ─────────────────────────────────────────────────────────
+function _refreshAssistMeta() {
+  if (typeof currentUser !== 'undefined' && currentUser) {
+    var el = document.getElementById('assist-author');
+    var rl = document.getElementById('assist-role');
+    if (el) el.textContent = currentUser.name || '—';
+    if (rl) rl.textContent = currentUser.role || '—';
+  }
+  var dd = document.getElementById('assist-date');
+  if (dd) {
+    var now = new Date();
+    dd.textContent = now.toLocaleDateString('fr-FR') + ' '
+      + now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  }
+}
+
+function selectUrgencyAdmin(level) {
+  _assistUrgency = level;
+  ['normal','urgent','critique'].forEach(function(l) {
+    var btn = document.getElementById('urgency-' + l);
+    if (!btn) return;
+    btn.className = 'urgency-btn';
+    if (l === level) btn.classList.add('ub-' + l);
+  });
+}
+
+function handleAssistFile(input) {
+  _assistAttach = null;
+  var prev = document.getElementById('assist-preview');
+  if (!input.files || !input.files[0]) {
+    if (prev) prev.style.display = 'none'; return;
+  }
+  var file = input.files[0];
+  // Redimensionnement automatique : 800 px max, JPEG 0.82
+  resizeImage(file, 800, 0.82, function(dataUrl) {
+    _assistAttach = { name: file.name, dataUrl: dataUrl, type: 'image/jpeg' };
+    if (prev) { prev.src = dataUrl; prev.style.display = 'block'; }
+  });
+}
+
+function resetAssistForm() {
+  var desc = document.getElementById('assist-desc');
+  var cat  = document.getElementById('assist-cat');
+  var file = document.getElementById('assist-file');
+  var prev = document.getElementById('assist-preview');
+  if (desc) desc.value = '';
+  if (cat)  cat.value  = 'bug';
+  if (file) file.value = '';
+  if (prev) { prev.src = ''; prev.style.display = 'none'; }
+  _assistAttach  = null;
+  _assistUrgency = 'normal';
+  selectUrgencyAdmin('normal');
+  _refreshAssistMeta();
+}
+
+function submitAssistance() {
+  var desc = (document.getElementById('assist-desc').value || '').trim();
+  var cat  = (document.getElementById('assist-cat') || {}).value || 'bug';
+  if (!desc) { _showMsg('assist-msg', 'Veuillez décrire votre demande.', 'err'); return; }
+
+  var ticket = {
+    id:          Date.now(),
+    authorId:    (typeof currentUser !== 'undefined' && currentUser) ? currentUser.id   : null,
+    authorName:  (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : 'Inconnu',
+    authorRole:  (typeof currentUser !== 'undefined' && currentUser) ? currentUser.role : '—',
+    createdAt:   new Date().toISOString(),
+    urgency:     _assistUrgency,
+    category:    cat,
+    description: desc,
+    attachment:  _assistAttach || null,
+    status:      'ouvert',
+    resolvedAt:  null,
+    resolvedBy:  null
+  };
+
+  var tickets = _loadTickets();
+  tickets.push(ticket);
+  _saveTickets(tickets);
+
+  var ref = String(ticket.id).slice(-5);
+  _showMsg('assist-msg', 'Demande envoyée. Référence : #' + ref, 'ok');
+  resetAssistForm();
+  _renderMyTickets();
+  _refreshTicketBadge();
+}
+
+// ─────────────────────────────────────────────────────────
+// MES TICKETS (vue non-superadmin)
+// ─────────────────────────────────────────────────────────
+var _CAT_LABELS = {
+  bug:'Bug technique', contenu:'Modification contenu',
+  fonctionnalite:'Nouvelle fonctionnalité', acces:'Accès & droits'
+};
+
+function _renderMyTickets() {
+  var container = document.getElementById('my-tickets-list');
+  if (!container) return;
+  if (typeof currentUser === 'undefined' || !currentUser) {
+    container.innerHTML = ''; return;
+  }
+  var tickets = _loadTickets().filter(function(t) {
+    return t.authorId == currentUser.id;
+  });
+  tickets.sort(function(a, b) { return b.id - a.id; });
+
+  if (!tickets.length) {
+    container.innerHTML = '<div class="ticket-empty">Aucune demande envoyée</div>'; return;
+  }
+  container.innerHTML = tickets.map(function(t) {
+    return '<div class="ticket-card">'
+      + '<div class="ticket-urgency-bar tub-' + (t.urgency || 'normal') + '"></div>'
+      + '<div class="ticket-body">'
+      + '<div class="ticket-header">'
+      + '<span class="ticket-cat">' + (_CAT_LABELS[t.category] || t.category) + '</span>'
+      + '<span class="ticket-urg urg-' + (t.urgency || 'normal') + '">'
+      + (t.urgency || 'normal').toUpperCase() + '</span>'
+      + '<span class="ticket-status tst-' + t.status + '">' + t.status + '</span>'
+      + '</div>'
+      + '<div class="ticket-meta">'
+      + new Date(t.createdAt).toLocaleDateString('fr-FR') + ' '
+      + new Date(t.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})
+      + '</div>'
+      + '<div class="ticket-desc">' + _esc(t.description) + '</div>'
+      + (t.resolvedBy
+          ? '<div class="ticket-resolved">Résolu par ' + _esc(t.resolvedBy)
+          + (t.resolvedAt ? ' le ' + new Date(t.resolvedAt).toLocaleDateString('fr-FR') : '')
+          + '</div>' : '')
+      + '</div>'
+      + (t.attachment
+          ? '<img class="ticket-thumb" src="' + t.attachment.dataUrl + '" alt="">' : '')
+      + '</div>';
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────
+// TICKETS SUPERADMIN
+// ─────────────────────────────────────────────────────────
+function renderTicketsAdmin(filter, tabEl) {
+  // Gérer les onglets
+  if (tabEl) {
+    document.querySelectorAll('.ticket-filter-tab').forEach(function(el) {
+      el.classList.remove('active');
+    });
+    tabEl.classList.add('active');
+  }
+
+  var container = document.getElementById('tickets-admin-list');
+  if (!container) return;
+
+  var tickets = _loadTickets();
+  tickets.sort(function(a, b) { return b.id - a.id; });
+  if (filter && filter !== 'tous') {
+    tickets = tickets.filter(function(t) { return t.status === filter; });
+  }
+
+  if (!tickets.length) {
+    container.innerHTML = '<div class="ticket-empty">Aucune demande</div>'; return;
+  }
+
+  container.innerHTML = tickets.map(function(t) {
+    var ref = String(t.id).slice(-5);
+    var actionBtns = '';
+    if (t.status !== 'en-cours') {
+      actionBtns += '<button class="ticket-action-btn btn-encours"'
+        + ' onclick="_setTicketStatus(' + t.id + ',\'en-cours\')">En cours</button>';
+    }
+    if (t.status !== 'resolu') {
+      actionBtns += '<button class="ticket-action-btn btn-resolu"'
+        + ' onclick="_setTicketStatus(' + t.id + ',\'resolu\')">Résoudre</button>';
+    }
+    if (t.status !== 'ouvert') {
+      actionBtns += '<button class="ticket-action-btn"'
+        + ' onclick="_setTicketStatus(' + t.id + ',\'ouvert\')">Rouvrir</button>';
+    }
+    return '<div class="ticket-card" id="tc-' + t.id + '">'
+      + '<div class="ticket-urgency-bar tub-' + (t.urgency || 'normal') + '"></div>'
+      + '<div class="ticket-body">'
+      + '<div class="ticket-header">'
+      + '<span style="font-size:10px;color:#000000;">#' + ref + '</span>'
+      + '<span class="ticket-cat">' + (_CAT_LABELS[t.category] || t.category) + '</span>'
+      + '<span class="ticket-urg urg-' + (t.urgency || 'normal') + '">'
+      + (t.urgency || 'normal').toUpperCase() + '</span>'
+      + '<span class="ticket-status tst-' + t.status + '">' + t.status + '</span>'
+      + '</div>'
+      + '<div class="ticket-meta"><strong>' + _esc(t.authorName) + '</strong> — '
+      + _esc(t.authorRole) + ' — '
+      + new Date(t.createdAt).toLocaleDateString('fr-FR') + ' '
+      + new Date(t.createdAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})
+      + '</div>'
+      + '<div class="ticket-desc">' + _esc(t.description) + '</div>'
+      + (t.resolvedBy
+          ? '<div class="ticket-resolved">Résolu par ' + _esc(t.resolvedBy)
+          + (t.resolvedAt ? ' le ' + new Date(t.resolvedAt).toLocaleDateString('fr-FR') : '')
+          + '</div>' : '')
+      + '<div class="ticket-actions">' + actionBtns + '</div>'
+      + '</div>'
+      + (t.attachment
+          ? '<img class="ticket-thumb" src="' + t.attachment.dataUrl + '" alt="">' : '')
+      + '</div>';
+  }).join('');
+}
+
+function _setTicketStatus(id, status) {
+  var tickets = _loadTickets();
+  var t = tickets.find(function(x) { return x.id === id; });
+  if (!t) return;
+  t.status = status;
+  if (status === 'resolu') {
+    t.resolvedAt = new Date().toISOString();
+    t.resolvedBy = (typeof currentUser !== 'undefined' && currentUser)
+      ? currentUser.name : 'Administrateur';
+  } else {
+    t.resolvedAt = null; t.resolvedBy = null;
+  }
+  _saveTickets(tickets);
+
+  // Re-render avec le filtre actif
+  var activeTab = document.querySelector('.ticket-filter-tab.active');
+  var txt = activeTab ? activeTab.textContent.trim().toLowerCase() : 'tous';
+  var filterMap = { tous:'tous', ouverts:'ouvert', 'en cours':'en-cours', résolus:'resolu' };
+  renderTicketsAdmin(filterMap[txt] || 'tous');
+  _refreshTicketBadge();
+}
+
+// ─────────────────────────────────────────────────────────
+// BADGE TICKETS
+// ─────────────────────────────────────────────────────────
+function _refreshTicketBadge() {
+  var badge = document.getElementById('ticket-badge-count');
+  if (!badge) return;
+  var isSA = (typeof currentUser !== 'undefined' && currentUser
+              && currentUser.role === 'superadmin');
+  if (!isSA) { badge.style.display = 'none'; return; }
+  var count = _loadTickets().filter(function(t) {
+    return t.status === 'ouvert' || t.status === 'en-cours';
+  }).length;
+  badge.textContent = count;
+  badge.className   = 'nav-badge' + (count > 0 ? ' show' : '');
+}
+
+// Rendre updateTicketBadge de shared.js compatible
+window.updateTicketBadge = function() { _refreshTicketBadge(); };
+
+// ─────────────────────────────────────────────────────────
+// STOCKAGE TICKETS
+// ─────────────────────────────────────────────────────────
+function _loadTickets() {
+  try { return JSON.parse(localStorage.getItem('harmonia_tickets') || '[]'); }
+  catch(e) { return []; }
+}
+function _saveTickets(t) {
+  try { localStorage.setItem('harmonia_tickets', JSON.stringify(t)); } catch(e) {}
+}
+function _seedOrderExample() {
+  try {
+    var existing = JSON.parse(localStorage.getItem('harmonia_orders') || '[]');
+    if (existing.length > 0) return;
+    var seed = [{
+      id:      'HRM-2024-0001',
+      name:    'Maria Da Silva',
+      email:   'maria.dasilva@gmail.com',
+      phone:   '+238 991 22 34',
+      address: 'Rua da Liberdade 12',
+      postal:  '7600',
+      city:    'Praia',
+      country: 'Cap-Vert',
+      total:   34.90,
+      date:    new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString().slice(0,10),
+      status:  'Confirmée',
+      items:   [
+        { name: 'Vinyl Cesária Évora — Miss Perfumado', qty: 1, price: 24.90 },
+        { name: 'T-Shirt Harmonia — Taille M',          qty: 1, price: 10.00 }
+      ]
+    },{
+      id:      'HRM-2024-0002',
+      name:    'João Monteiro',
+      email:   'j.monteiro@sapo.cv',
+      phone:   '+238 996 44 55',
+      address: 'Avenida Amílcar Cabral 5',
+      postal:  '5110',
+      city:    'Mindelo',
+      country: 'Cap-Vert',
+      total:   49.80,
+      date:    new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString().slice(0,10),
+      status:  'En préparation',
+      items:   [
+        { name: 'CD Tabanka Djaz — Antologia', qty: 2, price: 14.90 },
+        { name: 'Poster A2 — Harmonia Records', qty: 1, price:  9.90 },
+        { name: 'Tote bag Harmonia',            qty: 1, price: 10.10 }
+      ]
+    },{
+      id:      'HRM-2024-0003',
+      name:    'Anaïs Bernard',
+      email:   'anais.b@outlook.fr',
+      phone:   '+33 6 12 34 56 78',
+      address: '8 Rue du Faubourg Saint-Antoine',
+      postal:  '75011',
+      city:    'Paris',
+      country: 'France',
+      total:   19.90,
+      date:    new Date().toISOString().slice(0,10),
+      status:  'Expédiée',
+      items:   [
+        { name: 'Vinyl Bana — Gira Mundo', qty: 1, price: 19.90 }
+      ]
+    }];
+    localStorage.setItem('harmonia_orders', JSON.stringify(seed));
+  } catch(e) {}
+}
+
+function _seedTicketExample() {
+  var existing = _loadTickets();
+  if (existing.length > 0) return; // ne pas écraser si déjà des tickets
+  var seed = [{
+    id:          1700000000001,
+    authorId:    1,
+    authorName:  'Admin Harmonia',
+    authorEmail: 'admin@harmonia.cv',
+    authorRole:  'administrateur',
+    category:    'contenu',
+    urgency:     'normale',
+    subject:     'Mise à jour biographie de Cesária Évora',
+    message:     'La biographie de l\'artiste Cesária Évora doit être mise à jour avec les informations relatives à son dernier album posthume. Des photos HD sont disponibles pour remplacement du visuel actuel.',
+    status:      'ouvert',
+    createdAt:   new Date(Date.now() - 2 * 24 * 3600 * 1000).toISOString(),
+    resolvedAt:  null,
+    resolvedBy:  null
+  },{
+    id:          1700000000002,
+    authorId:    2,
+    authorName:  'Éditeur Label',
+    authorEmail: 'editor@harmonia.cv',
+    authorRole:  'editor',
+    category:    'technique',
+    urgency:     'urgent',
+    subject:     'Lecteur audio ne charge pas sur mobile Safari',
+    message:     'Sur iOS 17, le lecteur audio intégré sur la page artiste ne démarre pas. Le problème est reproductible sur iPhone 14 Pro. Priorité haute avant la sortie de l\'album "Sodade" vendredi.',
+    status:      'en-cours',
+    createdAt:   new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
+    resolvedAt:  null,
+    resolvedBy:  null
+  },{
+    id:          1700000000003,
+    authorId:    1,
+    authorName:  'Admin Harmonia',
+    authorEmail: 'admin@harmonia.cv',
+    authorRole:  'administrateur',
+    category:    'compte',
+    urgency:     'normale',
+    subject:     'Création compte éditeur pour nouveau prestataire',
+    message:     'Merci de créer un compte avec le rôle "éditeur" pour notre nouveau prestataire communication : contact@studiocv.net. Accès limité aux modules Actualités et Événements uniquement.',
+    status:      'resolu',
+    createdAt:   new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString(),
+    resolvedAt:  new Date(Date.now() - 6 * 24 * 3600 * 1000).toISOString(),
+    resolvedBy:  'Superadmin'
+  }];
+  _saveTickets(seed);
+}
+
+// ─────────────────────────────────────────────────────────
+// COMPATIBILITÉ avec les fonctions que shared.js appelle
+// après refreshAdminLists() (IDs des pages legacy non présents
+// dans ce fichier — on les ignore proprement)
+// ─────────────────────────────────────────────────────────
+(function patchSharedCompat() {
+  // shared.js showAdminPage gère .admin-page — ici nos sections s'appellent .admin-section.
+  // On ne veut pas que showAdminPage casse notre nav, on le neutralise proprement.
+  var _origShowAdminPage = window.showAdminPage;
+  window.showAdminPage = function(id) {
+    // Appeler l'original sans exploser si les IDs n'existent pas
+    try { if (typeof _origShowAdminPage === 'function') _origShowAdminPage(id); } catch(e) {}
+  };
+
+  // updateStats dans shared.js cherche stat-artists etc. — nos IDs correspondent, pas de patch.
+
+  // refreshAdminLists appelle populateArtistSelects, renderArtistsAdminList, etc.
+  // Ces fonctions cherchent des IDs de l'ancien admin — OK silencieux si absents.
+})();
+
+// ─────────────────────────────────────────────────────────
+// INIT AU CHARGEMENT (si session déjà restaurée)
+// ─────────────────────────────────────────────────────────
+(function() {
+  function poll() {
+    if (typeof currentUser !== 'undefined' && currentUser) {
+      _initAdminPanel(); return;
+    }
+    setTimeout(poll, 300);
+  }
+  setTimeout(poll, 400);
+})();
+
+// Init urgence par défaut
+selectUrgencyAdmin('normal');
+
+// ═══════════════════════════════════════════════════════════
+// CRUD — SYSTÈME COMPLET
+// ═══════════════════════════════════════════════════════════
+
+// ── Variables globales CRUD ───────────────────────────────
+var _modalType      = '';    // 'artiste' | 'album' | 'track' | 'news' | 'event' | 'produit'
+var _modalId        = null;  // null = création, number = modification
+var _modalImageKey  = null;  // imgKey en cours
+
+// ── Droits par rôle ──────────────────────────────────────
+function canDo(action) {
+  if (typeof currentUser === 'undefined' || !currentUser) return false;
+  var role = currentUser.role;
+  if (role === 'superadmin' || role === 'administrateur') return true;
+  if (role === 'editor') return action !== 'delete';
+  return false;
+}
+
+// ── Resize image via canvas ───────────────────────────────
+function resizeImage(file, maxPx, quality, callback) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var w = img.width, h = img.height;
+      if (w > maxPx || h > maxPx) {
+        if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+        else { w = Math.round(w * maxPx / h); h = maxPx; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── Obtenir un item par type + id ─────────────────────────
+function getItem(type, id) {
+  var map = {
+    artiste: DB.artists,
+    album:   DB.albums,
+    track:   DB.tracks,
+    news:    DB.news,
+    event:   DB.events,
+    produit: DB.products
+  };
+  return (map[type] || []).find(function(x) { return x.id === id; });
+}
+
+// ── Fermer la modale ─────────────────────────────────────
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  _modalType = ''; _modalId = null; _modalImageKey = null;
+}
+
+// ── Champ formulaire helper ───────────────────────────────
+function _mField(label, id, type, value, opts) {
+  type = type || 'text';
+  value = value || '';
+  opts  = opts  || {};
+  var ctrl = '';
+  if (type === 'textarea') {
+    ctrl = '<textarea id="' + id + '" style="width:100%;background:#fff;'
+         + 'border:1px solid rgba(10,22,40,0.3);color:#000;padding:10px 14px;'
+         + 'font-size:13px;font-family:Arial,sans-serif;outline:none;resize:vertical;" rows="'
+         + (opts.rows || 4) + '">' + _esc(value) + '</textarea>';
+  } else if (type === 'select') {
+    var optsHtml = (opts.options || []).map(function(o) {
+      var val = typeof o === 'object' ? o.value : o;
+      var lbl = typeof o === 'object' ? o.label : o;
+      return '<option value="' + _esc(val) + '"' + (val == value ? ' selected' : '') + '>'
+           + _esc(lbl) + '</option>';
+    }).join('');
+    ctrl = '<select id="' + id + '" style="width:100%;background:#fff;'
+         + 'border:1px solid rgba(10,22,40,0.3);color:#000;padding:10px 14px;'
+         + 'font-size:13px;font-family:Arial,sans-serif;outline:none;">'
+         + optsHtml + '</select>';
+  } else {
+    ctrl = '<input type="' + type + '" id="' + id + '" value="' + _esc(value) + '"'
+         + ' style="width:100%;background:#fff;border:1px solid rgba(10,22,40,0.3);'
+         + 'color:#000;padding:10px 14px;font-size:13px;font-family:Arial,sans-serif;outline:none;">';
+  }
+  return '<div class="a-field" style="margin-bottom:14px;">'
+       + '<label style="display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;'
+       + 'color:#000;margin-bottom:6px;">' + label + '</label>'
+       + ctrl + '</div>';
+}
+
+function _mGrid(html) {
+  return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + html + '</div>';
+}
+
+function _mImageField(currentSrc) {
+  var preview = currentSrc
+    ? '<img id="modal-img-preview" src="' + currentSrc + '" class="modal-img-preview" style="display:block;">'
+    : '<img id="modal-img-preview" class="modal-img-preview">';
+  return '<div class="a-field" style="margin-bottom:14px;">'
+       + '<label style="display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;'
+       + 'color:#000;margin-bottom:6px;">Image</label>'
+       + '<input type="file" id="modal-img-input" accept="image/*"'
+       + ' style="font-size:12px;color:#000;" onchange="_onModalImgChange(this)">'
+       + preview
+       + '</div>';
+}
+
+function _onModalImgChange(input) {
+  if (!input.files || !input.files[0]) return;
+  resizeImage(input.files[0], 1200, 0.85, function(dataUrl) {
+    var prev = document.getElementById('modal-img-preview');
+    if (prev) { prev.src = dataUrl; prev.style.display = 'block'; }
+    _modalImageKey = _modalImageKey || ('img_' + Date.now());
+  });
+}
+
+// ── Récupérer la valeur d'un champ modal ─────────────────
+function _mVal(id) {
+  var el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// SAUVEGARDE MODALE — dispatch selon _modalType
+// ═══════════════════════════════════════════════════════════
+function saveEditModal() {
+  var dispatch = {
+    artiste: _saveArtisteModal,
+    album:   _saveAlbumModal,
+    track:   _saveTrackModal,
+    news:    _saveNewsModal,
+    event:   _saveEventModal,
+    produit: _saveProduitModal
+  };
+  if (dispatch[_modalType]) {
+    dispatch[_modalType]();
+  }
+}
+
+// ── Sauvegarder l'image en cours si présente ─────────────
+function _persistModalImage(item) {
+  var input = document.getElementById('modal-img-input');
+  if (!input || !input.files || !input.files[0]) return;
+  if (!_modalImageKey) return;
+  var prev = document.getElementById('modal-img-preview');
+  if (!prev || !prev.src || !prev.src.startsWith('data:')) return;
+  if (!DB.images) DB.images = {};
+  DB.images[_modalImageKey] = prev.src;
+  item.imgKey = _modalImageKey;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ARTISTES
+// ═══════════════════════════════════════════════════════════
+function openArtisteModal(id) {
+  if (!canDo('edit')) return;
+  _modalType = 'artiste';
+  _modalId   = id || null;
+
+  var item = id ? (DB.artists || []).find(function(x){ return x.id === id; }) : null;
+  _modalImageKey = (item && item.imgKey) ? item.imgKey : (item ? 'art_' + (id || Date.now()) : 'art_' + Date.now());
+
+  var title = id ? 'Modifier l\'artiste' : 'Ajouter un artiste';
+  var imgSrc = '';
+  if (item) {
+    if (DB.images && item.imgKey && DB.images[item.imgKey]) imgSrc = DB.images[item.imgKey];
+    else if (item.photo && !item.photo.startsWith('IMG_')) imgSrc = item.photo;
+  }
+
+  // Déterminer si la catégorie actuelle est custom (pas traditional/urban)
+  var curCat = item ? (item.category || 'traditional') : 'traditional';
+  var isCustomCat = curCat !== 'traditional' && curCat !== 'urban';
+  var selectVal = isCustomCat ? 'autre' : curCat;
+  var customVal = isCustomCat ? curCat : '';
+
+  var categoryOptions = [
+    {value:'traditional', label:'Traditionnel'},
+    {value:'urban',       label:'Urban'},
+    {value:'autre',       label:'Autre'}
+  ];
+
+  document.getElementById('edit-modal-title').textContent = title;
+  document.getElementById('edit-modal-body').innerHTML =
+    _mGrid(
+      _mField('Nom', 'ma-name', 'text', item ? item.name : '') +
+      _mField('Origine', 'ma-origin', 'text', item ? item.origin : '')
+    ) +
+    _mGrid(
+      _mField('Style musical', 'ma-style', 'text', item ? item.style : '') +
+      _mField('Catégorie', 'ma-category', 'select', selectVal, {options: categoryOptions})
+    ) +
+    '<div class="a-field" id="ma-category-custom-wrap" style="display:' + (isCustomCat ? 'block' : 'none') + ';">' +
+      '<label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#000;display:block;margin-bottom:6px;">Catégorie personnalisée</label>' +
+      '<input type="text" id="ma-category-custom" value="' + customVal + '" placeholder="Saisir la catégorie..." ' +
+      'style="width:100%;border:1px solid rgba(10,22,40,0.3);padding:10px 14px;font-size:13px;color:#000;background:#fff;outline:none;">' +
+    '</div>' +
+    _mField('Bio courte', 'ma-bio', 'textarea', item ? (item.bioShort || item.bio || '') : '', {rows:3}) +
+    _mImageField(imgSrc);
+
+  document.getElementById('edit-modal').classList.add('open');
+
+  // Afficher/masquer le champ custom selon la sélection
+  var catSel = document.getElementById('ma-category');
+  if (catSel) {
+    catSel.onchange = function() {
+      var wrap = document.getElementById('ma-category-custom-wrap');
+      if (wrap) wrap.style.display = this.value === 'autre' ? 'block' : 'none';
+      if (this.value !== 'autre') {
+        var cust = document.getElementById('ma-category-custom');
+        if (cust) cust.value = '';
+      }
+    };
+  }
+}
+
+function _saveArtisteModal() {
+  var name = _mVal('ma-name');
+  if (!name) { alert('Le nom est requis.'); return; }
+
+  var isNew = !_modalId;
+  var item;
+  if (isNew) {
+    item = { id: Date.now(), active: true };
+    if (!DB.artists) DB.artists = [];
+    DB.artists.push(item);
+  } else {
+    item = (DB.artists || []).find(function(x){ return x.id === _modalId; });
+    if (!item) { closeEditModal(); return; }
+  }
+
+  item.name   = name;
+  item.origin = _mVal('ma-origin');
+  item.style  = _mVal('ma-style');
+  var catSel  = _mVal('ma-category');
+  if (catSel === 'autre') {
+    var customCat = (_mVal('ma-category-custom') || '').trim();
+    item.category = customCat || 'autre';
+  } else {
+    item.category = catSel;
+  }
+  item.bioShort = _mVal('ma-bio');
+
+  _persistModalImage(item);
+  saveData(DB);
+  closeEditModal();
+  _renderArtistes();
+  _refreshDashboard();
+}
+
+function renderArtistesAdmin() { _renderArtistes(); }
+
+function _renderArtistes() {
+  var el = document.getElementById('artistes-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.artists || [];
+
+  var addForm = '';
+  if (canDo('add')) {
+    addForm = '<div class="crud-add-form">'
+      + '<div class="crud-add-form-title">Ajouter un artiste</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field"><label>Nom</label><input type="text" id="add-art-name" placeholder="Nom artiste"></div>'
+      + '<div class="a-field"><label>Style</label><input type="text" id="add-art-style" placeholder="Morna · Funaná"></div>'
+      + '<div class="a-field"><label>Origine</label><input type="text" id="add-art-origin" placeholder="Mindelo, São Vicente"></div>'
+      + '</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field"><label>Catégorie</label>'
+      + '<select id="add-art-cat" onchange="var w=document.getElementById(\'add-art-cat-custom-wrap\');if(w)w.style.display=this.value===\'autre\'?\'block\':\'none\';">'
+      + '<option value="traditional">Traditionnel</option>'
+      + '<option value="urban">Urban</option>'
+      + '<option value="autre">Autre</option>'
+      + '</select></div>'
+      + '<div class="a-field" id="add-art-cat-custom-wrap" style="display:none;"><label>Préciser</label><input type="text" id="add-art-cat-custom" placeholder="Catégorie..."></div>'
+      + '<div class="a-field" style="grid-column:span 2;"><label>Bio courte</label><input type="text" id="add-art-bio" placeholder="Description courte..."></div>'
+      + '</div>'
+      + '<button class="a-btn a-btn-primary" onclick="_addArtiste()" style="margin-top:4px;">Ajouter</button>'
+      + '</div>';
+  }
+
+  if (!list.length) {
+    el.innerHTML = addForm + '<p style="color:#000000">Aucun artiste.</p>';
+    return;
+  }
+
+  var rows = list.map(function(a) {
+    var active = _isActive('artist', a.id);
+    var imgSrc = (DB.images && a.imgKey && DB.images[a.imgKey])
+      ? '<img src="' + DB.images[a.imgKey] + '" style="width:32px;height:32px;object-fit:cover;border:1px solid #ccc;">'
+      : '';
+    var actBtns = '';
+    if (canDo('edit')) {
+      actBtns += '<button class="a-btn-crud-edit" onclick="openArtisteModal(' + a.id + ')">Modifier</button>';
+    }
+    actBtns += '<button class="a-btn-sm ' + (active ? 'a-btn-danger' : 'a-btn-edit') + '"'
+      + ' onclick="_toggleActive(\'artist\',' + a.id + ')">'
+      + (active ? 'Désactiver' : 'Activer') + '</button>';
+    if (canDo('delete')) {
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'artiste\',' + a.id + ')">Supprimer</button>';
+    }
+    return '<tr>'
+      + '<td style="width:40px;">' + imgSrc + '</td>'
+      + '<td class="editable" style="font-family:Georgia,serif;" ondblclick="inlineEdit(this,\'artiste\',' + a.id + ',\'name\')">'
+      + _esc(a.name) + '</td>'
+      + '<td class="editable" style="font-size:11px;" ondblclick="inlineEdit(this,\'artiste\',' + a.id + ',\'style\')">'
+      + _esc(a.style || '') + '</td>'
+      + '<td class="editable" style="font-size:11px;" ondblclick="inlineEdit(this,\'artiste\',' + a.id + ',\'origin\')">'
+      + _esc(a.origin || '') + '</td>'
+      + '<td><span style="display:inline-block;padding:3px 10px;font-size:8px;letter-spacing:2px;text-transform:uppercase;background:#4a4a4a;color:#fff;">' + _esc(a.category || '') + '</span></td>'
+      + '<td style="white-space:nowrap;">' + actBtns + '</td>'
+      + '</tr>';
+  }).join('');
+
+  el.innerHTML = addForm
+    + '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th></th><th>Nom</th><th>Style</th><th>Origine</th><th>Catégorie</th><th>Actions</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+function _addArtiste() {
+  if (!canDo('add')) return;
+  var name = (document.getElementById('add-art-name') || {}).value || '';
+  if (!name.trim()) { alert('Le nom est requis.'); return; }
+  createItem('artiste', {
+    name:     name.trim(),
+    style:    ((document.getElementById('add-art-style') || {}).value || '').trim(),
+    origin:   ((document.getElementById('add-art-origin') || {}).value || '').trim(),
+    category: (function(){
+      var sel = (document.getElementById('add-art-cat') || {}).value || 'traditional';
+      if (sel === 'autre') {
+        var custom = ((document.getElementById('add-art-cat-custom') || {}).value || '').trim();
+        return custom || 'autre';
+      }
+      return sel;
+    })(),
+    bioShort: ((document.getElementById('add-art-bio') || {}).value || '').trim()
+  });
+  _renderArtistes();
+}
+
+// ═══════════════════════════════════════════════════════════
+// ALBUMS
+// ═══════════════════════════════════════════════════════════
+function openAlbumModal(id) {
+  if (!canDo('edit')) return;
+  _modalType = 'album';
+  _modalId   = id || null;
+
+  var item = id ? (DB.albums || []).find(function(x){ return x.id === id; }) : null;
+  _modalImageKey = (item && item.imgKey) ? item.imgKey : 'alb_' + (id || Date.now());
+
+  var imgSrc = '';
+  if (item) {
+    if (DB.images && item.imgKey && DB.images[item.imgKey]) imgSrc = DB.images[item.imgKey];
+    else if (item.cover && !item.cover.startsWith('IMG_')) imgSrc = item.cover;
+  }
+
+  var artistNames = (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; });
+
+  document.getElementById('edit-modal-title').textContent = id ? 'Modifier l\'album' : 'Ajouter un album';
+  document.getElementById('edit-modal-body').innerHTML =
+    _mGrid(
+      _mField('Titre', 'ma-title', 'text', item ? item.title : '') +
+      _mField('Artiste', 'ma-artist', 'select', item ? item.artist : '', {options: artistNames})
+    ) +
+    _mGrid(
+      _mField('Année', 'ma-year', 'number', item ? item.year : '') +
+      _mField('Genre', 'ma-genre', 'text', item ? item.genre : '')
+    ) +
+    _mGrid(
+      _mField('Label', 'ma-label', 'text', item ? item.label : '') +
+      _mField('Nb titres', 'ma-tracks', 'number', item ? item.tracks : '')
+    ) +
+    _mGrid(
+      _mField('Prix (€)', 'ma-price', 'number', item ? item.price : '') +
+      _mField('Stripe Link', 'ma-stripe', 'text', item ? (item.stripeLink || '') : '')
+    ) +
+    _mImageField(imgSrc);
+
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function _saveAlbumModal() {
+  var title = _mVal('ma-title');
+  if (!title) { alert('Le titre est requis.'); return; }
+
+  var isNew = !_modalId;
+  var item;
+  if (isNew) {
+    item = { id: Date.now(), active: true };
+    if (!DB.albums) DB.albums = [];
+    DB.albums.push(item);
+  } else {
+    item = (DB.albums || []).find(function(x){ return x.id === _modalId; });
+    if (!item) { closeEditModal(); return; }
+  }
+
+  item.title      = title;
+  item.artist     = _mVal('ma-artist');
+  item.year       = _mVal('ma-year');
+  item.genre      = _mVal('ma-genre');
+  item.label      = _mVal('ma-label');
+  item.tracks     = parseInt(_mVal('ma-tracks')) || 0;
+  item.price      = parseFloat(_mVal('ma-price')) || 0;
+  item.stripeLink = _mVal('ma-stripe');
+
+  _persistModalImage(item);
+  saveData(DB);
+  closeEditModal();
+  _renderAlbums();
+  _refreshDashboard();
+}
+
+function renderAlbumsAdmin() { _renderAlbums(); }
+
+function _renderAlbums() {
+  var el = document.getElementById('albums-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.albums || [];
+
+  var addForm = '';
+  if (canDo('add')) {
+    var artistOpts = (DB.artists || []).map(function(a){
+      return '<option value="' + _esc(a.name) + '">' + _esc(a.name) + '</option>';
+    }).join('');
+    addForm = '<div class="crud-add-form">'
+      + '<div class="crud-add-form-title">Ajouter un album</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field"><label>Titre</label><input type="text" id="add-alb-title" placeholder="Titre de l\'album"></div>'
+      + '<div class="a-field"><label>Artiste</label><select id="add-alb-artist">' + artistOpts + '</select></div>'
+      + '<div class="a-field"><label>Année</label><input type="number" id="add-alb-year" placeholder="2024"></div>'
+      + '</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field"><label>Genre</label><input type="text" id="add-alb-genre" placeholder="Morna · Coladeira"></div>'
+      + '<div class="a-field"><label>Label</label><input type="text" id="add-alb-label" placeholder="HARMONIA"></div>'
+      + '<div class="a-field"><label>Nb titres</label><input type="number" id="add-alb-tracks" placeholder="10"></div>'
+      + '</div>'
+      + '<button class="a-btn a-btn-primary" onclick="_addAlbum()" style="margin-top:4px;">Ajouter</button>'
+      + '</div>';
+  }
+
+  if (!list.length) {
+    el.innerHTML = addForm + '<p style="color:#000000">Aucun album.</p>';
+    return;
+  }
+
+  var rows = list.map(function(a) {
+    var active = _isActive('album', a.id);
+    var imgSrc = (DB.images && a.imgKey && DB.images[a.imgKey])
+      ? '<img src="' + DB.images[a.imgKey] + '" style="width:32px;height:32px;object-fit:cover;border:1px solid #ccc;">'
+      : '';
+    var actBtns = '';
+    if (canDo('edit')) {
+      actBtns += '<button class="a-btn-crud-edit" onclick="openAlbumModal(' + a.id + ')">Modifier</button>';
+    }
+    actBtns += '<button class="a-btn-sm ' + (active ? 'a-btn-danger' : 'a-btn-edit') + '"'
+      + ' onclick="_toggleActive(\'album\',' + a.id + ')">'
+      + (active ? 'Désactiver' : 'Activer') + '</button>';
+    if (canDo('delete')) {
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'album\',' + a.id + ')">Supprimer</button>';
+    }
+    return '<tr>'
+      + '<td style="width:40px;">' + imgSrc + '</td>'
+      + '<td class="editable" style="font-family:Georgia,serif;" ondblclick="inlineEdit(this,\'album\',' + a.id + ',\'title\')">'
+      + _esc(a.title || '') + '</td>'
+      + '<td class="editable" ondblclick="inlineEdit(this,\'album\',' + a.id + ',\'artist\')">'
+      + _esc(a.artist || '') + '</td>'
+      + '<td class="editable" style="font-size:11px;" ondblclick="inlineEdit(this,\'album\',' + a.id + ',\'year\')">'
+      + (a.year || '—') + '</td>'
+      + '<td class="editable" style="font-size:11px;" ondblclick="inlineEdit(this,\'album\',' + a.id + ',\'genre\')">'
+      + _esc(a.genre || '') + '</td>'
+      + '<td style="font-size:10px;">' + _esc(a.label || '') + '</td>'
+      + '<td style="text-align:center;">' + (a.tracks || '—') + '</td>'
+      + '<td style="white-space:nowrap;">' + actBtns + '</td>'
+      + '</tr>';
+  }).join('');
+
+  el.innerHTML = addForm
+    + '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th></th><th>Titre</th><th>Artiste</th><th>Année</th>'
+    + '<th>Genre</th><th>Label</th><th>Titres</th><th>Actions</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+function _addAlbum() {
+  if (!canDo('add')) return;
+  var title = (document.getElementById('add-alb-title') || {}).value || '';
+  if (!title.trim()) { alert('Le titre est requis.'); return; }
+  createItem('album', {
+    title:  title.trim(),
+    artist: ((document.getElementById('add-alb-artist') || {}).value || '').trim(),
+    year:   ((document.getElementById('add-alb-year') || {}).value || '').trim(),
+    genre:  ((document.getElementById('add-alb-genre') || {}).value || '').trim(),
+    label:  ((document.getElementById('add-alb-label') || {}).value || 'HARMONIA').trim(),
+    tracks: parseInt((document.getElementById('add-alb-tracks') || {}).value) || 0
+  });
+  _renderAlbums();
+}
+
+// ═══════════════════════════════════════════════════════════
+// TRACKS
+// ═══════════════════════════════════════════════════════════
+function openTrackModal(id) {
+  if (!canDo('edit')) return;
+  _modalType = 'track';
+  _modalId   = id || null;
+
+  var item = id ? (DB.tracks || []).find(function(x){ return x.id === id; }) : null;
+  var artistNames = (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; });
+  var albumNames  = (DB.albums  || []).map(function(a){ return {value: a.title, label: a.title}; });
+  var catOptions  = [{value:'traditional',label:'Traditionnel'},{value:'urban',label:'Urban'}];
+
+  document.getElementById('edit-modal-title').textContent = id ? 'Modifier le titre' : 'Ajouter un titre';
+  document.getElementById('edit-modal-body').innerHTML =
+    _mGrid(
+      _mField('Titre', 'mt-title', 'text', item ? item.title : '') +
+      _mField('Artiste', 'mt-artist', 'select', item ? item.artist : '', {options: artistNames})
+    ) +
+    _mGrid(
+      _mField('Album', 'mt-album', 'select', item ? item.album : '', {options: albumNames}) +
+      _mField('Durée (ex: 3:42)', 'mt-duration', 'text', item ? item.duration : '')
+    ) +
+    _mGrid(
+      _mField('Style', 'mt-style', 'text', item ? (item.style || '') : '') +
+      _mField('Catégorie', 'mt-category', 'select', item ? item.category : 'traditional', {options: catOptions})
+    ) +
+    _mField('URL / YouTube ID', 'mt-url', 'text', item ? (item.url || item.ytId || '') : '');
+
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function _saveTrackModal() {
+  var title = _mVal('mt-title');
+  if (!title) { alert('Le titre est requis.'); return; }
+
+  var isNew = !_modalId;
+  var item;
+  if (isNew) {
+    item = { id: Date.now(), active: true };
+    if (!DB.tracks) DB.tracks = [];
+    DB.tracks.push(item);
+  } else {
+    item = (DB.tracks || []).find(function(x){ return x.id === _modalId; });
+    if (!item) { closeEditModal(); return; }
+  }
+
+  item.title    = title;
+  item.artist   = _mVal('mt-artist');
+  item.album    = _mVal('mt-album');
+  item.duration = _mVal('mt-duration');
+  item.style    = _mVal('mt-style');
+  item.category = _mVal('mt-category');
+  item.url      = _mVal('mt-url');
+
+  saveData(DB);
+  closeEditModal();
+  _renderTracks();
+  _refreshDashboard();
+}
+
+function renderTracksAdmin() { _renderTracks(); }
+
+function _renderTracks() {
+  var el = document.getElementById('tracks-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.tracks || [];
+
+  var addForm = '';
+  if (canDo('add')) {
+    var artistOpts = (DB.artists || []).map(function(a){
+      return '<option value="' + _esc(a.name) + '">' + _esc(a.name) + '</option>';
+    }).join('');
+    var albumOpts = (DB.albums || []).map(function(a){
+      return '<option value="' + _esc(a.title) + '">' + _esc(a.title) + '</option>';
+    }).join('');
+    addForm = '<div class="crud-add-form">'
+      + '<div class="crud-add-form-title">Ajouter un titre</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field"><label>Titre</label><input type="text" id="add-trk-title" placeholder="Titre du morceau"></div>'
+      + '<div class="a-field"><label>Artiste</label><select id="add-trk-artist">' + artistOpts + '</select></div>'
+      + '<div class="a-field"><label>Album</label><select id="add-trk-album">' + albumOpts + '</select></div>'
+      + '</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field"><label>Durée</label><input type="text" id="add-trk-dur" placeholder="3:42"></div>'
+      + '<div class="a-field"><label>Style</label><input type="text" id="add-trk-style" placeholder="Morna"></div>'
+      + '<div class="a-field"><label>Catégorie</label>'
+      + '<select id="add-trk-cat"><option value="traditional">Traditionnel</option><option value="urban">Urban</option></select></div>'
+      + '</div>'
+      + '<button class="a-btn a-btn-primary" onclick="_addTrack()" style="margin-top:4px;">Ajouter</button>'
+      + '</div>';
+  }
+
+  if (!list.length) {
+    el.innerHTML = addForm + '<p style="color:#000000">Aucun titre.</p>';
+    return;
+  }
+
+  var rows = list.map(function(t) {
+    var actBtns = '';
+    if (canDo('edit')) {
+      actBtns += '<button class="a-btn-crud-edit" onclick="openTrackModal(' + t.id + ')">Modifier</button>';
+    }
+    if (canDo('delete')) {
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'track\',' + t.id + ')">Supprimer</button>';
+    }
+    return '<tr>'
+      + '<td class="editable" ondblclick="inlineEdit(this,\'track\',' + t.id + ',\'title\')">'
+      + _esc(t.title || '') + '</td>'
+      + '<td class="editable" ondblclick="inlineEdit(this,\'track\',' + t.id + ',\'artist\')">'
+      + _esc(t.artist || '') + '</td>'
+      + '<td class="editable" style="font-size:11px;" ondblclick="inlineEdit(this,\'track\',' + t.id + ',\'album\')">'
+      + _esc(t.album || '') + '</td>'
+      + '<td class="editable" ondblclick="inlineEdit(this,\'track\',' + t.id + ',\'duration\')">'
+      + _esc(t.duration || '') + '</td>'
+      + '<td class="editable" style="font-size:11px;" ondblclick="inlineEdit(this,\'track\',' + t.id + ',\'style\')">'
+      + _esc(t.style || '') + '</td>'
+      + '<td><span class="badge ' + (t.category === 'urban' ? 'badge-orange' : 'badge-green') + '">'
+      + _esc(t.category || 'traditional') + '</span></td>'
+      + '<td style="white-space:nowrap;">' + actBtns + '</td>'
+      + '</tr>';
+  }).join('');
+
+  el.innerHTML = addForm
+    + '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th>Titre</th><th>Artiste</th><th>Album</th>'
+    + '<th>Durée</th><th>Style</th><th>Catégorie</th><th>Actions</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+function _addTrack() {
+  if (!canDo('add')) return;
+  var title = (document.getElementById('add-trk-title') || {}).value || '';
+  if (!title.trim()) { alert('Le titre est requis.'); return; }
+  createItem('track', {
+    title:    title.trim(),
+    artist:   ((document.getElementById('add-trk-artist') || {}).value || '').trim(),
+    album:    ((document.getElementById('add-trk-album') || {}).value || '').trim(),
+    duration: ((document.getElementById('add-trk-dur') || {}).value || '').trim(),
+    style:    ((document.getElementById('add-trk-style') || {}).value || '').trim(),
+    category: ((document.getElementById('add-trk-cat') || {}).value || 'traditional')
+  });
+  _renderTracks();
+}
+
+// ═══════════════════════════════════════════════════════════
+// NEWS
+// ═══════════════════════════════════════════════════════════
+function openNewsModal(id) {
+  if (!canDo('edit')) return;
+  _modalType = 'news';
+  _modalId   = id || null;
+
+  var item = id ? (DB.news || []).find(function(x){ return x.id === id; }) : null;
+  _modalImageKey = (item && item.imgKey) ? item.imgKey : 'news_' + (id || Date.now());
+
+  var imgSrc = '';
+  if (item) {
+    if (DB.images && item.imgKey && DB.images[item.imgKey]) imgSrc = DB.images[item.imgKey];
+    else if (item.img && !item.img.startsWith('IMG_')) imgSrc = item.img;
+  }
+
+  // Titre : objet ou string
+  var titleVal = '';
+  if (item) {
+    titleVal = typeof item.title === 'object' ? (item.title.fr || '') : (item.title || '');
+  }
+  var contentVal = '';
+  if (item) {
+    contentVal = typeof item.content === 'object'
+      ? (item.content.fr || item.content || '')
+      : (item.content || item.excerpt && (typeof item.excerpt === 'object' ? item.excerpt.fr : item.excerpt) || '');
+  }
+
+  var artistNames = [{value:'',label:'— Aucun —'}].concat(
+    (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; })
+  );
+
+  document.getElementById('edit-modal-title').textContent = id ? 'Modifier l\'actualité' : 'Ajouter une actualité';
+  document.getElementById('edit-modal-body').innerHTML =
+    _mField('Titre', 'mn-title', 'text', titleVal) +
+    _mGrid(
+      _mField('Artiste', 'mn-artist', 'select', item ? (item.artist || '') : '', {options: artistNames}) +
+      _mField('Date (YYYY-MM-DD)', 'mn-date', 'text', item ? (item.date || '') : '')
+    ) +
+    _mField('Contenu / Extrait', 'mn-content', 'textarea', contentVal, {rows:5}) +
+    _mImageField(imgSrc);
+
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function _saveNewsModal() {
+  var title = _mVal('mn-title');
+  if (!title) { alert('Le titre est requis.'); return; }
+
+  var isNew = !_modalId;
+  var item;
+  if (isNew) {
+    item = { id: Date.now(), active: true };
+    if (!DB.news) DB.news = [];
+    DB.news.push(item);
+  } else {
+    item = (DB.news || []).find(function(x){ return x.id === _modalId; });
+    if (!item) { closeEditModal(); return; }
+  }
+
+  item.title   = title;
+  item.artist  = _mVal('mn-artist');
+  item.date    = _mVal('mn-date');
+  item.content = _mVal('mn-content');
+
+  _persistModalImage(item);
+  saveData(DB);
+  closeEditModal();
+  _renderNews();
+  _refreshDashboard();
+}
+
+function renderNewsAdmin() { _renderNews(); }
+
+function _renderNews() {
+  var el = document.getElementById('news-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.news || [];
+
+  var addForm = '';
+  if (canDo('add')) {
+    var artistOpts = '<option value="">— Aucun —</option>'
+      + (DB.artists || []).map(function(a){
+          return '<option value="' + _esc(a.name) + '">' + _esc(a.name) + '</option>';
+        }).join('');
+    addForm = '<div class="crud-add-form">'
+      + '<div class="crud-add-form-title">Ajouter une actualité</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field" style="grid-column:span 2;"><label>Titre</label><input type="text" id="add-nws-title" placeholder="Titre de l\'article"></div>'
+      + '<div class="a-field"><label>Date</label><input type="date" id="add-nws-date"></div>'
+      + '</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field"><label>Artiste</label><select id="add-nws-artist">' + artistOpts + '</select></div>'
+      + '<div class="a-field" style="grid-column:span 2;"><label>Extrait</label><input type="text" id="add-nws-content" placeholder="Résumé court..."></div>'
+      + '</div>'
+      + '<button class="a-btn a-btn-primary" onclick="_addNews()" style="margin-top:4px;">Ajouter</button>'
+      + '</div>';
+  }
+
+  if (!list.length) {
+    el.innerHTML = addForm + '<p style="color:#000000">Aucune actualité.</p>';
+    return;
+  }
+
+  var rows = list.map(function(n) {
+    var active = _isActive('news', n.id);
+    var imgSrc = (DB.images && n.imgKey && DB.images[n.imgKey])
+      ? '<img src="' + DB.images[n.imgKey] + '" style="width:32px;height:32px;object-fit:cover;border:1px solid #ccc;">'
+      : '';
+    var displayTitle = typeof n.title === 'object' ? (n.title.fr || '') : (n.title || '');
+    var actBtns = '';
+    if (canDo('edit')) {
+      actBtns += '<button class="a-btn-crud-edit" onclick="openNewsModal(' + n.id + ')">Modifier</button>';
+    }
+    actBtns += '<button class="a-btn-sm ' + (active ? 'a-btn-danger' : 'a-btn-edit') + '"'
+      + ' onclick="_toggleActive(\'news\',' + n.id + ')">'
+      + (active ? 'Dépublier' : 'Publier') + '</button>';
+    if (canDo('delete')) {
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'news\',' + n.id + ')">Supprimer</button>';
+    }
+    return '<tr>'
+      + '<td style="width:40px;">' + imgSrc + '</td>'
+      + '<td class="editable" style="font-family:Georgia,serif;" ondblclick="inlineEdit(this,\'news\',' + n.id + ',\'title\')">'
+      + _esc(displayTitle) + '</td>'
+      + '<td class="editable" ondblclick="inlineEdit(this,\'news\',' + n.id + ',\'artist\')">'
+      + _esc(n.artist || '') + '</td>'
+      + '<td class="editable" style="font-size:11px;" ondblclick="inlineEdit(this,\'news\',' + n.id + ',\'date\')">'
+      + _esc(n.date || '') + '</td>'
+      + '<td style="white-space:nowrap;">' + actBtns + '</td>'
+      + '</tr>';
+  }).join('');
+
+  el.innerHTML = addForm
+    + '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th></th><th>Titre</th><th>Artiste</th><th>Date</th><th>Actions</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+function _addNews() {
+  if (!canDo('add')) return;
+  var title = (document.getElementById('add-nws-title') || {}).value || '';
+  if (!title.trim()) { alert('Le titre est requis.'); return; }
+  createItem('news', {
+    title:   title.trim(),
+    artist:  ((document.getElementById('add-nws-artist') || {}).value || '').trim(),
+    date:    ((document.getElementById('add-nws-date') || {}).value || '').trim(),
+    content: ((document.getElementById('add-nws-content') || {}).value || '').trim()
+  });
+  _renderNews();
+}
+
+// ═══════════════════════════════════════════════════════════
+// EVENTS
+// ═══════════════════════════════════════════════════════════
+function openEventModal(id) {
+  if (!canDo('edit')) return;
+  _modalType = 'event';
+  _modalId   = id || null;
+
+  var item = id ? (DB.events || []).find(function(x){ return x.id === id; }) : null;
+  var artistNames = [{value:'',label:'— Aucun —'}].concat(
+    (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; })
+  );
+  var statusOpts = [
+    {value:'active',label:'Actif'},
+    {value:'cancelled',label:'Annulé'},
+    {value:'rescheduled',label:'Reprogrammé'},
+    {value:'extended',label:'Prolongé'}
+  ];
+
+  document.getElementById('edit-modal-title').textContent = id ? 'Modifier l\'événement' : 'Ajouter un événement';
+  document.getElementById('edit-modal-body').innerHTML =
+    _mGrid(
+      _mField('Artiste', 'me-artist', 'select', item ? (item.artist || '') : '', {options: artistNames}) +
+      _mField('Titre / Description', 'me-title', 'text', item ? (item.title || '') : '')
+    ) +
+    _mGrid(
+      _mField('Date (YYYY-MM-DD)', 'me-date', 'text', item ? (item.date || '') : '') +
+      _mField('Heure (HH:MM)', 'me-time', 'text', item ? (item.time || '20:00') : '20:00')
+    ) +
+    _mGrid(
+      _mField('Venue / Salle', 'me-venue', 'text', item ? (item.venue || '') : '') +
+      _mField('Ville', 'me-city', 'text', item ? (item.city || '') : '')
+    ) +
+    _mGrid(
+      _mField('Prix standard (€)', 'me-price', 'number', item ? (item.price || '') : '') +
+      _mField('Prix VIP (€)', 'me-vip', 'number', item ? (item.vip || '') : '')
+    ) +
+    _mField('Statut', 'me-status', 'select', item ? (item.status || 'active') : 'active', {options: statusOpts});
+
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function _saveEventModal() {
+  var artist = _mVal('me-artist');
+  var venue  = _mVal('me-venue');
+  if (!artist && !venue) { alert('L\'artiste ou la salle est requis.'); return; }
+
+  var isNew = !_modalId;
+  var item;
+  if (isNew) {
+    item = { id: Date.now(), active: true };
+    if (!DB.events) DB.events = [];
+    DB.events.push(item);
+  } else {
+    item = (DB.events || []).find(function(x){ return x.id === _modalId; });
+    if (!item) { closeEditModal(); return; }
+  }
+
+  item.artist = artist;
+  item.title  = _mVal('me-title');
+  item.date   = _mVal('me-date');
+  item.time   = _mVal('me-time');
+  item.venue  = venue;
+  item.city   = _mVal('me-city');
+  item.price  = parseFloat(_mVal('me-price')) || 0;
+  item.vip    = parseFloat(_mVal('me-vip')) || 0;
+  item.status = _mVal('me-status');
+
+  saveData(DB);
+  closeEditModal();
+  _renderEvents();
+}
+
+function renderEventsAdmin() { _renderEvents(); }
+
+function _renderEvents() {
+  var el = document.getElementById('events-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.events || [];
+
+  var statusLabels = { active:'Actif', cancelled:'Annulé', rescheduled:'Reprogrammé', extended:'Prolongé' };
+  var statusBadges = { active:'badge-green', cancelled:'badge-red', rescheduled:'badge-orange', extended:'badge-orange' };
+
+  var addForm = '';
+  if (canDo('add')) {
+    var artistOpts = '<option value="">— Aucun —</option>'
+      + (DB.artists || []).map(function(a){
+          return '<option value="' + _esc(a.name) + '">' + _esc(a.name) + '</option>';
+        }).join('');
+    addForm = '<div class="crud-add-form">'
+      + '<div class="crud-add-form-title">Ajouter un événement</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field"><label>Artiste</label><select id="add-evt-artist">' + artistOpts + '</select></div>'
+      + '<div class="a-field"><label>Venue</label><input type="text" id="add-evt-venue" placeholder="Nom de la salle"></div>'
+      + '<div class="a-field"><label>Ville</label><input type="text" id="add-evt-city" placeholder="Paris"></div>'
+      + '</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field"><label>Date</label><input type="date" id="add-evt-date"></div>'
+      + '<div class="a-field"><label>Prix (€)</label><input type="number" id="add-evt-price" placeholder="30"></div>'
+      + '<div class="a-field"><label>Prix VIP (€)</label><input type="number" id="add-evt-vip" placeholder="80"></div>'
+      + '</div>'
+      + '<button class="a-btn a-btn-primary" onclick="_addEvent()" style="margin-top:4px;">Ajouter</button>'
+      + '</div>';
+  }
+
+  if (!list.length) {
+    el.innerHTML = addForm + '<p style="color:#000000">Aucun événement.</p>';
+    return;
+  }
+
+  var rows = list.map(function(e) {
+    var st = e.status || 'active';
+    var actBtns = '';
+    if (canDo('edit')) {
+      actBtns += '<button class="a-btn-crud-edit" onclick="openEventModal(' + e.id + ')">Modifier</button>';
+    }
+    if (canDo('delete')) {
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'event\',' + e.id + ')">Supprimer</button>';
+    }
+    return '<tr>'
+      + '<td class="editable" style="font-family:Georgia,serif;" ondblclick="inlineEdit(this,\'event\',' + e.id + ',\'artist\')">'
+      + _esc(e.artist || '') + '</td>'
+      + '<td class="editable" style="font-size:12px;" ondblclick="inlineEdit(this,\'event\',' + e.id + ',\'venue\')">'
+      + _esc(e.venue || '') + '</td>'
+      + '<td class="editable" style="font-size:12px;" ondblclick="inlineEdit(this,\'event\',' + e.id + ',\'city\')">'
+      + _esc(e.city || '') + '</td>'
+      + '<td class="editable" style="font-size:11px;" ondblclick="inlineEdit(this,\'event\',' + e.id + ',\'date\')">'
+      + _esc(e.date || '') + '</td>'
+      + '<td>' + (e.price ? e.price + '€' : '—') + '</td>'
+      + '<td>' + (e.vip ? e.vip + '€' : '—') + '</td>'
+      + '<td><span class="badge ' + (statusBadges[st] || 'badge-gray') + '">'
+      + (statusLabels[st] || st) + '</span></td>'
+      + '<td style="white-space:nowrap;">' + actBtns + '</td>'
+      + '</tr>';
+  }).join('');
+
+  el.innerHTML = addForm
+    + '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th>Artiste</th><th>Venue</th><th>Ville</th>'
+    + '<th>Date</th><th>Standard</th><th>VIP</th><th>Statut</th><th>Actions</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+function _addEvent() {
+  if (!canDo('add')) return;
+  var venue = (document.getElementById('add-evt-venue') || {}).value || '';
+  if (!venue.trim()) { alert('La salle est requise.'); return; }
+  createItem('event', {
+    artist: ((document.getElementById('add-evt-artist') || {}).value || '').trim(),
+    venue:  venue.trim(),
+    city:   ((document.getElementById('add-evt-city') || {}).value || '').trim(),
+    date:   ((document.getElementById('add-evt-date') || {}).value || '').trim(),
+    price:  parseFloat((document.getElementById('add-evt-price') || {}).value) || 0,
+    vip:    parseFloat((document.getElementById('add-evt-vip') || {}).value) || 0,
+    status: 'active'
+  });
+  _renderEvents();
+}
+
+// ═══════════════════════════════════════════════════════════
+// PRODUITS
+// ═══════════════════════════════════════════════════════════
+function openProduitModal(id) {
+  if (!canDo('edit')) return;
+  _modalType = 'produit';
+  _modalId   = id || null;
+
+  var item = id ? (DB.products || []).find(function(x){ return x.id === id; }) : null;
+  _modalImageKey = (item && item.imgKey) ? item.imgKey : 'prod_' + (id || Date.now());
+
+  var imgSrc = '';
+  if (item) {
+    if (DB.images && item.imgKey && DB.images[item.imgKey]) imgSrc = DB.images[item.imgKey];
+    else if (item.img && !item.img.startsWith('IMG_')) imgSrc = item.img;
+  }
+
+  var artistNames = [{value:'',label:'— Aucun —'}].concat(
+    (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; })
+  );
+  var typeOpts = [
+    {value:'cd',label:'CD'},
+    {value:'vinyl',label:'Vinyle'},
+    {value:'merch',label:'Merchandising'},
+    {value:'album',label:'Album numérique'},
+    {value:'concert',label:'Concert'}
+  ];
+
+  document.getElementById('edit-modal-title').textContent = id ? 'Modifier le produit' : 'Ajouter un produit';
+  document.getElementById('edit-modal-body').innerHTML =
+    _mGrid(
+      _mField('Nom', 'mp-name', 'text', item ? (item.name || '') : '') +
+      _mField('Artiste', 'mp-artist', 'select', item ? (item.artist || '') : '', {options: artistNames})
+    ) +
+    _mGrid(
+      _mField('Type', 'mp-type', 'select', item ? (item.type || 'cd') : 'cd', {options: typeOpts}) +
+      _mField('Prix (€)', 'mp-price', 'number', item ? (item.price || '') : '')
+    ) +
+    _mGrid(
+      _mField('Stock (-1 = illimité)', 'mp-stock', 'number', item ? (item.stock !== undefined ? item.stock : '') : '') +
+      _mField('Stripe Link', 'mp-stripe', 'text', item ? (item.stripeLink || '') : '')
+    ) +
+    _mImageField(imgSrc);
+
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function _saveProduitModal() {
+  var name = _mVal('mp-name');
+  if (!name) { alert('Le nom est requis.'); return; }
+
+  var isNew = !_modalId;
+  var item;
+  if (isNew) {
+    item = { id: Date.now(), active: true };
+    if (!DB.products) DB.products = [];
+    DB.products.push(item);
+  } else {
+    item = (DB.products || []).find(function(x){ return x.id === _modalId; });
+    if (!item) { closeEditModal(); return; }
+  }
+
+  item.name       = name;
+  item.artist     = _mVal('mp-artist');
+  item.type       = _mVal('mp-type');
+  item.price      = parseFloat(_mVal('mp-price')) || 0;
+  item.stock      = parseInt(_mVal('mp-stock'));
+  item.stripeLink = _mVal('mp-stripe');
+  if (isNaN(item.stock)) item.stock = 999;
+
+  _persistModalImage(item);
+  saveData(DB);
+  closeEditModal();
+  _renderProduits();
+}
+
+function renderProduitsAdmin() { _renderProduits(); }
+
+function _renderProduits() {
+  var el = document.getElementById('produits-list');
+  if (!el || typeof DB === 'undefined') return;
+  var list = DB.products || [];
+
+  var addForm = '';
+  if (canDo('add')) {
+    var artistOpts = '<option value="">— Aucun —</option>'
+      + (DB.artists || []).map(function(a){
+          return '<option value="' + _esc(a.name) + '">' + _esc(a.name) + '</option>';
+        }).join('');
+    addForm = '<div class="crud-add-form">'
+      + '<div class="crud-add-form-title">Ajouter un produit</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field"><label>Nom</label><input type="text" id="add-prd-name" placeholder="Nom du produit"></div>'
+      + '<div class="a-field"><label>Artiste</label><select id="add-prd-artist">' + artistOpts + '</select></div>'
+      + '<div class="a-field"><label>Type</label>'
+      + '<select id="add-prd-type"><option value="cd">CD</option><option value="vinyl">Vinyle</option>'
+      + '<option value="merch">Merchandising</option><option value="album">Album numérique</option></select></div>'
+      + '</div>'
+      + '<div class="crud-add-grid">'
+      + '<div class="a-field"><label>Prix (€)</label><input type="number" id="add-prd-price" placeholder="20"></div>'
+      + '<div class="a-field"><label>Stock</label><input type="number" id="add-prd-stock" placeholder="999 = illimité"></div>'
+      + '</div>'
+      + '<button class="a-btn a-btn-primary" onclick="_addProduit()" style="margin-top:4px;">Ajouter</button>'
+      + '</div>';
+  }
+
+  if (!list.length) {
+    el.innerHTML = addForm + '<p style="color:#000000">Aucun produit.</p>';
+    return;
+  }
+
+  var rows = list.map(function(p) {
+    var imgSrc = (DB.images && p.imgKey && DB.images[p.imgKey])
+      ? '<img src="' + DB.images[p.imgKey] + '" style="width:32px;height:32px;object-fit:cover;border:1px solid #ccc;">'
+      : '';
+    var actBtns = '';
+    if (canDo('edit')) {
+      actBtns += '<button class="a-btn-crud-edit" onclick="openProduitModal(' + p.id + ')">Modifier</button>';
+    }
+    if (canDo('delete')) {
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'produit\',' + p.id + ')">Supprimer</button>';
+    }
+    return '<tr>'
+      + '<td style="width:40px;">' + imgSrc + '</td>'
+      + '<td class="editable" style="font-family:Georgia,serif;" ondblclick="inlineEdit(this,\'produit\',' + p.id + ',\'name\')">'
+      + _esc(p.name || '') + '</td>'
+      + '<td class="editable" ondblclick="inlineEdit(this,\'produit\',' + p.id + ',\'artist\')">'
+      + _esc(p.artist || '') + '</td>'
+      + '<td><span style="display:inline-block;padding:3px 10px;font-size:8px;letter-spacing:2px;text-transform:uppercase;background:#4a4a4a;color:#fff;">' + _esc(p.type || '—') + '</span></td>'
+      + '<td class="editable" ondblclick="inlineEdit(this,\'produit\',' + p.id + ',\'price\')">'
+      + (p.price ? parseFloat(p.price).toFixed(2) + '€' : '—') + '</td>'
+      + '<td style="text-align:center;">'
+      + (p.stock === 999 || p.stock === undefined ? '&infin;' : p.stock)
+      + '</td>'
+      + '<td style="white-space:nowrap;">' + actBtns + '</td>'
+      + '</tr>';
+  }).join('');
+
+  el.innerHTML = addForm
+    + '<div class="a-table-wrap"><table class="a-table">'
+    + '<thead><tr>'
+    + '<th></th><th>Nom</th><th>Artiste</th><th>Type</th><th>Prix</th><th>Stock</th><th>Actions</th>'
+    + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+function _addProduit() {
+  if (!canDo('add')) return;
+  var name = (document.getElementById('add-prd-name') || {}).value || '';
+  if (!name.trim()) { alert('Le nom est requis.'); return; }
+  createItem('produit', {
+    name:   name.trim(),
+    artist: ((document.getElementById('add-prd-artist') || {}).value || '').trim(),
+    type:   ((document.getElementById('add-prd-type') || {}).value || 'cd'),
+    price:  parseFloat((document.getElementById('add-prd-price') || {}).value) || 0,
+    stock:  parseInt((document.getElementById('add-prd-stock') || {}).value) || 999
+  });
+  _renderProduits();
+}
+
+// ═══════════════════════════════════════════════════════════
+// COMMANDES — lecture seule (rendu conservé)
+// ═══════════════════════════════════════════════════════════
+// _renderCommandes() est déjà défini plus haut, pas de modification.
+
+// ═══════════════════════════════════════════════════════════
+// CRUD GÉNÉRIQUE — createItem / deleteItem
+// ═══════════════════════════════════════════════════════════
+function createItem(type, data) {
+  if (!canDo('add')) return;
+  data.id     = Date.now();
+  data.active = true;
+  var map = { artiste:'artists', album:'albums', track:'tracks', news:'news', event:'events', produit:'products' };
+  if (map[type]) {
+    if (!DB[map[type]]) DB[map[type]] = [];
+    DB[map[type]].push(data);
+    saveData(DB);
+  }
+}
+
+function deleteItem(type, id) {
+  if (!canDo('delete')) return;
+  if (!confirm('Supprimer cet élément ? Cette action est irréversible.')) return;
+  var map = { artiste:'artists', album:'albums', track:'tracks', news:'news', event:'events', produit:'products' };
+  if (map[type]) {
+    if (!DB[map[type]]) return;
+    DB[map[type]] = DB[map[type]].filter(function(x){ return x.id !== id; });
+    saveData(DB);
+  }
+  // Re-render
+  var renders = {
+    artiste: _renderArtistes,
+    album:   _renderAlbums,
+    track:   _renderTracks,
+    news:    _renderNews,
+    event:   _renderEvents,
+    produit: _renderProduits
+  };
+  if (renders[type]) renders[type]();
+  _refreshDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+// ÉDITION INLINE
+// ═══════════════════════════════════════════════════════════
+function inlineEdit(td, type, id, field) {
+  if (!canDo('edit')) return;
+  var old = td.textContent.trim();
+  // Supprimer le symbole € éventuel pour les prix
+  var editVal = old.replace(/€$/, '').trim();
+
+  var input = document.createElement('input');
+  input.value = editVal;
+  input.style.cssText = 'width:100%;border:1.5px solid #0a1628;padding:4px 8px;'
+    + 'font-size:13px;color:#000;background:#fff;outline:none;box-sizing:border-box;';
+  td.innerHTML = '';
+  td.appendChild(input);
+  input.focus();
+  input.select();
+
+  function save() {
+    var val = input.value.trim();
+    var item = getItem(type, id);
+    if (item) {
+      // Pour les champs titre des news qui peuvent être des objets
+      if (field === 'title' && typeof item.title === 'object') {
+        item.title.fr = val;
+      } else {
+        item[field] = val;
+      }
+      saveData(DB);
+    }
+    td.textContent = val || old;
+  }
+
+  input.onblur = save;
+  input.onkeydown = function(e) {
+    if (e.key === 'Enter') { input.blur(); }
+    if (e.key === 'Escape') { td.textContent = old; }
+  };
+}
+
+// ── Fermer la modale avec Escape ────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    var m = document.getElementById('edit-modal');
+    if (m && m.classList.contains('open')) closeEditModal();
+  }
+});
+
+// ── Fermer en cliquant sur le fond ──────────────────────
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+
+// ── Override render functions pour utiliser les nouvelles ─
+// (les fonctions internes appelées par switchSection sont désormais les nouvelles)
+// Rien à faire : les noms _renderArtistes, _renderAlbums, etc. sont les mêmes fonctions
+// que les anciens stubs, qui sont maintenant remplacés par ces définitions complètes.
+</script>
+</body>
+</html>

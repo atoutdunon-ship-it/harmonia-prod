@@ -1,0 +1,895 @@
+<!-- ADMIN OVERLAY -->
+<div id="admin-overlay">
+  <!-- LOGIN -->
+    <div id="admin-login" class="admin-login">
+    <div class="admin-login-box">
+      <div class="admin-login-title" style="display:flex;align-items:center;justify-content:center;margin-bottom:8px;"><img src="images/logo-base.png" alt="HARMONIA" style="height:44px;margin-bottom:8px;"></div>
+      <div class="admin-login-sub" data-i18n="admin_sub">Espace HARMONIA</div>
+      <!-- Onglets -->
+      <div class="auth-tabs">
+        <button class="auth-tab auth-tab-active" id="auth-tab-login" onclick="_toggleAuthMode('login')">Connexion</button>
+        <button class="auth-tab" id="auth-tab-register" onclick="_toggleAuthMode('register')">Créer un compte</button>
+      </div>
+      <!-- Formulaire connexion -->
+      <div id="auth-login-form">
+        <div class="admin-err" id="login-err">Email ou mot de passe incorrect</div>
+        <div class="admin-field">
+          <label>Adresse email</label>
+          <input type="email" id="login-email" placeholder="votre@email.com" autocomplete="email">
+        </div>
+        <div class="admin-field">
+          <label data-i18n="admin_pass">Mot de passe</label>
+          <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <button class="admin-btn" onclick="doLogin()" data-i18n="admin_login_btn">Se connecter</button>
+        <div style="margin-top:16px;text-align:center;">
+          <a href="#" onclick="closeAdmin(event)" style="font-family:Arial;font-size:10px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;" data-i18n="back_site">← Retour au site</a>
+        </div>
+      </div>
+      <!-- Formulaire inscription -->
+      <div id="auth-register-form" style="display:none;">
+        <div class="admin-err" id="register-err"></div>
+        <div class="admin-field">
+          <label>Nom complet</label>
+          <input type="text" id="reg-name" placeholder="Votre nom" autocomplete="name">
+        </div>
+        <div class="admin-field">
+          <label>Adresse email</label>
+          <input type="email" id="reg-email" placeholder="votre@email.com" autocomplete="email">
+        </div>
+        <div class="admin-field">
+          <label>Mot de passe</label>
+          <input type="password" id="reg-pass" placeholder="6 caractères minimum" autocomplete="new-password">
+        </div>
+        <div class="admin-field">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" id="reg-pass2" placeholder="••••••••" autocomplete="new-password" onkeydown="if(event.key==='Enter')doRegister()">
+        </div>
+        <button class="admin-btn" onclick="doRegister()">Créer mon compte</button>
+        <div style="margin-top:16px;text-align:center;">
+          <a href="#" onclick="closeAdmin(event)" style="font-family:Arial;font-size:10px;letter-spacing:2px;color:var(--gray);text-transform:uppercase;">← Retour au site</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- PANEL -->
+  <div class="admin-panel" id="admin-panel">
+    <div class="admin-sidebar">
+      <div class="admin-sidebar-logo" style="padding:8px 0;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 52" height="40" aria-label="HARMONIA">
+  <defs>
+    <linearGradient id="lgM1" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#c8f060"/>
+      <stop offset="45%" stop-color="#4ecb71"/>
+      <stop offset="100%" stop-color="#1a8040"/>
+    </linearGradient>
+    <linearGradient id="lgM2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3aaa55"/>
+      <stop offset="100%" stop-color="#0d5c28"/>
+    </linearGradient>
+  </defs>
+  <text x="2" y="38" style="font-family:Arial,sans-serif;font-size:38px;font-weight:900;letter-spacing:5px;fill:#ffffff;">HARM</text>
+  <g transform="translate(147,22)">
+    <ellipse cx="0" cy="12" rx="18" ry="6" fill="url(#lgM2)"/>
+    <ellipse cx="0" cy="7"  rx="18" ry="6" fill="url(#lgM1)"/>
+    <ellipse cx="0" cy="6"  rx="10" ry="3.5" fill="#1a5c30"/>
+    <ellipse cx="0" cy="5"  rx="4"  ry="2"   fill="#051a0c"/>
+    <ellipse cx="-6" cy="3" rx="4" ry="1.5" fill="rgba(220,255,180,0.28)" transform="rotate(-8,-6,3)"/>
+  </g>
+  <text x="169" y="38" style="font-family:Arial,sans-serif;font-size:38px;font-weight:900;letter-spacing:5px;fill:#ffffff;">NIA</text>
+</svg></div>
+      <div class="admin-nav-item active" onclick="showAdminPage('dashboard')">&#9632; <span data-i18n="admin_dashboard">Dashboard</span></div>
+      <div class="admin-nav-item" onclick="showAdminPage('artists-admin')">&#9632; Artistes</div>
+      <div class="admin-nav-item" onclick="showAdminPage('music-admin')">&#9632; Musiques</div>
+      <div class="admin-nav-item" onclick="showAdminPage('albums-admin')">&#9632; Albums</div>
+      <div class="admin-nav-item" onclick="showAdminPage('news-admin')">&#9632; Actualités</div>
+      <div class="admin-nav-item" onclick="showAdminPage('orders-admin')">&#9632; Commandes</div>
+      <div class="admin-nav-item" onclick="showAdminPage('music-categories')">&#9632; Catégories Musique</div>
+      <div class="admin-nav-item" onclick="showAdminPage('shop-products')">&#9632; Produits Shop</div>
+      <div class="admin-nav-item" onclick="showAdminPage('shop-events')">&#9632; Événements</div>
+      <div class="admin-nav-item" onclick="showAdminPage('payment-links')">&#9632; Liens Paiement</div>
+      <div class="admin-nav-item" onclick="showAdminPage('customers-admin')">&#9632; Clients</div>
+            <div class="admin-nav-item" onclick="showAdminPage('users-admin')">&#9632; Utilisateurs</div>
+      <div class="admin-nav-item" id="admin-modules-nav-item" onclick="showAdminPage('modules-admin')" style="display:none;">&#9632; &#9881; Modules</div>
+      <button class="admin-preview-btn" id="preview-toggle-btn" onclick="togglePreviewMode()">
+        <span class="preview-icon">&#128065;</span>
+        <span id="preview-btn-label">Voir le site</span>
+      </button>
+      <div class="admin-logout">
+        <button onclick="openChangePwd()" style="background:none;border:1px solid rgba(255,255,255,0.1);color:var(--gray);padding:10px 20px;font-family:Arial;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;width:100%;margin-bottom:8px;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--gray)'">Changer mot de passe</button>
+        <button onclick="doLogout()">Déconnexion</button>
+      </div>
+    </div>
+    <div class="admin-main">
+
+      <!-- DASHBOARD -->
+      <div class="admin-page active" id="page-dashboard">
+        <div class="admin-page-title">Dashboard</div>
+        <div class="admin-page-sub">Vue d'ensemble — HARMONIA Production</div>
+        <div class="admin-divider"></div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="stat-artists">6</div>
+            <div class="stat-label">Artistes</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-tracks">0</div>
+            <div class="stat-label">Morceaux</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-albums">0</div>
+            <div class="stat-label">Albums</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-news">3</div>
+            <div class="stat-label">Actualités</div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Accès rapide</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="admin-btn-sm" onclick="showAdminPage('music-admin')">+ Ajouter un morceau</button>
+            <button class="admin-btn-sm" onclick="showAdminPage('news-admin')">+ Ajouter une actualité</button>
+            <button class="admin-btn-sm" onclick="showAdminPage('albums-admin')">+ Ajouter un album</button>
+            <button class="admin-btn-sm" onclick="showAdminPage('artists-admin')">+ Gérer les artistes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARTISTES ADMIN -->
+      <div class="admin-page" id="page-artists-admin">
+        <div class="admin-page-title">Artistes</div>
+        <div class="admin-page-sub">Gérer le roster HARMONIA</div>
+        <div class="admin-divider"></div>
+        <div class="admin-success" id="artists-success">Artiste enregistré avec succès.</div>
+        <div class="admin-card">
+          <div class="admin-card-title">Ajouter / Modifier un artiste</div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Nom de l'artiste</label>
+              <input type="text" id="a-name" placeholder="Nom complet">
+            </div>
+            <div class="admin-field">
+              <label>Origine / Pays</label>
+              <input type="text" id="a-origin" placeholder="Ex: Cabo Verde">
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>Biographie courte</label>
+            <textarea id="a-bio-short" rows="2" placeholder="Résumé (affiché sur la carte)"></textarea>
+          </div>
+          <div class="admin-field">
+            <label>Biographie longue</label>
+            <textarea id="a-bio-long" rows="5" placeholder="Biographie complète (modale)"></textarea>
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Instagram</label>
+              <input type="text" id="a-insta" placeholder="@handle">
+            </div>
+            <div class="admin-field">
+              <label>Spotify / Streaming</label>
+              <input type="text" id="a-spotify" placeholder="URL Spotify">
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>Photo (URL ou base64)</label>
+            <div class="file-upload-zone">
+              <input type="file" id="a-photo-file" accept="image/*" onchange="handleArtistPhoto(this)">
+              <div class="file-upload-text">Glisser une photo ou cliquer pour parcourir</div>
+              <div class="file-name-preview" id="a-photo-preview"></div>
+            </div>
+          </div>
+          <div class="admin-submit-row">
+            <button class="admin-btn-ghost" onclick="resetArtistForm()">Réinitialiser</button>
+            <button class="admin-btn-sm" onclick="saveArtist()">Enregistrer l'artiste</button>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Artistes enregistrés</div>
+          <div id="artists-admin-list"></div>
+        </div>
+
+        <div class="admin-card" id="disco-admin-section" style="display:none;">
+          <div class="admin-card-title">Discographie de <span id="disco-artist-name"></span></div>
+          <div id="disco-list"></div>
+          <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:16px;">
+            <div class="admin-card-title" style="font-size:11px;">Ajouter un album</div>
+            <div class="admin-form-row">
+              <div><label class="admin-label">Titre</label><input class="admin-input" id="disco-title" type="text" placeholder="Nom de l'album"></div>
+              <div><label class="admin-label">Année</label><input class="admin-input" id="disco-year" type="number" placeholder="2024"></div>
+            </div>
+            <div><label class="admin-label">Description</label><textarea class="admin-input" id="disco-desc" rows="2" placeholder="Courte description..."></textarea></div>
+            <div><label class="admin-label">Lien Spotify</label><input class="admin-input" id="disco-spotify" type="url" placeholder="https://open.spotify.com/..."></div>
+            <div style="margin-top:8px;"><label class="admin-label">Pochette (image)</label><input type="file" accept="image/*" id="disco-cover-input" onchange="previewUpload(this,'disco-cover-preview')" style="background:none;border:none;color:var(--white);padding:0;"></div>
+            <img id="disco-cover-preview" class="admin-upload-preview" alt="">
+            <button class="admin-btn-primary" style="margin-top:12px;" onclick="addDiscoAlbum()">Ajouter cet album</button>
+          </div>
+        </div>
+
+        <div class="admin-card" id="yt-admin-section" style="display:none;">
+          <div class="admin-card-title">Vidéos YouTube de <span id="yt-artist-name"></span></div>
+          <div id="yt-list"></div>
+          <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:16px;">
+            <div class="admin-card-title" style="font-size:11px;">Ajouter une vidéo</div>
+            <div class="admin-form-row">
+              <div><label class="admin-label">ID YouTube</label><input class="admin-input" id="yt-id-input" type="text" placeholder="ex: D6vBMXSFbfg"></div>
+              <div><label class="admin-label">Titre</label><input class="admin-input" id="yt-title-input" type="text" placeholder="Titre de la vidéo"></div>
+            </div>
+            <button class="admin-btn-primary" onclick="addArtistYT()">Ajouter cette vidéo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MUSIC ADMIN -->
+      <div class="admin-page" id="page-music-admin">
+        <div class="admin-page-title">Musiques</div>
+        <div class="admin-page-sub">Gérer le catalogue audio</div>
+        <div class="admin-divider"></div>
+        <div class="admin-success" id="music-success">Morceau ajouté avec succès.</div>
+        <div class="admin-card">
+          <div class="admin-card-title">Ajouter un morceau</div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Titre du morceau</label>
+              <input type="text" id="t-title" placeholder="Titre">
+            </div>
+            <div class="admin-field">
+              <label>Artiste</label>
+              <select id="t-artist"></select>
+            </div>
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Album (optionnel)</label>
+              <input type="text" id="t-album" placeholder="Nom de l'album">
+            </div>
+            <div class="admin-field">
+              <label>Durée (ex: 3:42)</label>
+              <input type="text" id="t-duration" placeholder="3:42">
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>Fichier audio (MP3)</label>
+            <div class="file-upload-zone">
+              <input type="file" id="t-audio-file" accept="audio/*" onchange="handleAudioFile(this)">
+              <div class="file-upload-text">Glisser un MP3 ou cliquer pour parcourir</div>
+              <div class="file-name-preview" id="t-audio-preview"></div>
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>URL Spotify / externe (alternatif au fichier)</label>
+            <input type="text" id="t-url" placeholder="https://open.spotify.com/...">
+          </div>
+          <div class="admin-field">
+            <label>Image de couverture</label>
+            <div class="file-upload-zone">
+              <input type="file" id="t-cover-file" accept="image/*" onchange="handleTrackCover(this)">
+              <div class="file-upload-text">Glisser une image ou cliquer</div>
+              <div class="file-name-preview" id="t-cover-preview"></div>
+            </div>
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label class="admin-label">Style musical</label>
+              <input class="admin-input" id="track-style" type="text" placeholder="ex: Morna, Funaná, Urban...">
+            </div>
+            <div class="admin-field">
+              <label class="admin-label">Catégorie</label>
+              <select class="admin-input" id="track-category">
+                <option value="traditional">Traditional Music</option>
+                <option value="urban">Urban Music</option>
+              </select>
+            </div>
+          </div>
+          <div class="admin-submit-row">
+            <button class="admin-btn-ghost" onclick="resetTrackForm()">Réinitialiser</button>
+            <button class="admin-btn-sm" onclick="saveTrack()">Ajouter au catalogue</button>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Catalogue actuel</div>
+          <div id="music-admin-list"></div>
+        </div>
+      </div>
+
+      <!-- ALBUMS ADMIN -->
+      <div class="admin-page" id="page-albums-admin">
+        <div class="admin-page-title">Albums</div>
+        <div class="admin-page-sub">Gérer la discographie</div>
+        <div class="admin-divider"></div>
+        <div class="admin-success" id="albums-success">Album enregistré avec succès.</div>
+        <div class="admin-card">
+          <div class="admin-card-title">Ajouter un album</div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Titre de l'album</label>
+              <input type="text" id="al-title" placeholder="Titre">
+            </div>
+            <div class="admin-field">
+              <label>Artiste</label>
+              <select id="al-artist"></select>
+            </div>
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Année de sortie</label>
+              <input type="text" id="al-year" placeholder="2025">
+            </div>
+            <div class="admin-field">
+              <label>Label</label>
+              <input type="text" id="al-label" placeholder="Label / Distributeur">
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>Description</label>
+            <textarea id="al-desc" rows="3" placeholder="Présentation de l'album"></textarea>
+          </div>
+          <div class="admin-field">
+            <label>Pochette (image)</label>
+            <div class="file-upload-zone">
+              <input type="file" id="al-cover-file" accept="image/*" onchange="handleAlbumCover(this)">
+              <div class="file-upload-text">Glisser une pochette ou cliquer</div>
+              <div class="file-name-preview" id="al-cover-preview"></div>
+            </div>
+          </div>
+          <div class="admin-field">
+            <label class="admin-label">Catégorie</label>
+            <select class="admin-input" id="album-category">
+              <option value="traditional">Traditional Music</option>
+              <option value="urban">Urban Music</option>
+            </select>
+          </div>
+          <div class="admin-submit-row">
+            <button class="admin-btn-ghost" onclick="resetAlbumForm()">Réinitialiser</button>
+            <button class="admin-btn-sm" onclick="saveAlbum()">Enregistrer l'album</button>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Discographie</div>
+          <div id="albums-admin-list"></div>
+        </div>
+      </div>
+
+      <!-- NEWS ADMIN -->
+      <div class="admin-page" id="page-news-admin">
+        <div class="admin-page-title">Actualités</div>
+        <div class="admin-page-sub">Gérer les articles et news</div>
+        <div class="admin-divider"></div>
+        <div class="admin-success" id="news-success">Article publié avec succès.</div>
+        <div class="admin-card">
+          <div class="admin-card-title">Publier un article</div>
+          <div class="admin-field">
+            <label>Titre de l'article</label>
+            <input type="text" id="n-title" placeholder="Titre">
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field">
+              <label>Artiste concerné</label>
+              <select id="n-artist"></select>
+            </div>
+            <div class="admin-field">
+              <label>Date de publication</label>
+              <input type="date" id="n-date">
+            </div>
+          </div>
+          <div class="admin-field">
+            <label>Résumé (affiché en carte)</label>
+            <textarea id="n-excerpt" rows="2" placeholder="Courte description..."></textarea>
+          </div>
+          <div class="admin-field">
+            <label>Contenu complet</label>
+            <textarea id="n-content" rows="6" placeholder="Article complet..."></textarea>
+          </div>
+          <div class="admin-field">
+            <label>Image de couverture</label>
+            <div class="file-upload-zone">
+              <input type="file" id="n-img-file" accept="image/*" onchange="handleNewsImg(this)">
+              <div class="file-upload-text">Glisser une image ou cliquer</div>
+              <div class="file-name-preview" id="n-img-preview"></div>
+            </div>
+          </div>
+          <div class="admin-submit-row">
+            <button class="admin-btn-ghost" onclick="resetNewsForm()">Réinitialiser</button>
+            <button class="admin-btn-sm" onclick="saveNews()">Publier l'article</button>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Articles publiés</div>
+          <div id="news-admin-list"></div>
+        </div>
+      </div>
+
+
+      <!-- USERS ADMIN -->
+      <div class="admin-page" id="page-users-admin">
+        <div class="admin-page-title">Utilisateurs</div>
+        <div class="admin-page-sub">Gestion des accès et droits — AdminArt</div>
+        <div class="admin-divider"></div>
+        <div class="admin-success" id="users-success">Utilisateur enregistré.</div>
+        <div id="users-superadmin-only" style="display:none;">
+          <div class="admin-card">
+            <div class="admin-card-title">Créer un utilisateur</div>
+            <div class="admin-field" style="margin-bottom:12px;">
+              <label>Adresse email <span style="color:var(--accent2);">*</span></label>
+              <input type="email" id="u-email" placeholder="utilisateur@email.com">
+            </div>
+            <div class="admin-grid-2">
+              <div class="admin-field">
+                <label>Identifiant (optionnel)</label>
+                <input type="text" id="u-login" placeholder="login">
+              </div>
+              <div class="admin-field">
+                <label>Mot de passe</label>
+                <input type="password" id="u-pass" placeholder="••••••••">
+              </div>
+            </div>
+            <div class="admin-grid-2">
+              <div class="admin-field">
+                <label>Prénom / Nom</label>
+                <input type="text" id="u-name" placeholder="Prénom Nom">
+              </div>
+              <div class="admin-field">
+                <label>Rôle prédéfini</label>
+                <select id="u-role" onchange="applyRoleTemplate()">
+                  <option value="custom">Personnalisé</option>
+                  <option value="editor">Éditeur — tous droits sauf admin</option>
+                  <option value="contributor">Contributeur — ajout uniquement</option>
+                  <option value="moderator">Modérateur — édition + suppression</option>
+                  <option value="readonly">Lecteur — consultation seule</option>
+                  <option value="membre">Membre — compte visiteur</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="margin: 24px 0 16px; font-family:Arial; font-size:10px; letter-spacing:3px; color:var(--gray); text-transform:uppercase; border-bottom:1px solid rgba(31,158,92,0.15); padding-bottom:12px;">
+              Permissions granulaires
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table id="perm-table" style="width:100%; border-collapse:collapse; font-family:Arial; font-size:11px;">
+                <thead>
+                  <tr style="color:var(--gray); letter-spacing:2px; text-transform:uppercase;">
+                    <th style="text-align:left; padding:10px 0; width:140px;">Section</th>
+                    <th style="padding:10px 16px; text-align:center;">Voir</th>
+                    <th style="padding:10px 16px; text-align:center;">Ajouter</th>
+                    <th style="padding:10px 16px; text-align:center;">Modifier</th>
+                    <th style="padding:10px 16px; text-align:center;">Supprimer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-top:1px solid rgba(31,158,92,0.1);">
+                    <td style="padding:10px 0; color:var(--lightgray);">Artistes</td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="view" checked></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="add"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="edit"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="delete"></td>
+                  </tr>
+                  <tr style="border-top:1px solid rgba(31,158,92,0.1);">
+                    <td style="padding:10px 0; color:var(--lightgray);">Musiques</td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="view" checked></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="add"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="edit"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="delete"></td>
+                  </tr>
+                  <tr style="border-top:1px solid rgba(31,158,92,0.1);">
+                    <td style="padding:10px 0; color:var(--lightgray);">Albums</td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="view" checked></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="add"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="edit"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="delete"></td>
+                  </tr>
+                  <tr style="border-top:1px solid rgba(31,158,92,0.1);">
+                    <td style="padding:10px 0; color:var(--lightgray);">Actualités</td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="view" checked></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="add"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="edit"></td>
+                    <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="delete"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="admin-submit-row">
+              <button class="admin-btn-ghost" onclick="resetUserForm()">Réinitialiser</button>
+              <button class="admin-btn-sm" onclick="saveUser()">Créer l'utilisateur</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="users-readonly-notice" style="display:none;">
+          <div class="admin-card">
+            <div style="color:var(--gray);font-family:Arial;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-align:center;padding:20px;">
+              Accès réservé au Super-Administrateur
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div class="admin-card-title">Utilisateurs enregistrés</div>
+          <div id="users-admin-list"></div>
+        </div>
+      </div>
+
+
+      <!-- ORDERS ADMIN -->
+      <div class="admin-page" id="page-orders-admin">
+        <div class="admin-page-title">Commandes</div>
+        <div class="admin-page-sub">Suivi et gestion des commandes boutique</div>
+        <div class="admin-divider"></div>
+        <div class="eco-stats-grid">
+          <div class="stat-card-eco"><div class="stat-card-value" id="ostat-ca">0 €</div><div class="stat-card-label">CA Total</div></div>
+          <div class="stat-card-eco"><div class="stat-card-value" id="ostat-total">0</div><div class="stat-card-label">Commandes</div></div>
+          <div class="stat-card-eco"><div class="stat-card-value" id="ostat-avg">0 €</div><div class="stat-card-label">Panier Moyen</div></div>
+          <div class="stat-card-eco"><div class="stat-card-value" id="ostat-month">0</div><div class="stat-card-label">Ce Mois</div></div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <span>Liste des commandes</span>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <select id="orders-status-filter" onchange="refreshAdminOrders()" style="background:var(--navy2);border:1px solid rgba(31,158,92,0.2);color:var(--white);padding:8px 12px;font-family:Arial;font-size:11px;letter-spacing:1px;cursor:pointer;">
+                <option value="all">Tous les statuts</option>
+                <option value="pending">En attente</option>
+                <option value="shipped">Expédié</option>
+                <option value="cancelled">Annulé</option>
+              </select>
+              <button onclick="exportOrdersCSV()" style="background:none;border:1px solid rgba(31,158,92,0.3);color:var(--accent2);padding:8px 16px;font-family:Arial;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">Exporter CSV</button>
+            </div>
+          </div>
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>N° Commande</th>
+                  <th>Date</th>
+                  <th>Client</th>
+                  <th>Articles</th>
+                  <th style="text-align:right;">Total</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-table-body"></tbody>
+            </table>
+            <div id="orders-empty" class="orders-empty" style="display:none;">Aucune commande pour le moment.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: PRODUITS SHOP -->
+      <div class="admin-page" id="page-shop-products">
+        <div class="admin-page-title">Produits Shop</div>
+        <div class="admin-page-sub">Gestion du catalogue produits</div>
+        <div class="admin-divider"></div>
+        <div class="shop-admin-grid">
+          <div class="admin-card">
+            <div class="admin-card-title" id="prod-form-title">Ajouter un produit</div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Nom du produit</label>
+                <input class="admin-input" id="prod-name" type="text" placeholder="Titre de l'album...">
+              </div>
+              <div>
+                <label class="admin-label">Artiste</label>
+                <select class="admin-input" id="prod-artist"></select>
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Type</label>
+                <select class="admin-input" id="prod-type">
+                  <option value="cd">CD</option>
+                  <option value="digital">Digital</option>
+                  <option value="vinyle">Vinyle</option>
+                </select>
+              </div>
+              <div>
+                <label class="admin-label">Prix (€)</label>
+                <input class="admin-input" id="prod-price" type="number" step="0.01" min="0" placeholder="18.90">
+              </div>
+              <div class="admin-field">
+                <label class="admin-label">Lien Stripe (Payment Link)</label>
+                <input class="admin-input" id="prod-stripe-link" type="url" placeholder="https://buy.stripe.com/...">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Stock</label>
+                <input class="admin-input" id="prod-stock" type="number" min="0" placeholder="10">
+              </div>
+              <div>
+                <label class="admin-label">Image produit</label>
+                <input type="file" accept="image/*" id="prod-img-input" onchange="previewUpload(this,'prod-img-preview')" style="background:var(--navy2);border:1px solid rgba(31,158,92,0.2);color:var(--gray);padding:8px;width:100%;font-family:Arial;font-size:11px;">
+              </div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Description courte</label>
+              <textarea class="admin-input" id="prod-desc" rows="3" placeholder="Description..."></textarea>
+            </div>
+            <img id="prod-img-preview" class="admin-upload-preview" alt="">
+            <input type="hidden" id="prod-edit-id" value="">
+            <div style="display:flex;gap:10px;margin-top:16px;">
+              <button class="admin-btn-primary" onclick="saveProd()">Ajouter le produit</button>
+              <button class="admin-btn-secondary" onclick="resetProdForm()" style="display:none;" id="prod-cancel-btn">Annuler</button>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Aperçu image</div>
+            <div style="text-align:center;padding:40px 0;color:var(--gray);font-family:Arial;font-size:11px;" id="prod-img-hint">Sélectionnez une image pour prévisualiser</div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Catalogue produits (<span id="prod-count">0</span>)</div>
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead><tr><th>Photo</th><th>Artiste</th><th>Titre</th><th>Type</th><th style="text-align:right;">Prix</th><th>Stock</th><th>Actions</th></tr></thead>
+              <tbody id="prod-table-body"></tbody>
+            </table>
+            <div id="prod-empty" style="text-align:center;padding:32px;color:var(--gray);font-family:Arial;font-size:12px;display:none;">Aucun produit.</div>
+          </div>
+        </div>
+      </div>
+
+      
+      <!-- PAGE: CATÉGORIES MUSIQUE -->
+      <div class="admin-page" id="page-music-categories">
+        <div class="admin-page-title">Catégories Musique</div>
+        <div class="admin-page-sub">Créez et gérez les catégories du catalogue</div>
+        <div class="admin-divider"></div>
+        <div class="shop-admin-grid">
+          <div class="admin-card">
+            <div class="admin-card-title">Ajouter une catégorie</div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Identifiant (sans espace)</label>
+              <input class="admin-input" id="cat-id" type="text" placeholder="ex: jazz, pop, folk">
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Nom affiché</label>
+              <input class="admin-input" id="cat-label" type="text" placeholder="ex: Jazz &amp; Soul">
+            </div>
+            <button class="admin-btn-primary" onclick="addMusicCategory()">Créer la catégorie</button>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Catégories existantes (<span id="cat-count">0</span>)</div>
+            <div id="cat-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: ÉVÉNEMENTS -->
+      <div class="admin-page" id="page-shop-events">
+        <div class="admin-page-title">Événements</div>
+        <div class="admin-page-sub">Gestion des concerts et événements</div>
+        <div class="admin-divider"></div>
+        <div class="shop-admin-grid">
+          <div class="admin-card">
+            <div class="admin-card-title" id="evt-form-title">Créer un événement</div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Artiste</label>
+                <select class="admin-input" id="evt-artist"></select>
+              </div>
+              <div>
+                <label class="admin-label">Venue (salle)</label>
+                <input class="admin-input" id="evt-venue" type="text" placeholder="Olympia...">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Ville</label>
+                <input class="admin-input" id="evt-city" type="text" placeholder="Paris">
+              </div>
+              <div>
+                <label class="admin-label">Pays</label>
+                <input class="admin-input" id="evt-country" type="text" placeholder="France">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Date</label>
+                <input class="admin-input" id="evt-date" type="date">
+              </div>
+              <div>
+                <label class="admin-label">Heure</label>
+                <input class="admin-input" id="evt-time" type="time" value="20:00">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Prix Standard (€)</label>
+                <input class="admin-input" id="evt-price" type="number" step="0.01" min="0" placeholder="35">
+              </div>
+              <div>
+                <label class="admin-label">Prix VIP (€)</label>
+                <input class="admin-input" id="evt-vip" type="number" step="0.01" min="0" placeholder="65">
+              </div>
+              <div class="admin-field">
+                <label class="admin-label">Lien Stripe Billets (Payment Link)</label>
+                <input class="admin-input" id="evt-stripe-link" type="url" placeholder="https://buy.stripe.com/...">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Capacité totale</label>
+                <input class="admin-input" id="evt-capacity" type="number" min="1" placeholder="300">
+              </div>
+              <div>
+                <label class="admin-label">Photo événement</label>
+                <input type="file" accept="image/*" id="evt-img-input" onchange="previewUpload(this,'evt-img-preview')" style="background:var(--navy2);border:1px solid rgba(31,158,92,0.2);color:var(--gray);padding:8px;width:100%;font-family:Arial;font-size:11px;">
+              </div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Description</label>
+              <textarea class="admin-input" id="evt-desc" rows="3" placeholder="Description de l'événement..."></textarea>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Statut</label>
+              <select class="admin-input" id="evt-status">
+                <option value="active">Actif</option>
+                <option value="cancelled">Annulé</option>
+                <option value="rescheduled">Reprogrammé</option>
+                <option value="extended">Prolongé</option>
+              </select>
+            </div>
+            <img id="evt-img-preview" class="admin-upload-preview" alt="">
+            <input type="hidden" id="evt-edit-id" value="">
+            <div style="display:flex;gap:10px;margin-top:16px;">
+              <button class="admin-btn-primary" onclick="saveEvt()">Créer l'événement</button>
+              <button class="admin-btn-secondary" onclick="resetEvtForm()" style="display:none;" id="evt-cancel-btn">Annuler</button>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Statistiques événements</div>
+            <div class="eco-stats-grid" style="grid-template-columns:1fr 1fr;">
+              <div class="stat-card-eco"><div class="stat-card-value" id="evt-stat-total">0</div><div class="stat-card-label">Total</div></div>
+              <div class="stat-card-eco"><div class="stat-card-value" id="evt-stat-active">0</div><div class="stat-card-label">Actifs</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Liste des événements (<span id="evt-count">0</span>)</div>
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead><tr><th>Date</th><th>Artiste</th><th>Venue</th><th>Ville</th><th style="text-align:right;">Standard</th><th style="text-align:right;">VIP</th><th>Places</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody id="evt-table-body"></tbody>
+            </table>
+            <div id="evt-empty" style="text-align:center;padding:32px;color:var(--gray);font-family:Arial;font-size:12px;display:none;">Aucun événement.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: LIENS PAIEMENT -->
+      <div class="admin-page" id="page-payment-links">
+        <div class="admin-page-title">Liens Paiement</div>
+        <div class="admin-page-sub">Générer et envoyer des liens de paiement personnalisés</div>
+        <div class="admin-divider"></div>
+        <div class="shop-admin-grid">
+          <div class="admin-card">
+            <div class="admin-card-title">Générer un lien</div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Article</label>
+              <select class="admin-input" id="plink-item" onchange="fillPLinkPrice()">
+                <option value="">— Sélectionner —</option>
+              </select>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Quantité</label>
+                <input class="admin-input" id="plink-qty" type="number" min="1" value="1" onchange="updatePLinkTotal()">
+              </div>
+              <div>
+                <label class="admin-label">Prix unitaire (€)</label>
+                <input class="admin-input" id="plink-price" type="number" step="0.01" min="0" onchange="updatePLinkTotal()">
+              </div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Total : <span id="plink-total" style="color:var(--accent2);">0,00 €</span></label>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Email destinataire</label>
+              <input class="admin-input" id="plink-email" type="email" placeholder="client@email.com">
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Message personnalisé</label>
+              <textarea class="admin-input" id="plink-msg" rows="4" placeholder="Bonjour, veuillez trouver ci-dessous votre lien de paiement..."></textarea>
+            </div>
+            <button class="admin-btn-primary" onclick="generatePaymentLink()">Générer &amp; Envoyer le lien</button>
+            <div id="plink-result" style="display:none;">
+              <div class="payment-link-box" id="plink-url"></div>
+              <button onclick="copyPLink()" style="margin-top:10px;background:none;border:1px solid rgba(31,158,92,0.3);color:var(--accent2);padding:8px 20px;font-family:Arial;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;width:100%;">Copier le lien</button>
+            </div>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Guide d'utilisation</div>
+            <div style="font-family:Arial;font-size:12px;color:var(--gray);line-height:1.8;">
+              <p>1. Sélectionnez un produit ou événement</p>
+              <p>2. Ajustez la quantité et le prix si nécessaire</p>
+              <p>3. Entrez l'email du destinataire</p>
+              <p>4. Personnalisez le message</p>
+              <p>5. Cliquez "Générer &amp; Envoyer" — votre client de messagerie s'ouvrira avec le lien pré-rempli</p>
+              <p style="color:var(--accent2);margin-top:16px;">Les liens générés sont conservés dans l'historique ci-dessous.</p>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title">Historique des liens (<span id="plink-count">0</span>)</div>
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead><tr><th>Date</th><th>Destinataire</th><th>Article</th><th style="text-align:right;">Montant</th><th>Lien</th><th>Statut</th><th>Actions</th></tr></thead>
+              <tbody id="plink-table-body"></tbody>
+            </table>
+            <div id="plink-empty" style="text-align:center;padding:32px;color:var(--gray);font-family:Arial;font-size:12px;display:none;">Aucun lien généré.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: CLIENTS -->
+      <div class="admin-page" id="page-customers-admin">
+        <div class="admin-page-title">Clients</div>
+        <div class="admin-page-sub">Base de données clients</div>
+        <div class="admin-divider"></div>
+        <div class="shop-admin-grid">
+          <div class="admin-card">
+            <div class="admin-card-title">Ajouter un client</div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Prénom</label>
+                <input class="admin-input" id="cust-firstname" type="text" placeholder="Jean">
+              </div>
+              <div>
+                <label class="admin-label">Nom</label>
+                <input class="admin-input" id="cust-lastname" type="text" placeholder="Dupont">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
+                <label class="admin-label">Email</label>
+                <input class="admin-input" id="cust-email" type="email" placeholder="jean@email.com">
+              </div>
+              <div>
+                <label class="admin-label">Pays</label>
+                <input class="admin-input" id="cust-country" type="text" placeholder="France">
+              </div>
+            </div>
+            <div style="margin-bottom:16px;">
+              <label class="admin-label">Téléphone (optionnel)</label>
+              <input class="admin-input" id="cust-phone" type="tel" placeholder="+33 6 00 00 00 00">
+            </div>
+            <button class="admin-btn-primary" id="cust-save-btn" onclick="saveCustomer()">Ajouter le client</button>
+            <button class="admin-btn-secondary" id="cust-cancel-btn" style="display:none;margin-left:8px;" onclick="resetCustForm()">Annuler</button>
+          </div>
+          <div class="admin-card">
+            <div class="admin-card-title">Statistiques clients</div>
+            <div class="eco-stats-grid" style="grid-template-columns:1fr 1fr;">
+              <div class="stat-card-eco"><div class="stat-card-value" id="cust-stat-total">0</div><div class="stat-card-label">Total clients</div></div>
+              <div class="stat-card-eco"><div class="stat-card-value" id="cust-stat-orders">0</div><div class="stat-card-label">Avec commandes</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <span>Liste clients (<span id="cust-count">0</span>)</span>
+            <button onclick="exportCustomersCSV()" style="background:none;border:1px solid rgba(31,158,92,0.3);color:var(--accent2);padding:8px 16px;font-family:Arial;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;">Exporter CSV</button>
+          </div>
+          <input class="customer-search" id="cust-search" type="text" placeholder="Rechercher par nom ou email..." oninput="renderCustomers()">
+          <div class="orders-table-wrap">
+            <table class="orders-table">
+              <thead><tr><th>Nom</th><th>Email</th><th>Pays</th><th>Commandes</th><th style="text-align:right;">Total dépensé</th><th>Inscription</th><th>Actions</th></tr></thead>
+              <tbody id="cust-table-body"></tbody>
+            </table>
+            <div id="cust-empty" style="text-align:center;padding:32px;color:var(--gray);font-family:Arial;font-size:12px;display:none;">Aucun client.</div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- MODULES ADMIN — superadmin only -->
+      <div class="admin-page" id="page-modules-admin">
+        <div class="admin-page-title">&#9881; Gestion des Modules</div>
+        <div class="admin-page-sub">Activer ou désactiver les sections du site — Super Admin uniquement</div>
+        <div class="admin-divider"></div>
+        <div id="modules-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:24px;"></div>
+      </div>
+
+    </div><!-- /admin-main -->
+  </div><!-- /admin-panel -->
+</div><!-- /admin-overlay -->
