@@ -558,6 +558,21 @@ html, body {
   margin-bottom: 20px;
 }
 
+/* ── Accès rapide — grille desktop → 2 col mobile ── */
+.quick-access-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.qa-btn {
+  background: #4a4a4a !important;
+  color: #fff !important;
+  border: none !important;
+  flex: 1 1 auto;
+  min-width: 120px;
+  text-align: center;
+}
+
 /* ─────────────────────────────────────────────
    TOGGLE MODULE
 ───────────────────────────────────────────── */
@@ -766,10 +781,28 @@ html, body {
     width: 240px; z-index: 300;
     transition: left 0.28s cubic-bezier(0.4,0,0.2,1);
     overflow-y: auto;
+    display: flex; flex-direction: column;
   }
   #admin-sidebar.open { left: 0; }
   #sidebar-toggle { display: flex; }
   #sidebar-close  { display: block; }
+
+  /* ── "Site public" remonté juste après le user-bar ── */
+  .sb-footer {
+    order: -1;          /* remonte en haut du flex */
+    margin-top: 0;
+    padding: 10px 20px;
+    border-top: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sb-footer a {
+    font-size: 10px; letter-spacing: 2px;
+    color: rgba(255,255,255,0.6);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ── "Quitter" collé en bas ── */
+  .sb-logout-bar { margin-top: auto; }
 
   /* Main prend toute la largeur */
   #admin-main { width: 100%; }
@@ -854,8 +887,26 @@ html, body {
   .a-card { padding: 16px; }
   .a-card-title { font-size: 9px; }
 
-  /* Boutons accès rapide */
+  /* Boutons génériques */
   .a-btn { padding: 10px 16px; font-size: 9px; }
+
+  /* ── Accès rapide : grille 2 colonnes stricte sur mobile ── */
+  .quick-access-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .qa-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 13px 8px !important;
+    font-size: 9px !important;
+    letter-spacing: 1.5px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center !important;
+  }
 
   /* Nav bar interne */
   #nav-breadcrumb { display: none; }
@@ -1236,21 +1287,14 @@ td.editable:hover { background: #eaf1fb !important; }
 
       <div class="a-card">
         <div class="a-card-title">Accès rapide</div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;">
-          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
-                  onclick="switchSection('artistes')">Gérer artistes</button>
-          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
-                  onclick="switchSection('albums')">Gérer albums</button>
-          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
-                  onclick="switchSection('events')">Événements</button>
-          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
-                  onclick="switchSection('produits')">Boutique</button>
-          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
-                  onclick="switchSection('commandes')">Commandes</button>
-          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
-                  onclick="switchSection('users')">Utilisateurs</button>
-          <button class="a-btn" style="background:#4a4a4a;color:#fff;border:none;"
-                  onclick="switchSection('modules')">Modules</button>
+        <div class="quick-access-grid">
+          <button class="a-btn qa-btn" onclick="switchSection('artistes')">Gérer artistes</button>
+          <button class="a-btn qa-btn" onclick="switchSection('albums')">Gérer albums</button>
+          <button class="a-btn qa-btn" onclick="switchSection('events')">Événements</button>
+          <button class="a-btn qa-btn" onclick="switchSection('produits')">Boutique</button>
+          <button class="a-btn qa-btn" onclick="switchSection('commandes')">Commandes</button>
+          <button class="a-btn qa-btn" onclick="switchSection('users')">Utilisateurs</button>
+          <button class="a-btn qa-btn" onclick="switchSection('modules')">Modules</button>
         </div>
       </div>
     </div><!-- /dashboard -->
