@@ -1236,6 +1236,7 @@ td.editable:hover { background: #eaf1fb !important; }
 
     <div class="sb-footer">
       <a href="artistes.html">&larr; Site public</a>
+      <button onclick="launchSiteEditMode()" style="display:block;width:100%;margin-top:12px;background:rgba(46,204,128,0.08);border:1px solid rgba(46,204,128,0.4);color:#2ecc80;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px 0;cursor:pointer;border-radius:2px;transition:background 0.2s;" onmouseover="this.style.background='rgba(46,204,128,0.18)'" onmouseout="this.style.background='rgba(46,204,128,0.08)'">&#9998; &Eacute;diter le site</button>
     </div>
 
     <!-- Quitter — ancré en bas -->
@@ -1727,6 +1728,11 @@ function adminLogout() {
   if (typeof window._adminPageShowLogin === 'function') {
     window._adminPageShowLogin();
   }
+}
+
+function launchSiteEditMode() {
+  try { sessionStorage.setItem('harmonia_edit_mode', '1'); } catch(e) {}
+  window.location.href = 'index.html';
 }
 
 // ── Restauration session après chargement shared.js ───────

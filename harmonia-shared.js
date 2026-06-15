@@ -1440,6 +1440,11 @@ function initInlineEditBtn() {
   fab.onmouseleave = function(){ if(!_editModeActive) fab.style.background='#0d2618'; };
   fab.onclick = toggleEditMode;
   document.body.appendChild(fab);
+
+  // Auto-activation si le mode était actif sur une autre page
+  if (sessionStorage.getItem('harmonia_edit_mode') === '1' && !_editModeActive) {
+    setTimeout(toggleEditMode, 100);
+  }
 }
 
 var _editModeActive = false;
@@ -1502,13 +1507,14 @@ function toggleEditMode() {
   _editModeActive = !_editModeActive;
   var fab = document.getElementById('inline-edit-fab');
   if (_editModeActive) {
+    sessionStorage.setItem('harmonia_edit_mode', '1');
     if (fab) { fab.innerHTML = '&#10006; Quitter &eacute;dition'; fab.style.background='rgba(46,204,128,0.12)'; }
     _pendingEdits = {};
     document.body.classList.add('edit-mode-active');
     _activateEditables();
     _showEditBar();
     _rerenderItemSections();
-    setTimeout(function() { _injectItemToggles(); }, 50);
+    setTimeout(function() { _injectItemToggles(); _activateImageImport(); }, 80);
   } else {
     _cancelAllEdits();
   }
@@ -1562,7 +1568,7 @@ function _showEditBar() {
     + '</div>'
     + '<div style="display:flex;gap:12px;">'
     + '<button onclick="saveAllEdits()" style="background:#1f9e5c;border:none;color:#fff;font-family:Arial;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px 28px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background=\'#2ecc80\'" onmouseout="this.style.background=\'#1f9e5c\'">&#10003; Enregistrer</button>'
-    + '<button onclick="_cancelAllEdits()" style="background:none;border:1px solid rgba(255,255,255,0.2);color:#8a9bb5;font-family:Arial;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px 28px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor=\'rgba(255,255,255,0.5)\';this.style.color=\'#fff\'" onmouseout="this.style.borderColor=\'rgba(255,255,255,0.2)\';this.style.color=\'#8a9bb5\'">&#10006; Annuler</button>'
+    + '<button onclick="_cancelAllEdits()" style="background:none;border:1px solid rgba(255,69,58,0.4);color:#ff6b6b;font-family:Arial;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px 28px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor=\'rgba(255,69,58,0.8)\';this.style.color=\'#ff4a4a\'" onmouseout="this.style.borderColor=\'rgba(255,69,58,0.4)\';this.style.color=\'#ff6b6b\'">&#10006; Quitter l&#39;&eacute;dition</button>'
     + '</div>';
 
   document.body.appendChild(bar);
@@ -1576,14 +1582,12 @@ function saveAllEdits() {
   saveData(DB);
   _pendingEdits = {};
 
-  // Flash confirmation
+  // Flash confirmation — reste en mode édition, ne quitte pas
   var bar = document.getElementById('inline-edit-bar');
   if (bar) {
-    var old = bar.innerHTML;
+    var savedHtml = bar.innerHTML;
     bar.innerHTML = '<span style="font-family:Arial;font-size:11px;letter-spacing:2px;color:#2ecc80;margin:auto;">&#10003; Modifications enregistrées</span>';
-    setTimeout(function() { _exitEditMode(); }, 1200);
-  } else {
-    _exitEditMode();
+    setTimeout(function() { bar.innerHTML = savedHtml; var cnt = document.getElementById('edit-bar-count'); if(cnt) cnt.textContent = '0 modification'; }, 1200);
   }
 }
 
@@ -1599,8 +1603,10 @@ function _cancelAllEdits() {
 
 function _exitEditMode() {
   _editModeActive = false;
+  sessionStorage.removeItem('harmonia_edit_mode');
   document.body.classList.remove('edit-mode-active');
   _deactivateEditables();
+  _deactivateImageImport();
   _removeItemToggles();
   _rerenderItemSections();
   var bar = document.getElementById('inline-edit-bar');
@@ -1609,6 +1615,162 @@ function _exitEditMode() {
   if (fab) { fab.innerHTML = '&#9998; Mode &Eacute;dition'; fab.style.background = '#0d2618'; }
   // Apply saved texts
   applyPageTexts();
+}
+
+// ═══════════════════════════════════════════════════════════
+// IMAGE IMPORT (Mode Édition)
+// ═══════════════════════════════════════════════════════════
+function _activateImageImport() {
+  // Cartes artistes
+  document.querySelectorAll('[data-item-type="artist"][data-item-id]').forEach(function(card) {
+    if (card.querySelector('.img-import-overlay')) return;
+    var imgEl = card.querySelector('img');
+    var photoWrap = imgEl ? imgEl.parentElement : card;
+    var artistId = +card.dataset.itemId;
+
+    // Wrapper relatif sur l'image
+    var wrap = document.createElement('div');
+    wrap.className = 'img-import-overlay';
+    wrap.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,5,15,0.55);opacity:0;transition:opacity 0.2s;z-index:100;pointer-events:none;';
+
+    var btn = document.createElement('button');
+    btn.textContent = '⬆ Importer une image';
+    btn.style.cssText = 'background:#0a1628;border:1px solid rgba(46,204,128,0.7);color:#2ecc80;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px 18px;cursor:pointer;border-radius:2px;pointer-events:all;';
+    btn.onclick = function(e) {
+      e.stopPropagation();
+      _triggerArtistPhotoImport(artistId, card);
+    };
+    wrap.appendChild(btn);
+
+    // Positionner l'overlay sur la photo
+    if (imgEl) {
+      var imgParent = imgEl.parentElement;
+      if (getComputedStyle(imgParent).position === 'static') imgParent.style.position = 'relative';
+      imgParent.appendChild(wrap);
+      imgParent.addEventListener('mouseenter', _imgOverlayShow);
+      imgParent.addEventListener('mouseleave', _imgOverlayHide);
+      imgParent.dataset.hasImgOverlay = '1';
+    } else {
+      if (getComputedStyle(card).position === 'static') card.style.position = 'relative';
+      card.appendChild(wrap);
+    }
+  });
+
+  // Images avec data-editable-img (autres zones)
+  document.querySelectorAll('[data-editable-img]').forEach(function(el) {
+    if (el.dataset.hasImgOverlay) return;
+    var imgKey = el.dataset.editableImg;
+    var wrap = document.createElement('div');
+    wrap.className = 'img-import-overlay';
+    wrap.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(0,5,15,0.55);opacity:0;transition:opacity 0.2s;z-index:100;pointer-events:none;';
+    var btn = document.createElement('button');
+    btn.textContent = '⬆ Importer une image';
+    btn.style.cssText = 'background:#0a1628;border:1px solid rgba(46,204,128,0.7);color:#2ecc80;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px 18px;cursor:pointer;border-radius:2px;pointer-events:all;';
+    btn.onclick = function(e) { e.stopPropagation(); _triggerKeyedImgImport(imgKey, el); };
+    wrap.appendChild(btn);
+    if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+    el.appendChild(wrap);
+    el.addEventListener('mouseenter', _imgOverlayShow);
+    el.addEventListener('mouseleave', _imgOverlayHide);
+    el.dataset.hasImgOverlay = '1';
+  });
+}
+
+function _imgOverlayShow() {
+  var ov = this.querySelector('.img-import-overlay');
+  if (ov) { ov.style.opacity = '1'; ov.style.pointerEvents = 'all'; }
+}
+function _imgOverlayHide() {
+  var ov = this.querySelector('.img-import-overlay');
+  if (ov) { ov.style.opacity = '0'; ov.style.pointerEvents = 'none'; }
+}
+
+function _deactivateImageImport() {
+  document.querySelectorAll('.img-import-overlay').forEach(function(el) { el.remove(); });
+  document.querySelectorAll('[data-has-img-overlay]').forEach(function(el) {
+    el.removeEventListener('mouseenter', _imgOverlayShow);
+    el.removeEventListener('mouseleave', _imgOverlayHide);
+    delete el.dataset.hasImgOverlay;
+  });
+}
+
+function _resizeImageToBase64(file, maxPx, quality, cb) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var w = img.width, h = img.height;
+      if (w > maxPx || h > maxPx) {
+        if (w >= h) { h = Math.round(h * maxPx / w); w = maxPx; }
+        else        { w = Math.round(w * maxPx / h); h = maxPx; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function _triggerArtistPhotoImport(artistId, card) {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = function() {
+    var file = input.files[0];
+    if (!file) return;
+    _resizeImageToBase64(file, 900, 0.88, function(b64) {
+      var artist = DB.artists.find(function(a){ return a.id === artistId; });
+      if (!artist) return;
+      artist.photo = b64;
+      saveData(DB);
+      // Mise à jour immédiate de l'image dans la carte
+      var imgEl = card.querySelector('img');
+      if (imgEl) { imgEl.src = b64; }
+      else {
+        var noPhoto = card.querySelector('.artist-no-photo');
+        if (noPhoto) {
+          var newImg = document.createElement('img');
+          newImg.src = b64;
+          newImg.alt = artist.name;
+          newImg.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+          noPhoto.replaceWith(newImg);
+        }
+      }
+      // Flash confirmation
+      var ov = card.querySelector('.img-import-overlay');
+      if (ov) {
+        ov.style.background = 'rgba(10,158,110,0.35)';
+        ov.style.opacity = '1';
+        var btn = ov.querySelector('button');
+        if (btn) btn.textContent = '✓ Image importée';
+        setTimeout(function() {
+          if (ov) { ov.style.background = 'rgba(0,5,15,0.55)'; ov.style.opacity = '0'; if(btn) btn.textContent = '⬆ Importer une image'; }
+        }, 1800);
+      }
+    });
+  };
+  input.click();
+}
+
+function _triggerKeyedImgImport(imgKey, container) {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.onchange = function() {
+    var file = input.files[0];
+    if (!file) return;
+    _resizeImageToBase64(file, 1200, 0.88, function(b64) {
+      if (!DB.images) DB.images = {};
+      DB.images[imgKey] = b64;
+      saveData(DB);
+      var imgEl = container.tagName === 'IMG' ? container : container.querySelector('img');
+      if (imgEl) imgEl.src = b64;
+    });
+  };
+  input.click();
 }
 
 // ═══════════════════════════════════════════════════════════
