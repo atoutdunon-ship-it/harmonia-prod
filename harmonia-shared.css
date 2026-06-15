@@ -3742,6 +3742,70 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
 
   /* Labels / badges */
   .section-label  { letter-spacing: 2px; }
+
+  /* ══════════════════════════════════════════
+     SCROLLBARS MOBILES — tous les modules
+  ══════════════════════════════════════════ */
+
+  /* Tout tableau : scroll horizontal avec barre visible */
+  .cart-table-wrap,
+  .orders-table-wrap,
+  .checkout-recap-table,
+  [class*="-table-wrap"] {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(31,158,92,0.45) rgba(255,255,255,0.06);
+  }
+  .cart-table-wrap::-webkit-scrollbar,
+  .orders-table-wrap::-webkit-scrollbar { height: 5px; }
+  .cart-table-wrap::-webkit-scrollbar-track,
+  .orders-table-wrap::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); }
+  .cart-table-wrap::-webkit-scrollbar-thumb,
+  .orders-table-wrap::-webkit-scrollbar-thumb { background: rgba(31,158,92,0.5); border-radius: 3px; }
+
+  /* Tableaux internes : largeur minimale pour forcer le scroll */
+  .cart-table     { min-width: 540px; }
+  .orders-table   { min-width: 640px; }
+
+  /* Onglets (shop, musique, compte) : scrollbar horizontale discrète */
+  .shop-tabs,
+  .music-filter-tabs,
+  .account-tabs {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(31,158,92,0.3) transparent;
+  }
+
+  /* Sections publiques : jamais couper le contenu horizontalement */
+  section { overflow-x: hidden; }
+
+  /* Fiche artiste — tracklist scroll si trop longue */
+  .ap-tracks-list {
+    max-height: 60vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(31,158,92,0.4) rgba(255,255,255,0.04);
+  }
+  .ap-tracks-list::-webkit-scrollbar { width: 4px; }
+  .ap-tracks-list::-webkit-scrollbar-thumb { background: rgba(31,158,92,0.5); border-radius: 2px; }
+
+  /* Discographie scroll vertical */
+  .ap-disco-grid {
+    max-height: 70vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(31,158,92,0.4) rgba(255,255,255,0.04);
+  }
+
+  /* Panier sidebar items */
+  .cart-items {
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(31,158,92,0.4) rgba(255,255,255,0.04);
+  }
+  .cart-items::-webkit-scrollbar { width: 4px; }
+  .cart-items::-webkit-scrollbar-thumb { background: rgba(31,158,92,0.5); border-radius: 2px; }
 }
 
 /* ── Très petit (≤ 380px) ── */

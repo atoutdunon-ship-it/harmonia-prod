@@ -685,41 +685,63 @@ try { if(typeof renderShopConcerts==='function') renderShopConcerts(); } catch(e
 
 // --- Nav button state ---
 function updateNavConnectBtn() {
-  const btn = document.getElementById('nav-connect-btn');
-  if (!btn) return;
+  var btn     = document.getElementById('nav-connect-btn');
+  var mobileLi = document.getElementById('mobile-connect-li');
+
   if (currentUser) {
     var isAdmin = (currentUser.role !== 'membre');
-    if (isAdmin) {
-      btn.innerHTML = currentUser.name
-        + ' <span data-action="admin" style="opacity:0.75;font-size:9px;letter-spacing:1px;margin-left:8px;color:var(--accent2);cursor:pointer;">[ ADMIN ]</span>'
-        + ' <span data-action="logout" style="opacity:0.4;font-size:9px;letter-spacing:1px;margin-left:4px;cursor:pointer;">[ QUITTER ]</span>';
+    var destUrl = isAdmin ? 'admin.html' : 'mon-compte.html';
+    var destLabel = isAdmin ? 'ADMIN' : 'MON COMPTE';
+
+    /* ── Desktop ── */
+    if (btn) {
+      btn.innerHTML =
+        '<span data-action="goto" style="cursor:pointer;">' + _escHTML(currentUser.name) + '</span>'
+        + '<span data-action="goto" style="font-size:9px;letter-spacing:1px;margin-left:10px;color:var(--accent2);opacity:.85;cursor:pointer;">[ ' + destLabel + ' ]</span>'
+        + '<button data-action="logout" style="margin-left:12px;background:none;border:1px solid rgba(255,255,255,0.25);color:var(--white);font-family:Arial,sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;cursor:pointer;border-radius:2px;white-space:nowrap;">Déconnexion</button>';
       btn.classList.add('connected');
-      btn.title = '';
       btn.onclick = function(e) {
         var t = e.target.closest('[data-action]');
-        if (t && t.dataset.action === 'logout') { doLogout(); return; }
-        window.location.href = 'admin.html';
-      };
-    } else {
-      // Membre : lien mon-compte + déconnexion
-      btn.innerHTML = currentUser.name
-        + ' <span data-action="compte" style="opacity:0.75;font-size:9px;letter-spacing:1px;margin-left:8px;color:var(--accent2);cursor:pointer;">[ MON COMPTE ]</span>'
-        + ' <span data-action="logout" style="opacity:0.4;font-size:9px;letter-spacing:1px;margin-left:4px;cursor:pointer;">[ QUITTER ]</span>';
-      btn.classList.add('connected');
-      btn.title = '';
-      btn.onclick = function(e) {
-        var t = e.target.closest('[data-action]');
-        if (t && t.dataset.action === 'logout') { e.stopPropagation(); doLogout(); return; }
-        window.location.href = 'mon-compte.html';
+        if (!t) return;
+        if (t.dataset.action === 'logout') { e.stopPropagation(); doLogout(); return; }
+        window.location.href = destUrl;
       };
     }
+
+    /* ── Mobile (dans le menu burger) ── */
+    if (mobileLi) {
+      mobileLi.innerHTML =
+        '<div style="display:flex;flex-direction:column;gap:8px;">'
+        + '<div style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--white);padding:4px 0;">' + _escHTML(currentUser.name) + '</div>'
+        + '<button onclick="(function(){window.location.href=\'' + destUrl + '\';window.__closeMenu&&window.__closeMenu();})()" style="display:block;width:100%;padding:10px 0;background:rgba(31,158,92,0.10);border:1px solid rgba(31,158,92,0.35);color:var(--accent2);font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:2px;">' + destLabel + '</button>'
+        + '<button onclick="doLogout()" style="display:block;width:100%;padding:10px 0;background:none;border:1px solid rgba(255,255,255,0.18);color:var(--white);font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:2px;">Déconnexion</button>'
+        + '</div>';
+    }
+
   } else {
-    btn.textContent = T('nav_login');
-    btn.removeAttribute('title');
-    btn.classList.remove('connected');
-    btn.onclick = openAdmin;
+    /* ── Déconnecté ── */
+    if (btn) {
+      btn.textContent = T('nav_login');
+      btn.classList.remove('connected');
+      btn.onclick = openAdmin;
+    }
+    if (mobileLi) {
+      mobileLi.innerHTML = '<button onclick="openAdmin(event)" style="display:block!important;width:100%!important;padding:12px 0!important;background:rgba(31,158,92,0.12)!important;border:1px solid rgba(31,158,92,0.4)!important;border-bottom:1px solid rgba(31,158,92,0.4)!important;color:var(--white)!important;font-family:Arial,sans-serif!important;font-size:11px!important;letter-spacing:3px!important;text-transform:uppercase!important;text-align:center!important;cursor:pointer!important;border-radius:2px!important;" data-i18n="nav_login">Se connecter</button>';
+    }
   }
 }
+
+function _escHTML(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Expose fermeture menu mobile pour les boutons dans #mobile-connect-li
+window.__closeMenu = function() {
+  var hb = document.getElementById('hamburger-btn');
+  var nl = document.querySelector('.nav-links');
+  if (hb) hb.classList.remove('open');
+  if (nl) nl.classList.remove('open');
+};
 
 function toggleMenu(){
   const btn=document.getElementById('hamburger-btn');
@@ -2071,6 +2093,8 @@ function doRegister() {
 function doLogout() {
   currentUser = null;
   try { sessionStorage.removeItem('harmonia_user'); } catch(e) {}
+  // Fermer le menu mobile si ouvert
+  if (typeof window.__closeMenu === 'function') window.__closeMenu();
   var _al = document.getElementById('admin-login');     if (_al) _al.style.display = 'flex';
   var _ap = document.getElementById('admin-panel');     if (_ap) _ap.classList.remove('active');
   var _lu = document.getElementById('login-email');     if (_lu) _lu.value = '';
