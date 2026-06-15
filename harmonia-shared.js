@@ -607,12 +607,25 @@ if (!DB.users.find(u => u.login === 'PROD'))  { DB.users.unshift(defaultUsers()[
   if (changed) saveData(DB);
 })();
 if (!DB.artists || DB.artists.length === 0)   { DB.artists = defaultArtists(); saveData(DB); }
-// Garantie permanente : Cesária (id=0) toujours présente en tête
-(function ensureCesaria() {
-  if (!DB.artists.find(function(a){ return a.id === 0; })) {
-    var _ces = defaultArtists()[0]; // id=0 est toujours le premier
-    if (_ces && _ces.id === 0) { DB.artists.unshift(_ces); saveData(DB); }
-  }
+// Migration artistes : synchroniser avec la liste officielle (ajouter manquants, retirer absents)
+(function migrateArtists() {
+  var canonical = defaultArtists();
+  var canonicalIds = canonical.map(function(a){ return a.id; });
+  var changed = false;
+  // Retirer les artistes absents de la liste officielle
+  var filtered = DB.artists.filter(function(a){ return canonicalIds.indexOf(a.id) !== -1; });
+  if (filtered.length !== DB.artists.length) { DB.artists = filtered; changed = true; }
+  // Ajouter les artistes manquants + mettre à jour la catégorie si elle a changé
+  canonical.forEach(function(def) {
+    var existing = DB.artists.find(function(a){ return a.id === def.id; });
+    if (!existing) {
+      DB.artists.push(def); changed = true;
+    } else if (existing.category !== def.category) {
+      existing.category = def.category; changed = true;
+    }
+  });
+  DB.artists.sort(function(a,b){ return a.id - b.id; });
+  if (changed) saveData(DB);
 })();
 if (!DB.tracks || DB.tracks.length === 0)     { DB.tracks = defaultTracks(); saveData(DB); }
 if (!DB.albums || DB.albums.length === 0)     { DB.albums = defaultAlbums(); saveData(DB); }
@@ -976,14 +989,9 @@ function defaultUsers() {
 
 // ---- Default content ----
 function defaultArtists() {
+  // Liste officielle HARMONIA — catégorie TRADITION
+  // Cesária Évora a sa propre page dédiée (cesaria.html) — absente de ce listing
   return [
-    { id:0, name:"Cesária Évora", category:"traditional", origin:"Mindelo, São Vicente",
-      style:"Morna · Coladeira · Funaná",
-      bioShort:"La Diva aux pieds nus. La voix qui a porté Cabo Verde jusqu'aux étoiles — Nobel officieux de la musique du monde.",
-      photo:"IMG_CESARIA",
-      pageLink:"cesaria.html",
-      instagram:"", facebook:"", youtube:"", spotify:"",
-      discography:[], youtubeVideos:[] },
     { id:1, name:"Elida Almeida", category:"traditional", origin:"Santiago, Cabo Verde",
       style:"Tabanka · Funaná · Batuque",
       bioShort:"Elida Almeida est une force de la nature — la voix qui réinvente le funaná et le batuque pour le monde entier, avec une énergie scénique irrésistible.",
@@ -993,60 +1001,174 @@ function defaultArtists() {
       facebook:"https://www.facebook.com/Elida.Almeida.Music",
       youtube:"https://www.youtube.com/channel/UCTMH3pKsN3CzYgK7nPApT_g",
       spotify:"https://open.spotify.com/intl-fr/artist/4QMgntJ821xE1UtdWtJWbd",
-      discography:[{title:"Ora Doci Ora Margos",year:2014,cover:"",desc:"L'album révélation qui a propulsé Elida sur la scène mondiale.",spotify:"https://open.spotify.com/intl-fr/artist/4QMgntJ821xE1UtdWtJWbd"},{title:"Elida",year:2017,cover:"",desc:"La confirmation d'un talent hors norme.",spotify:"https://open.spotify.com/intl-fr/artist/4QMgntJ821xE1UtdWtJWbd"}],
+      discography:[
+        {title:"Ora Doci Ora Margos",year:2014,cover:"",desc:"L'album révélation qui a propulsé Elida sur la scène mondiale.",spotify:"https://open.spotify.com/intl-fr/artist/4QMgntJ821xE1UtdWtJWbd"},
+        {title:"Elida",year:2017,cover:"",desc:"La confirmation d'un talent hors norme.",spotify:"https://open.spotify.com/intl-fr/artist/4QMgntJ821xE1UtdWtJWbd"}
+      ],
       youtubeVideos:[{ytId:"D6vBMXSFbfg",title:"Ora Doci Ora Margos"},{ytId:"kAGv6QLMJ6g",title:"Nha Cretcheu Di Alma"}] },
-    { id:2, name:"Ceuzany", category:"urban", origin:"Mindelo, São Vicente",
+
+    { id:2, name:"Ceuzany", category:"traditional", origin:"Mindelo, São Vicente",
       style:"Morna · Coladeira · Funaná",
       bioShort:"Née entre deux rives, Ceuzany Pires chante l'âme de Mindelo avec une grâce rare — de Lusafrica aux scènes européennes, une voix qui traverse les frontières.",
-      bioLong:"Ceuzany Pires est née au Sénégal de parents cap-verdiens, mais c'est à Mindelo, capitale culturelle de São Vicente, qu'elle a trouvé sa voix. Bercée par la morna et la coladeira, formée au sein du groupe Cordas do Sol, elle absorbe la tradition comme une seconde peau avant de s'en emparer pour mieux la réinventer.\n\nSon premier album solo « Nha Vida » (2012) est une déclaration d'existence. Le hit « Último Chance » circule sur les ondes des deux côtés de l'Atlantique et installe Ceuzany comme une valeur sûre de la scène cap-verdienne. Avec « Ilha d'Melodia », son deuxième opus, elle approfondit l'exploration : chaque titre est une île, chaque mélodie un voyage intérieur entre mémoire et désir. La production se fait plus intime, plus ciselée, révélant une artiste qui maîtrise aussi bien le silence que l'éclat.\n\nEn 2022, le chanteur français Christophe Maé traverse l'Atlantique pour enregistrer à ses côtés « Pays des Merveilles » — collaboration qui génère une tournée européenne retentissante et révèle Ceuzany à un public grand public international. Son single « Pedra Run » (Lusafrica, 2023) prend position avec courage sur les ravages de la drogue dans la jeunesse cap-verdienne : une chanson sociale à la puissance poétique redoutable.\n\nSon prochain album, attendu avec impatience, abordera la violence domestique — un sujet que Ceuzany traite avec la même intégrité artistique qui fait d'elle bien plus qu'une interprète : une voix de conscience, une artiste engagée, une femme qui chante ce que d'autres n'osent pas dire.",
+      bioLong:"Ceuzany Pires est née au Sénégal de parents cap-verdiens, mais c'est à Mindelo, capitale culturelle de São Vicente, qu'elle a trouvé sa voix. Bercée par la morna et la coladeira, formée au sein du groupe Cordas do Sol, elle absorbe la tradition comme une seconde peau avant de s'en emparer pour mieux la réinventer.\n\nSon premier album solo « Nha Vida » (2012) est une déclaration d'existence. Le hit « Último Chance » circule sur les ondes des deux côtés de l'Atlantique et installe Ceuzany comme une valeur sûre de la scène cap-verdienne. Avec « Ilha d'Melodia », son deuxième opus, elle approfondit l'exploration : chaque titre est une île, chaque mélodie un voyage intérieur entre mémoire et désir. La production se fait plus intime, plus ciselée, révélant une artiste qui maîtrise aussi bien le silence que l'éclat.\n\nEn 2022, le chanteur français Christophe Maé traverse l'Atlantique pour enregistrer à ses côtés « Pays des Merveilles » — collaboration qui génère une tournée européenne retentissante et révèle Ceuzany à un public grand public international. Son single « Pedra Run » (Lusafrica, 2023) prend position avec courage sur les ravages de la drogue dans la jeunesse cap-verdienne : une chanson sociale à la puissance poétique redoutable.",
       photo:"IMG_CEUZANY",
       instagram:"https://www.instagram.com/ceuzany_pires/",
       facebook:"https://www.facebook.com/ceuzany.pires",
       youtube:"https://www.youtube.com/@CeuzanyVEVO",
       spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L",
-      discography:[{title:"Nha Vida",year:2012,cover:"",desc:"Le premier solo. 'Último Chance' en vedette.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"},{title:"Pays des Merveilles",year:2022,cover:"",desc:"Single feat. Christophe Maé — tournée européenne.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"}],
+      discography:[
+        {title:"Nha Vida",year:2012,cover:"",desc:"Le premier album solo. Le hit 'Último Chance' en vedette.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"},
+        {title:"Ilha d'Melodia",year:2016,cover:"",desc:"Un voyage intérieur entre mémoire et désir.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"},
+        {title:"Pays des Merveilles",year:2022,cover:"",desc:"Single feat. Christophe Maé — tournée européenne.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"}
+      ],
       youtubeVideos:[{ytId:"lBCfSaMyaAg",title:"Pays des Merveilles"},{ytId:"NZhG5JFjuMU",title:"Pedra Run"}] },
+
     { id:3, name:"Lucibela", category:"traditional", origin:"Cabo Verde",
       style:"Morna · Coladeira",
       bioShort:"Lucibela est la morna dans toute sa splendeur — une voix de velours qui porte la saudade cap-verdienne aux quatre coins du monde.",
-      bioLong:"Il existe des voix qui semblent venir d'un ailleurs intemporel — des voix qui portent en elles l'histoire entière d'un peuple, sa douleur et sa beauté confondues. La voix de Lucibela est de celles-là. Depuis son émergence sur la scène internationale, les critiques les plus exigeants du monde de la world music s'accordent : Lucibela est l'une des grandes voix de la morna vivante, l'héritière naturelle d'une tradition que Cesária Évora a portée au rang du patrimoine universel.\n\nSon album « Laço Umbilical » (2018) est un événement. Le titre — « cordon ombilical » — dit tout de la démarche : un lien viscéral, charnel, entre l'artiste et sa terre, entre la voix et la mémoire collective de Cabo Verde. Interprétant les plus grands compositeurs cap-verdiens avec une maturité qui dépasse son âge, Lucibela réussit le prodige de rendre la tradition vivante sans jamais la trahir. Les plus grandes salles et festivals du monde — de l'Europe à l'Amérique du Sud — l'accueillent avec l'ovation réservée aux artistes rares.\n\nAvec « Aura » (2021), Lucibela franchit une nouvelle étape. Son univers s'élargit, sa palette s'affine, sa présence scénique atteint une plénitude nouvelle. Chaque note est placée avec une précision chirurgicale, chaque silence est habité. On ne sort pas inchangé d'un concert de Lucibela.\n\nProduite par HARMONIA, Lucibela incarne la promesse la plus haute du label : celle de transmette aux générations futures la flamme d'une musique qui a traversé les océans et résisté au temps. La morna a trouvé en elle sa gardienne pour le XXIe siècle.",
+      bioLong:"Il existe des voix qui semblent venir d'un ailleurs intemporel — des voix qui portent en elles l'histoire entière d'un peuple, sa douleur et sa beauté confondues. La voix de Lucibela est de celles-là. Depuis son émergence sur la scène internationale, les critiques les plus exigeants du monde de la world music s'accordent : Lucibela est l'une des grandes voix de la morna vivante, l'héritière naturelle d'une tradition que Cesária Évora a portée au rang du patrimoine universel.\n\nSon album « Laço Umbilical » (2018) est un événement. Le titre — « cordon ombilical » — dit tout de la démarche : un lien viscéral, charnel, entre l'artiste et sa terre, entre la voix et la mémoire collective de Cabo Verde. Interprétant les plus grands compositeurs cap-verdiens avec une maturité qui dépasse son âge, Lucibela réussit le prodige de rendre la tradition vivante sans jamais la trahir. Les plus grandes salles et festivals du monde — de l'Europe à l'Amérique du Sud — l'accueillent avec l'ovation réservée aux artistes rares.\n\nAvec « Aura » (2021), Lucibela franchit une nouvelle étape. Son univers s'élargit, sa palette s'affine, sa présence scénique atteint une plénitude nouvelle. Chaque note est placée avec une précision chirurgicale, chaque silence est habité. On ne sort pas inchangé d'un concert de Lucibela.\n\nProduite par HARMONIA, Lucibela incarne la promesse la plus haute du label : celle de transmettre aux générations futures la flamme d'une musique qui a traversé les océans et résisté au temps.",
       photo:"IMG_LUCIBELA",
-      instagram:"", facebook:"", youtube:"", spotify:"",
-      discography:[{title:"Laço Umbilical",year:2018,cover:"",desc:"Le disque événement mondial.",spotify:""},{title:"Aura",year:2021,cover:"",desc:"Maturité et splendeur de la morna.",spotify:""}],
+      instagram:"https://www.instagram.com/lucibela_oficial/",
+      facebook:"https://www.facebook.com/LucibelaOficial",
+      youtube:"https://www.youtube.com/@LucibelaOficial",
+      spotify:"https://open.spotify.com/intl-fr/artist/6Vc5SDqQcMjBQ35yJW6mZX",
+      discography:[
+        {title:"Laço Umbilical",year:2018,cover:"",desc:"Le disque événement qui a révélé Lucibela au monde.",spotify:"https://open.spotify.com/intl-fr/artist/6Vc5SDqQcMjBQ35yJW6mZX"},
+        {title:"Aura",year:2021,cover:"",desc:"Maturité et splendeur absolue de la morna.",spotify:"https://open.spotify.com/intl-fr/artist/6Vc5SDqQcMjBQ35yJW6mZX"}
+      ],
       youtubeVideos:[{ytId:"PfGHGbSXprI",title:"Laço Umbilical"},{ytId:"7NUbNjBakOY",title:"Sodade"}] },
-    { id:4, name:"Fábio Ramos", category:"traditional", origin:"Mindelo, São Vicente",
+
+    { id:4, name:"Fábio Ramos", category:"traditional", origin:"São Nicolau · Mindelo, São Vicente",
       style:"Morna · Coladeira",
-      bioShort:"Fábio Ramos est l'âme de Mindelo incarnée — morna pure, saudade authentique, la voix d'une ville qui ne s'oublie jamais.",
-      bioLong:"« Quem canta saudade, canta amor » — celui qui chante la saudade, chante l'amour. Cette maxime cap-verdienne pourrait avoir été écrite pour Fábio Ramos. Enfant de Mindelo, la cité créole de São Vicente où la morna a pris racine et fleuri, Fábio Ramos est façonné par l'âme d'une ville qui respire la musique comme d'autres respirent l'air marin.\n\nSon attachement à la tradition est viscéral, jamais nostalgique au sens passéiste du terme : il s'agit d'une fidélité vivante, d'un dialogue permanent avec les maîtres de la morna et de la coladeira. Sur scène, Fábio Ramos incarne le « Muçim d'Soncent » — l'enfant de São Vicente — avec une conviction rare. Sa présence est sobre et magnétique, sa voix porte la mélancolie douce-amère qui caractérise les grandes interprétations mornas.\n\nSon album « Um Cálice d'Nha Terra » — « Un verre de ma terre » — est à la fois une coupe levée et une déclaration d'amour. Chaque titre est une adresse à Mindelo, à ses ruelles, à sa lumière particulière, à ses absences. La production respecte l'architecture mélodique traditionnelle tout en lui offrant un écrin sonore à la hauteur d'une diffusion internationale.\n\nDans un paysage musical cap-verdien souvent tourné vers la modernité, Fábio Ramos rappelle que la tradition bien portée est une force, pas un héritage figé. HARMONIA, en le produisant, affirme une conviction fondatrice : les racines nourissent les cimes.",
+      bioShort:"Enfant de São Nicolau élevé à Mindelo, Fábio Ramos incarne la saudade authentique — une voix sobre et magnétique, gardienne de la morna traditionnelle.",
+      bioLong:"« Quem canta saudade, canta amor » — celui qui chante la saudade, chante l'amour. Cette maxime cap-verdienne pourrait avoir été écrite pour Fábio Ramos. Né sur l'île de São Nicolau, il grandit à Mindelo, la cité créole de São Vicente où la morna a pris racine et fleuri. C'est dans les ruelles de Mindelo, sur la guitare de son oncle, qu'il égrène ses premières notes et découvre bientôt que la voix est son instrument véritable.\n\nInfluencé par les grandes figures de la morna et de la coladeira — Miri Lobo, Bana, et la Diva aux pieds nus elle-même —, Fábio Ramos s'inscrit dans une lignée d'artistes pour qui la tradition n'est pas un musée mais une maison vivante. Son attachement est viscéral et jamais passéiste : il s'agit d'une fidélité active, d'un dialogue permanent avec les maîtres.\n\nSon premier album, enregistré sous le label Lusafrica fondé par José da Silva, rassemble une dizaine de compositions dont la majorité sont de sa plume — trait rare dans une tradition où l'interprétation prime souvent sur la création. Sur scène, Fábio Ramos incarne le « Muçim d'Soncent » — l'enfant de São Vicente — avec une conviction sobre et magnétique. Sa présence n'a pas besoin de l'ostentation : elle s'impose par la vérité.\n\nDans un paysage musical cap-verdien souvent tourné vers la modernité, Fábio Ramos rappelle que la tradition bien portée est une force, pas un héritage figé. HARMONIA, en le produisant, affirme une conviction fondatrice : les racines nourrissent les cimes.",
       photo:"IMG_FABIO",
       instagram:"https://www.instagram.com/fabioramos04/",
       facebook:"https://www.facebook.com/fabio.junior.ramos.884941",
       youtube:"https://www.youtube.com/@fabioramos9408",
       spotify:"https://open.spotify.com/intl-fr/artist/6CowL8BBT38y7guwUaSa4L",
-      discography:[{title:"Um Cálice d'Nha Terra",year:2022,cover:"",desc:"L'âme de Mindelo incarnée.",spotify:"https://open.spotify.com/intl-fr/artist/6CowL8BBT38y7guwUaSa4L"}],
-      youtubeVideos:[{ytId:"oQVkCBkX2Ug",title:"Um Cálice d'Nha Terra"}] },
-    { id:5, name:"Jenifer Solidade", category:"urban", origin:"Cabo Verde",
-      style:"Funaná · Batuque · Soul",
-      bioShort:"Jenifer Solidade est un phénomène — funaná, batuque, soul et gírias cap-verdiennes dans une voix de feu qui ne laisse personne indifférent.",
-      bioLong:"Jenifer Solidade ne chante pas — elle déclare. Sa voix, rauque et puissante, capable de la douceur la plus inattendue, est une arme artistique d'une précision redoutable. Elle descend du funaná et du batuque — ces rythmes de résistance nés dans les villages de l'intérieur de Santiago — et les porte dans le présent avec une énergie qui fracasse les codes.\n\nCe qui distingue immédiatement Jenifer sur scène, c'est bien plus que la voix : c'est la présence totale, l'expressivité du visage, ce langage corporel instinctif qui transforme chaque performance en cérémonie. Ses expressions sont devenues une signature — inoubliables, imitables, jamais reproduites. Le public ne la regarde pas chanter : il la vit.\n\nDans ses compositions, Jenifer Solidade s'approprie les gírias — l'argot vivant des rues de Santiago — pour nommer les réalités que d'autres artistes esquivent. Elle parle de l'île, de ses contradictions, de ses corps, de ses joies crues. Sa touche soul et moderne vient enrichir sans diluer un répertoire profondément ancré dans la tradition cap-verdienne. Le mélange est explosif, généreux, absolument singulier.\n\nJenifer Solidade est la preuve que la musique de Cabo Verde n'est pas un musée — c'est un volcan actif. HARMONIA l'a compris avant tout le monde.",
+      discography:[
+        {title:"Um Cálice d'Nha Terra",year:2022,cover:"",desc:"Morna et coladeira — l'âme de Mindelo incarnée, dix compositions originales.",spotify:"https://open.spotify.com/intl-fr/artist/6CowL8BBT38y7guwUaSa4L"}
+      ],
+      youtubeVideos:[{ytId:"Jjfv6n5Og_g",title:"Sonhe d'Flameng"},{ytId:"oQVkCBkX2Ug",title:"Morna Live"}] },
+
+    { id:5, name:"Jenifer Solidade", category:"traditional", origin:"Mindelo, São Vicente",
+      style:"Morna · Coladeira",
+      bioShort:"Née à Mindelo le 13 juin 1984, Jenifer Solidade a grandit dans la morna avant de devenir l'une des voix les plus distinguées de la nouvelle génération cap-verdienne.",
+      bioLong:"Jenifer Solidade Almeida naît le 13 juin 1984 à Mindelo, île de São Vicente — la ville où la morna a toujours été une langue maternelle autant qu'un genre musical. Elle chante la morna depuis l'enfance, et c'est cette intimité originelle avec la forme qui fait d'elle bien plus qu'une interprète : une héritière consciente d'un patrimoine qu'elle porte avec élégance et conviction.\n\nAvant de se lancer en solo, Jenifer Solidade fait ses classes dans les coulisses des plus grands. Elle devient choriste pour Tito Paris, Ildo Lobo, Nancy Vieira et Mayra Andrade — une école d'exigence incomparable. Elle intègre l'Orchestre de Cesária Évora, expérience fondatrice qui lui enseigne ce que signifie servir une musique plus grande que soi. En 2011, elle s'installe à Lisbonne pour perfectionner sa technique vocale — discipline rare dans un milieu où le talent naturel fait souvent office de formation.\n\nSon premier album solo « Um Click » paraît en 2015. Le titre — « un clic » — est une métaphore lucide sur notre rapport à l'image et aux réseaux sociaux, thème inhabituel dans la morna traditionnelle. Mais l'habillage musical reste fidèle à la tradition : mornas profondes, coladeiras élégantes, arrangements qui respirent l'air de São Vicente. La ballade « Razao de Ser » et l'exubérance rythmique de « Bossa Nova » coexistent dans un album d'une belle cohérence.\n\nJenifer Solidade est la preuve qu'une voix peut être à la fois ancrée dans la tradition la plus pure et résolument tournée vers son temps. HARMONIA est fière de compter parmi ses artistes cette voix distinctive, « husky, moderne, généreuse et incroyablement stylée » selon la presse internationale.",
       photo:"IMG_JENIFER",
       instagram:"https://www.instagram.com/jenifersolidade/",
       facebook:"https://www.facebook.com/jenifersolidade.cv",
       youtube:"https://www.youtube.com/@JeniferSolidadeVEVO",
       spotify:"https://open.spotify.com/intl-fr/artist/7FAutlaokOl6lePZDdTEgs",
-      discography:[{title:"Jenifer Solidade",year:2023,cover:"",desc:"Funaná, batuque et soul — une voix de feu.",spotify:"https://open.spotify.com/intl-fr/artist/7FAutlaokOl6lePZDdTEgs"}],
-      youtubeVideos:[{ytId:"oAoeqBWNWNQ",title:"Jenifer Solidade Live"}] },
+      discography:[
+        {title:"Um Click",year:2015,cover:"",desc:"Premier album solo — morna, coladeira et regard lucide sur le monde contemporain.",spotify:"https://open.spotify.com/intl-fr/artist/7FAutlaokOl6lePZDdTEgs"}
+      ],
+      youtubeVideos:[{ytId:"iRByIDZvDT4",title:"Criol Ê Bitche"},{ytId:"Rk1hfxSq6pI",title:"So Minha"}] },
+
     { id:6, name:"Neuza de Pina", category:"traditional", origin:"Praia, Santiago",
-      style:"Talaia Baxo · Rabolo · Samba",
-      bioShort:"Découverte par José da Silva dans un restaurant de Praia, Neuza de Pina porte en elle tous les secrets musicaux de l'île do Fogo — une grâce rare et bouleversante.",
-      bioLong:"Certaines histoires semblent écrites par le destin. Neuza de Pina naît le 10 novembre 1985 à Praia, île de Santiago. Sa mère disparaît quand elle a six ans — un manque fondateur qui traversera toute son œuvre. Élevée entre Praia et l'île do Fogo, elle absorbe en silence deux des univers musicaux les plus singuliers de l'archipel : les rythmes profonds de Santiago et la culture de feu de Fogo, île volcanique où la musique ressemble à la lave — lente, brûlante, irrésistible.\n\nElle a 24 ans quand José da Silva — l'homme qui a révélé Cesária Évora au monde — l'entend chanter dans un restaurant de Praia. Ce que d'autres auraient manqué, lui l'entend immédiatement : une voix rare, habitée, qui porte en elle une vérité que nul enseignement ne peut fabriquer. Il l'invite à enregistrer. L'album « Flor di Bila » (2013) naît de cette rencontre providentielle — une plongée dans les rythmes méconnus et précieux de l'île do Fogo : talaia baxo, rabolo, samba de Fogo. Une révélation pour la scène world music internationale.\n\n« Badia di Fogo » (2018) marque un tournant personnel. Pour la première fois, Neuza signe quatre compositions et offre « Izilda », une chanson écrite pour sa mère disparue — peut-être le moment le plus bouleversant de sa discographie. L'EP « Mininus 2000 », dédié à sa fille aînée, confirme une artiste qui puise dans les liens les plus intimes pour atteindre l'universel. Ses singles « Pidi Perdon » et « Combersu ku Distinu » — ce dernier en duo avec Mureno — enrichissent encore un catalogue d'une cohérence et d'une beauté rares.\n\nNeuza de Pina est la gardienne d'un patrimoine musical que le reste du monde commence à peine à découvrir. Sa voix, douce comme la lave refroidie et profonde comme le cratère, est une des plus précieuses du label HARMONIA.",
+      style:"Talaia Baxo · Rabolo · Samba de Fogo",
+      bioShort:"Découverte par José da Silva dans un bar de Praia, Neuza de Pina porte en elle tous les secrets musicaux de l'île do Fogo — une voix haut perchée d'une grâce bouleversante.",
+      bioLong:"Certaines histoires semblent écrites par le destin. Neuza de Pina naît en 1985 à Praia, île de Santiago. Sa mère, qui chante dans les bars de la capitale en échange de nourriture et de boisson, disparaît quand Neuza n'a que six ans — un manque fondateur qui traversera toute son œuvre. Élevée entre Praia et l'île do Fogo par sa marraine, elle absorbe en silence deux des univers musicaux les plus singuliers de l'archipel : les rythmes profonds de Santiago et la culture de feu de Fogo, île volcanique où la musique ressemble à la lave — lente, brûlante, irrésistible.\n\nElle travaille dans un restaurant de Praia quand son ami Francisco Cruz emmène José da Silva l'entendre chanter. Ce que d'autres auraient manqué, le producteur l'entend immédiatement : une voix rare, haut perchée et habitée, qui porte en elle une vérité que nul enseignement ne peut fabriquer. Il lui propose d'enregistrer pour le label HARMONIA. L'album « Flor di Bila » (2013) naît de cette rencontre providentielle — une plongée dans les rythmes méconnus et précieux de l'île do Fogo : talaia baxo, rabolo, samba de Fogo. Une révélation pour la scène world music internationale, récompensée aux Cape Verde Music Awards 2014.\n\n« Badia di Fogo » (2018) marque un tournant personnel. Pour la première fois, Neuza signe plusieurs compositions et offre « Izilda », une chanson écrite pour sa mère disparue — peut-être le moment le plus bouleversant de sa discographie. L'EP « Mininus 2000 », dédié à sa fille aînée, confirme une artiste qui puise dans les liens les plus intimes pour atteindre l'universel.\n\nNeuza de Pina est la gardienne d'un patrimoine musical que le reste du monde commence à peine à découvrir. Sa voix, douce comme la lave refroidie et profonde comme le cratère, est une des plus précieuses du label HARMONIA.",
       photo:"IMG_NEUZA",
       instagram:"https://www.instagram.com/neuzapina_85/",
       facebook:"https://www.facebook.com/www.neuzadepina.cv",
       youtube:"https://www.youtube.com/@NeuzaVEVO",
       spotify:"https://open.spotify.com/intl-fr/artist/1xDJ96IbGuTLeuODZW4QN2",
-      discography:[{title:"Flor di Bila",year:2013,cover:"",desc:"Les secrets musicaux de l'île do Fogo.",spotify:"https://open.spotify.com/intl-fr/artist/1xDJ96IbGuTLeuODZW4QN2"},{title:"Badia di Fogo",year:2018,cover:"",desc:"Album intime — 'Izilda' pour sa mère.",spotify:"https://open.spotify.com/intl-fr/artist/1xDJ96IbGuTLeuODZW4QN2"}],
-      youtubeVideos:[{ytId:"MFcxIoMKHZo",title:"Neuza de Pina Live"},{ytId:"Q4J0h9LNWMI",title:"Pidi Perdon"}] }
+      discography:[
+        {title:"Flor di Bila",year:2013,cover:"",desc:"Révélation mondiale — les rythmes secrets de l'île do Fogo.",spotify:"https://open.spotify.com/intl-fr/artist/1xDJ96IbGuTLeuODZW4QN2"},
+        {title:"Badia di Fogo",year:2018,cover:"",desc:"Album intime — 'Izilda', une chanson pour sa mère.",spotify:"https://open.spotify.com/intl-fr/artist/1xDJ96IbGuTLeuODZW4QN2"}
+      ],
+      youtubeVideos:[{ytId:"6jOgf4ihD8g",title:"Badia Di Fogo"},{ytId:"8Xq7bxuV6w0",title:"Flor di Bila"}] },
+
+    // ── CATÉGORIE URBAN ────────────────────────────────────────────────────
+
+    { id:7, name:"Elly Paris", category:"urban", origin:"Cabo Verde",
+      style:"Urban · Pop · R&B",
+      bioShort:"Elly Paris est la voix urbaine d'une nouvelle génération cap-verdienne — pop lumineux, énergie scénique naturelle, et une personnalité artistique déjà distincte.",
+      bioLong:"Elly Paris est née pour être sur scène. Sa voix chaude et son charisme instinctif ont immédiatement retenu l'attention de la maison HARMONIA, qui a reconnu en elle un tempérament artistique rare — celui des artistes qui n'ont pas besoin de se construire une image parce qu'ils sont déjà eux-mêmes dès la première note.\n\nSon univers musical mêle pop urbaine contemporaine, influences R&B et culture cap-verdienne dans une alchimie spontanée et communicative. Son single « Sabi » (2023) — « délicieux, savoureux » en créole — est une déclaration d'identité : une musique qui se savoure, qui s'écoute et se danse dans le même souffle. « Xpia B'oia » (2022) confirme une artiste qui sait raconter des histoires avec une économie de mots et une générosité de groove.\n\nLa collaboration avec l'artiste Kiddye Bonz sur « Adax » (2023) révèle également une capacité à s'insérer dans des univers différents sans jamais perdre sa voix propre — qualité rare et précieuse dans un paysage musical en mutation permanente.\n\nElly Paris est l'une des représentantes de cette nouvelle scène cap-verdienne urbaine qui s'impose sans complexe dans le concert de la musique afro-contemporaine mondiale. HARMONIA mise sur son avenir avec la conviction que les meilleures pages de son histoire restent à écrire.",
+      photo:"IMG_ELLY",
+      instagram:"https://www.instagram.com/ellyparis_/",
+      facebook:"",
+      youtube:"https://www.youtube.com/@EllyParis",
+      spotify:"",
+      discography:[
+        {title:"Xpia B'oia",year:2022,cover:"",desc:"Premier single — identité urbaine affirmée.",spotify:""},
+        {title:"Sabi / Adax",year:2023,cover:"",desc:"Double single confirmant une voix distincte de la nouvelle scène CV.",spotify:""}
+      ],
+      youtubeVideos:[{ytId:"HRnSlprhbIQ",title:"Sabi"},{ytId:"m75CxcGXGn8",title:"Xpia B'oia"}] },
+
+    { id:8, name:"Indira", category:"urban", origin:"Cabo Verde",
+      style:"Urban · R&B · Soul",
+      bioShort:"Indira est l'une des voix R&B les plus prometteuses de la scène cap-verdienne — une présence sur scène à la fois sensuelle et puissante, déjà appréciée des festivals.",
+      bioLong:"Indira s'est imposée sur la scène musicale cap-verdienne par la force de sa voix et l'authenticité de sa présence. Dans un paysage où les artistes urbains commencent à occuper une place de premier plan aux côtés de la tradition, elle représente cette génération qui assume pleinement ses influences R&B et soul tout en restant profondément ancrée dans la culture des îles.\n\nSa participation aux grandes scènes du pays — dont le festival Gamboa — l'a placée aux côtés des noms les plus en vue de la musique cap-verdienne contemporaine : Hélio Batalha, Mito Kaskas, Paulinha. Une reconnaissance par les pairs qui ne trompe pas.\n\nSon univers musical, à la croisée du R&B américain et des cadences afro-lusitaniennes, lui permet d'aborder des sujets universels — l'amour, l'identité, la résilience — avec une profondeur qui dépasse son jeune âge. Chaque performance est une invitation à entrer dans un monde intime et chaleureux, où la voix fait le travail d'une confidence.\n\nHARMONIA a identifié en Indira une artiste en pleine construction dont la trajectoire s'annonce remarquable. Elle fait partie de cette vague de talents cap-verdiens qui prouve que Cabo Verde n'est pas seulement la patrie de la morna — c'est aussi un vivier d'artistes urbains de calibre international.",
+      photo:"IMG_INDIRA",
+      instagram:"",
+      facebook:"",
+      youtube:"",
+      spotify:"",
+      discography:[],
+      youtubeVideos:[{ytId:"1ztMmdEZ1bw",title:"Momento de Musica — Live"}] },
+
+    { id:9, name:"Ley Lazz", category:"urban", origin:"Cabo Verde",
+      style:"Urban · Afrobeat · R&B",
+      bioShort:"Ley Lazz incarne la fusion des sonorités afro-caribéennes et des beats contemporains — un artiste cap-verdien qui s'impose avec une énergie et un charisme naturels.",
+      bioLong:"Ley Lazz appartient à cette génération d'artistes cap-verdiens qui ont grandi entre deux mondes : les rythmes de l'archipel et les productions afro-contemporaines qui circulent des Caraïbes à l'Afrique de l'Ouest, de Lisbonne à Paris. C'est de cette double exposition qu'est née sa musique — un mélange instinctif d'Afrobeat, de R&B et de pop qui semble couler de source.\n\nSon approche artistique est résolument moderne : productions léchées, mélodies immédiates, textes en créole et en portugais qui touchent juste. « We Vibe » illustre parfaitement cet univers — une ode à la connexion humaine, à l'attraction, au groove partagé. Directe, efficace, dansante.\n\nLey Lazz travaille avec une économie d'effets qui révèle une vraie maîtrise : pas besoin de surcharge sonore quand l'ossature mélodique est solide. C'est la marque des artistes qui construisent pour durer.\n\nAvec HARMONIA, Ley Lazz entre dans une phase décisive de son développement artistique. Le label apporte la structure et la vision internationale ; l'artiste apporte l'originalité et l'énergie. Une combinaison qui a déjà fait ses preuves.",
+      photo:"IMG_LEY_LAZZ",
+      instagram:"",
+      facebook:"",
+      youtube:"",
+      spotify:"",
+      discography:[
+        {title:"We Vibe",year:2024,cover:"",desc:"Single — Afrobeat et R&B cap-verdien en fusion.",spotify:""}
+      ],
+      youtubeVideos:[{ytId:"NDqCs1c7eYU",title:"We Vibe"}] },
+
+    { id:10, name:"Mureno", category:"urban", origin:"Cabo Verde",
+      style:"Urban · R&B · Kizomba",
+      bioShort:"Mureno est une valeur sûre de la scène urbaine cap-verdienne — sa voix grave et ses mélodies sensuelles en ont fait l'un des artistes les plus appréciés des publics jeunes.",
+      bioLong:"Il y a dans la voix de Mureno quelque chose qui s'impose sans effort — une gravité naturelle, une chaleur qui enveloppe l'auditeur dès les premières mesures. C'est peut-être pour cela que ses collaborations comptent parmi les moments les plus marquants de la scène cap-verdienne contemporaine. Son duo avec Neuza de Pina sur « Conberso cu Distino » est devenu une référence — deux univers qui se rencontrent, le traditionnel et l'urbain, et qui découvrent qu'ils parlent la même langue au fond.\n\nSon propre single « Diskulpam » — « Pardonne-moi » — est un exemple de ce que la musique urbaine cap-verdienne fait de mieux : une sincérité désarmante emballée dans une production contemporaine qui n'oublie pas ses racines. Le titre circule sur les radios et les réseaux, porté par une mélodie qui résiste à l'usure.\n\nMureno travaille à la frontière entre le R&B, la kizomba et les influences afro-lusitaniennes. Il fait partie de ces artistes dont le positionnement stylistique est suffisamment ouvert pour toucher des publics différents sans jamais perdre en authenticité. Ce grand écart, peu d'artistes savent le tenir. Mureno en a naturellement les moyens.",
+      photo:"IMG_MURENO",
+      instagram:"",
+      facebook:"",
+      youtube:"",
+      spotify:"",
+      discography:[
+        {title:"Diskulpam",year:2023,cover:"",desc:"Single — R&B cap-verdien, sincère et accrocheur.",spotify:""}
+      ],
+      youtubeVideos:[{ytId:"7HorxxeTgNs",title:"Diskulpam"},{ytId:"-Gn9JJGG47g",title:"Conberso cu Distino feat. Neuza"}] },
+
+    { id:11, name:"Neguinho Tivane", category:"urban", origin:"São Vicente, Cabo Verde",
+      style:"R&B · Soul · Afrobeat",
+      bioShort:"Jardel 'Neguinho' Tivane, 28 ans, de São Vicente — une voix R&B douce et habituée du label HARMONIA, qui chante l'amour authentique avec une sensibilité rare.",
+      bioLong:"Jardel Tivane — alias Neguinho Tivane — a commencé à chanter par jeu, lors d'une compétition amicale entre copains où lui chantait pendant que son camarade dansait. Ce qui est né d'un moment de légèreté est devenu une vocation. Il a 28 ans, il vit à São Vicente, et la musique est désormais son horizon définitif.\n\nSon style se définit lui-même : R&B, romantisme, profondeur. Influencé par des artistes comme Pedro Abrunhosa, Diogo Piçarra et le cap-verdien Lisandro Cuxi, Neguinho Tivane cherche à créer une musique qui parle aux émotions plutôt qu'aux tendances. Dans un monde où les sentiments semblent de plus en plus jetables, ses chansons défendent une vision de l'amour authentique et durable.\n\n« Outubro Rosa » (2024) — son premier single avec HARMONIA — est une ode à la force et à la dignité des femmes qui luttent contre le cancer du sein. Pas une chanson sur la maladie, mais sur ces femmes elles-mêmes : leur beauté, leur courage, leur présence au monde. Le single « Maria » (2025) parle de l'amour véritable dans un monde qui l'a oublié. « Code » (2026) explore des sonorités afrobeat et reggaeton qui élargissent sa palette sans trahir son âme.\n\nNeguinho Tivane est la preuve que la musique cap-verdienne sait produire des artistes R&B d'un calibre international. HARMONIA l'accompagne dans cette trajectoire avec la conviction que son meilleur chapitre reste à venir.",
+      photo:"IMG_NEGUINHO",
+      instagram:"",
+      facebook:"",
+      youtube:"",
+      spotify:"",
+      discography:[
+        {title:"Outubro Rosa",year:2024,cover:"",desc:"Hommage aux femmes face au cancer — force et dignité.",spotify:""},
+        {title:"Maria",year:2025,cover:"",desc:"Single — l'amour authentique, dans un monde qui l'a oublié.",spotify:""},
+        {title:"Code",year:2026,cover:"",desc:"Single Afrobeat/Reggaeton — une palette sonore élargie.",spotify:""}
+      ],
+      youtubeVideos:[] },
+
+    { id:12, name:"Sonia Sousa", category:"urban", origin:"Cabo Verde",
+      style:"R&B · Funk · Soul",
+      bioShort:"Sonia Sousa est la reine du R&B cap-verdien — groove, sensualité et créole dans une voix qui sait marier la rue de Praia et les meilleures productions contemporaines.",
+      bioLong:"Sonia Sousa a trouvé sa voie à l'intersection de deux mondes : la tradition musicale de Cabo Verde et le R&B/funk contemporain qui irrigue les playlists mondiales. Ce n'est pas une fusion de façade — c'est une synthèse organique, construite par une artiste qui a absorbé autant James Brown que la musique des rues de Santiago.\n\nSon style est immédiatement identifiable : un groove profond, une ligne mélodique qui s'accroche, et cette façon qu'elle a de chanter en créole caboverdien comme si aucune autre langue ne pouvait contenir ce qu'elle ressent. « Pa Bo » — « Pour toi » — est l'archétype de sa démarche : une ballade R&B qui sonne universel tout en étant profondément locale. La collaboration avec Hélio Batalha sur « Dexam Bua » — « Laisse-moi t'embrasser » — confirme sa capacité à s'insérer dans des productions plus ambitieuses sans jamais perdre son identité propre.\n\nSes textes explorent l'amour dans toutes ses nuances — la désir, l'abandon, la nostalgie, la joie du corps — avec une franchise et une élégance qui sont sa marque de fabrique. Sonia Sousa ne joue pas la carte de l'exotisme : elle joue la carte de l'honnêteté artistique, et le public l'en récompense.\n\nAvec une présence croissante sur les plateformes de streaming internationales, Sonia Sousa est en train de s'imposer comme l'une des voix R&B de référence de l'espace lusophone. HARMONIA est fière de compter parmi ses artistes cette force tranquille du groove cap-verdien.",
+      photo:"IMG_SONIA",
+      instagram:"",
+      facebook:"",
+      youtube:"https://www.youtube.com/channel/UCa5OHGXWMJVABJ6m8byEvsQ",
+      spotify:"https://open.spotify.com/intl-fr/artist/6vYZ29NTfmd4Z4mpde2uNk",
+      discography:[
+        {title:"Pa Bo",year:2022,cover:"",desc:"Single R&B — groove cap-verdien, texte en créole.",spotify:"https://open.spotify.com/intl-fr/artist/6vYZ29NTfmd4Z4mpde2uNk"},
+        {title:"Dexam Bua",year:2023,cover:"",desc:"Feat. Hélio Batalha — duo R&B/Funk devenu incontournable.",spotify:"https://open.spotify.com/intl-fr/artist/6vYZ29NTfmd4Z4mpde2uNk"}
+      ],
+      youtubeVideos:[{ytId:"c9-LYtadmUA",title:"Pa Bo"},{ytId:"zvmWpSRHy1k",title:"Dexam Bua feat. Hélio Batalha"}] }
+
   ];
 }
 

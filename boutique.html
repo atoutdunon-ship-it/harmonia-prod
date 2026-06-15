@@ -1495,7 +1495,7 @@ document.addEventListener('DOMContentLoaded', function() {
   try { if(typeof renderShopConcerts==='function') renderShopConcerts(); } catch(e) {}
 });
 </script>
-
+<script>
 // Auto-activate tab from URL param ?tab=...
 (function(){
   var tab = new URLSearchParams(window.location.search).get('tab');
@@ -1504,12 +1504,12 @@ document.addEventListener('DOMContentLoaded', function() {
       var btn = document.querySelector('.shop-tab[onclick*="' + tab + '"]');
       if (typeof switchShopTab === 'function') switchShopTab(tab, btn);
     });
-    // Also call after shared JS init (harmonia-shared loads async in some pages)
     window.addEventListener('load', function() {
       var btn = document.querySelector('.shop-tab[onclick*="' + tab + '"]');
       if (typeof switchShopTab === 'function') switchShopTab(tab, btn);
     });
   }
 })();
+</script>
 </body>
 </html>
