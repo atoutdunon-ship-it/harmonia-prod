@@ -1528,11 +1528,36 @@ var _activeEditEl   = null;
 
 function applyPageTexts() {
   if (!DB || !DB.pageTexts) return;
-  Object.keys(DB.pageTexts).forEach(function(key) {
-    var val = DB.pageTexts[key];
-    if (!val) return;
+  var lang = (typeof currentLang !== 'undefined' ? currentLang : null) || 'fr';
+  var applied = {};
+
+
+  Object.keys(DB.pageTexts).forEach(function(fullKey) {
+    if (fullKey.indexOf('__style') >= 0) return;
+    var col = fullKey.indexOf(':');
+    if (col < 0) return;
+    if (fullKey.substring(0, col) !== lang) return;
+    var key = fullKey.substring(col + 1);
+    var val = DB.pageTexts[fullKey];
+    if (!val || typeof val !== 'string') return;
+    var s = DB.pageTexts[lang + ':' + key + '__style'] || '';
     document.querySelectorAll('[data-editable-key="' + key + '"]:not([contenteditable="true"])').forEach(function(el) {
       el.innerHTML = val;
+      if (s) el.setAttribute('style', s); else el.removeAttribute('style');
+    });
+    applied[key] = true;
+  });
+
+
+  Object.keys(DB.pageTexts).forEach(function(key) {
+    if (key.indexOf(':') >= 0 || key.indexOf('__style') >= 0) return;
+    if (applied[key]) return;
+    var val = DB.pageTexts[key];
+    if (!val || typeof val !== 'string') return;
+    var s = DB.pageTexts[key + '__style'] || '';
+    document.querySelectorAll('[data-editable-key="' + key + '"]:not([contenteditable="true"])').forEach(function(el) {
+      el.innerHTML = val;
+      if (s) el.setAttribute('style', s);
     });
   });
 }
@@ -1724,6 +1749,8 @@ function _onEditableClick(e) {
   el.setAttribute('contenteditable', 'true');
   el.addEventListener('input', _onEditInput);
 
+  el.addEventListener('paste', _onEditPaste);
+
   el.focus();
   _showFloatingToolbar(el);
 }
@@ -1737,8 +1764,35 @@ function _onDocMouseDown(e) {
 
 function _onEditInput() {
   var key = this.getAttribute('data-editable-key');
-  _pendingEdits[key] = { el: this, value: this.innerHTML };
+  _pendingEdits[key] = {
+    el    : this,
+    value : this.innerHTML,
+    style : this.getAttribute('style') || ''
+  };
   _updateEditCount();
+}
+
+function _onEditPaste(e) {
+  e.preventDefault();
+  var text = (e.clipboardData || window.clipboardData).getData('text/plain');
+  if (!text) return;
+
+  text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  if (document.execCommand) {
+    document.execCommand('insertText', false, text);
+  } else {
+
+    var sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return;
+    var range = sel.getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(document.createTextNode(text));
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    this.dispatchEvent(new Event('input', { bubbles: true }));
+  }
 }
 
 function _updateEditCount() {
@@ -1749,74 +1803,186 @@ function _updateEditCount() {
 
 function _showFloatingToolbar(el) {
   _hideFloatingToolbar();
+  var cs   = window.getComputedStyle(el);
+  var curFont = cs.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+  var curSize = Math.round(parseFloat(cs.fontSize)) || 14;
   var rect = el.getBoundingClientRect();
+
   var t = document.createElement('div');
   t.id = 'edit-floating-toolbar';
-  t.style.cssText = 'position:fixed;z-index:99999;background:#061a10;border:1px solid rgba(46,204,128,0.4);box-shadow:0 4px 28px rgba(0,0,0,0.75);display:flex;align-items:center;gap:2px;padding:5px 8px;border-radius:3px;white-space:nowrap;';
+  t.style.cssText = 'position:fixed;z-index:99999;background:#030f07;border:1px solid rgba(46,204,128,0.42);'
+    + 'box-shadow:0 6px 32px rgba(0,0,0,0.88);display:flex;flex-wrap:wrap;align-items:center;gap:2px;'
+    + 'padding:5px 10px;border-radius:4px;white-space:nowrap;font-family:Arial,sans-serif;'
+    + 'user-select:none;max-width:calc(100vw - 20px);';
 
-  var top = rect.top - 52;
-  var left = Math.max(8, Math.min(rect.left, window.innerWidth - 380));
-  if (top < 62) top = Math.min(rect.bottom + 6, window.innerHeight - 60);
-  t.style.top  = top + 'px';
+  var top  = rect.top - 56;
+  var left = Math.max(8, Math.min(rect.left, window.innerWidth - 580));
+  if (top < 62) top = Math.min(rect.bottom + 8, window.innerHeight - 72);
+  t.style.top  = top  + 'px';
   t.style.left = left + 'px';
 
   var key = el.getAttribute('data-editable-key');
-  var S   = 'background:none;border:none;color:#c8d8c8;font-family:Arial,sans-serif;font-size:12px;padding:5px 8px;cursor:pointer;border-radius:2px;transition:background 0.12s;line-height:1;';
-  var SEP = '<div style="width:1px;height:18px;background:rgba(255,255,255,0.1);margin:0 3px;flex-shrink:0;"></div>';
+  var BTN = 'display:inline-flex;align-items:center;justify-content:center;background:none;border:none;'
+    + 'color:#c8e0cc;cursor:pointer;border-radius:3px;padding:0 7px;height:28px;min-width:26px;'
+    + 'font-family:Arial,sans-serif;font-size:13px;';
+  var SEL = 'background:#071a0e;border:1px solid rgba(46,204,128,0.28);color:#c8e0cc;'
+    + 'font-family:Arial,sans-serif;font-size:11px;height:26px;border-radius:3px;cursor:pointer;outline:none;';
 
-  var cmds = [
-    { label:'B',        cmd:'bold',          extra:'font-weight:bold;',   title:'Gras' },
-    { label:'I',        cmd:'italic',         extra:'font-style:italic;',  title:'Italique' },
-    null,
-    { label:'&#8676;',  cmd:'justifyLeft',    extra:'',                    title:'Aligner à gauche' },
-    { label:'&#8596;',  cmd:'justifyCenter',  extra:'',                    title:'Centrer' },
-    { label:'&#8677;',  cmd:'justifyRight',   extra:'',                    title:'Aligner à droite' },
-    null,
-    { label:'&#8635; Réinit.', cmd:'reset',  extra:'color:#ff9999;',      title:'Réinitialiser' }
-  ];
 
-  var label = document.createElement('span');
-  label.style.cssText = 'font-family:Arial;font-size:8px;letter-spacing:2px;color:rgba(46,204,128,0.6);text-transform:uppercase;padding-right:8px;border-right:1px solid rgba(255,255,255,0.1);margin-right:3px;';
-  label.innerHTML = '&#9998; ÉDITION';
-  t.appendChild(label);
+  var lbl = document.createElement('span');
+  lbl.style.cssText = 'font-size:8px;letter-spacing:2px;color:rgba(46,204,128,0.65);'
+    + 'text-transform:uppercase;padding-right:8px;border-right:1px solid rgba(255,255,255,0.1);'
+    + 'margin-right:4px;line-height:1;';
+  lbl.innerHTML = '&#9998;&nbsp;ÉDITION';
+  t.appendChild(lbl);
 
-  cmds.forEach(function(c) {
-    if (!c) { t.insertAdjacentHTML('beforeend', SEP); return; }
+  function sep() {
+    var s = document.createElement('div');
+    s.style.cssText = 'width:1px;height:18px;background:rgba(255,255,255,0.1);margin:0 3px;flex-shrink:0;align-self:center;';
+    t.appendChild(s);
+  }
+
+  function mkBtn(html, cssExtra, titleText, onMD) {
     var btn = document.createElement('button');
-    btn.style.cssText = S + c.extra;
-    btn.title = c.title;
-    btn.innerHTML = c.label;
+    btn.style.cssText = BTN + (cssExtra || '');
+    btn.title = titleText;
+    btn.innerHTML = html;
     btn.addEventListener('mouseover', function() { btn.style.background = 'rgba(46,204,128,0.15)'; });
     btn.addEventListener('mouseout',  function() { btn.style.background = 'none'; });
     btn.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!_activeEditEl) return;
-      _activeEditEl.focus();
-      if (c.cmd === 'reset') {
-        _resetEditable(key);
-        return;
-      }
-
-      if (c.cmd === 'justifyLeft')   { _activeEditEl.style.textAlign = 'left';   }
-      else if (c.cmd === 'justifyCenter') { _activeEditEl.style.textAlign = 'center'; }
-      else if (c.cmd === 'justifyRight')  { _activeEditEl.style.textAlign = 'right';  }
-      else {
-
-        var sel = window.getSelection();
-        if (!sel || sel.toString().length === 0) {
-          var range = document.createRange();
-          range.selectNodeContents(_activeEditEl);
-          sel.removeAllRanges();
-          sel.addRange(range);
-        }
-        document.execCommand(c.cmd, false, null);
-      }
-
-      var evt = new Event('input', { bubbles: true });
-      _activeEditEl.dispatchEvent(evt);
+      e.preventDefault(); e.stopPropagation();
+      onMD(btn);
     });
     t.appendChild(btn);
+    return btn;
+  }
+
+
+  var selFont = document.createElement('select');
+  selFont.style.cssText = SEL + 'width:108px;margin-right:3px;padding:0 3px;';
+  selFont.title = 'Police';
+  [
+    ['Arial',          'Arial'],
+    ['Georgia',        'Georgia'],
+    ['Helvetica',      'Helvetica'],
+    ['Times New Roman','Times NR'],
+    ['Courier New',    'Courier'],
+    ['Verdana',        'Verdana'],
+    ['Trebuchet MS',   'Trebuchet'],
+  ].forEach(function(f) {
+    var o = document.createElement('option');
+    o.value = f[0]; o.textContent = f[1]; o.style.fontFamily = f[0];
+    if (curFont.toLowerCase().indexOf(f[0].toLowerCase()) >= 0) o.selected = true;
+    selFont.appendChild(o);
+  });
+  selFont.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+  selFont.addEventListener('change', function() {
+    if (!_activeEditEl) return;
+    _activeEditEl.style.fontFamily = this.value;
+    _activeEditEl.focus();
+    _activeEditEl.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  t.appendChild(selFont);
+
+
+  var selSize = document.createElement('select');
+  selSize.style.cssText = SEL + 'width:60px;padding:0 3px;';
+  selSize.title = 'Taille (px)';
+  [9,10,11,12,13,14,15,16,18,20,22,24,28,32,36,42,48,60,72].forEach(function(s) {
+    var o = document.createElement('option');
+    o.value = s; o.textContent = s + 'px';
+    if (s === curSize) o.selected = true;
+    selSize.appendChild(o);
+  });
+  selSize.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+  selSize.addEventListener('change', function() {
+    if (!_activeEditEl) return;
+    _activeEditEl.style.fontSize = this.value + 'px';
+    _activeEditEl.focus();
+    _activeEditEl.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  t.appendChild(selSize);
+
+  sep();
+
+
+  function fmtBtn(html, cmd, titleText) {
+    mkBtn(html, '', titleText, function() {
+      if (!_activeEditEl) return;
+      _activeEditEl.focus();
+      var sel = window.getSelection();
+      if (!sel || sel.toString().length === 0) {
+        var range = document.createRange();
+        range.selectNodeContents(_activeEditEl);
+        sel.removeAllRanges(); sel.addRange(range);
+      }
+      document.execCommand(cmd, false, null);
+      _activeEditEl.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+  }
+  fmtBtn('<b>B</b>',                           'bold',          'Gras (Ctrl+B)');
+  fmtBtn('<i>I</i>',                           'italic',        'Italique (Ctrl+I)');
+  fmtBtn('<u>U</u>',                           'underline',     'Souligner (Ctrl+U)');
+  fmtBtn('<s style="font-size:11px">S</s>',   'strikeThrough', 'Barré');
+
+  sep();
+
+
+  var colorInput = document.createElement('input');
+  colorInput.type = 'color';
+  colorInput.value = _rgbToHex(cs.color);
+  colorInput.style.cssText = 'position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;';
+  colorInput.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+  colorInput.addEventListener('input', function() {
+    if (!_activeEditEl) return;
+    _activeEditEl.style.color = this.value;
+    colorMark.style.borderBottomColor = this.value;
+    _activeEditEl.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  var colorWrap = document.createElement('span');
+  colorWrap.style.cssText = 'position:relative;display:inline-flex;align-items:center;';
+  colorWrap.appendChild(colorInput);
+  var colorMark = document.createElement('span');
+  colorMark.style.cssText = 'border-bottom:3px solid ' + _rgbToHex(cs.color) + ';font-size:13px;line-height:1;';
+  colorMark.textContent = 'A';
+  var colorBtn = document.createElement('button');
+  colorBtn.style.cssText = BTN;
+  colorBtn.title = 'Couleur du texte';
+  colorBtn.appendChild(colorMark);
+  colorBtn.addEventListener('mouseover', function() { colorBtn.style.background = 'rgba(46,204,128,0.15)'; });
+  colorBtn.addEventListener('mouseout',  function() { colorBtn.style.background = 'none'; });
+  colorBtn.addEventListener('mousedown', function(e) { e.preventDefault(); e.stopPropagation(); });
+  colorBtn.addEventListener('click', function(e) { e.stopPropagation(); colorInput.click(); });
+  colorWrap.appendChild(colorBtn);
+  t.appendChild(colorWrap);
+
+  sep();
+
+
+  var curAlign = (el.style.textAlign || cs.textAlign || 'left').trim();
+  var alignBtns = [];
+  [
+    { html:'&#8676;', align:'left',    title:'Aligner à gauche' },
+    { html:'&#8596;', align:'center',  title:'Centrer' },
+    { html:'&#8677;', align:'right',   title:'Aligner à droite' },
+    { html:'&#8644;', align:'justify', title:'Justifier' },
+  ].forEach(function(a) {
+    var btn = mkBtn(a.html, (curAlign === a.align ? 'background:rgba(46,204,128,0.15);' : ''), a.title, function(b) {
+      if (!_activeEditEl) return;
+      _activeEditEl.style.textAlign = a.align;
+      _activeEditEl.focus();
+      _activeEditEl.dispatchEvent(new Event('input', { bubbles: true }));
+      alignBtns.forEach(function(ab) { ab.style.background = 'none'; });
+      b.style.background = 'rgba(46,204,128,0.15)';
+    });
+    alignBtns.push(btn);
+  });
+
+  sep();
+
+
+  mkBtn('&#8635;&nbsp;Réinit.', 'color:#ff9999;font-size:11px;', 'Réinitialiser', function() {
+    _resetEditable(key);
   });
 
   document.body.appendChild(t);
@@ -1827,43 +1993,211 @@ function _hideFloatingToolbar() {
   if (t) t.remove();
 }
 
+function _rgbToHex(rgb) {
+  if (!rgb) return '#ffffff';
+  var m = rgb.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (!m) return '#ffffff';
+  return '#' + [m[1], m[2], m[3]].map(function(x) {
+    return ('0' + parseInt(x, 10).toString(16)).slice(-2);
+  }).join('');
+}
+
 function _resetEditable(key) {
   var el = document.querySelector('[data-editable-key="' + key + '"]');
   if (!el) return;
   var orig = el.getAttribute('data-original');
   if (orig !== null) { el.innerHTML = orig; }
+  el.removeAttribute('style');
   delete _pendingEdits[key];
   _updateEditCount();
 }
 
 function saveAllEdits() {
   if (!DB.pageTexts) DB.pageTexts = {};
+  var lang = (typeof currentLang !== 'undefined' ? currentLang : null) || 'fr';
+  var savedKeys  = [];
+  var pendingSnap = _pendingEdits;
+
   Object.keys(_pendingEdits).forEach(function(key) {
-    var val = _pendingEdits[key].value;
-    DB.pageTexts[key] = val;
+    var pending = _pendingEdits[key];
+    var val = pending.value;
+
+    DB.pageTexts[lang + ':' + key] = val;
+    if (pending.style) {
+      DB.pageTexts[lang + ':' + key + '__style'] = pending.style;
+    } else {
+      delete DB.pageTexts[lang + ':' + key + '__style'];
+    }
+    savedKeys.push(key);
 
     var m = key.match(/^artist_(\d+)_(name|style|bio|label)$/);
     if (m) {
       var aid = +m[1], field = m[2];
       var artist = DB.artists.find(function(a){ return a.id === aid; });
       if (artist) {
-        var plain = _pendingEdits[key].el.innerText || val.replace(/<[^>]+>/g,'');
+        var plain = pending.el.innerText || val.replace(/<[^>]+>/g, '');
         if (field === 'name')  artist.name    = plain;
         if (field === 'style') artist.style   = plain;
         if (field === 'bio')   artist.bioLong = plain;
       }
     }
   });
+
   saveData(DB);
   _pendingEdits = {};
   _updateEditCount();
+
 
   var bar = document.getElementById('inline-edit-bar');
   if (bar) {
     var prev = bar.innerHTML;
     bar.innerHTML = '<span style="font-family:Arial;font-size:11px;letter-spacing:2px;color:#2ecc80;margin:auto;padding:0 32px;">&#10003; Modifications sauvegardées</span>';
-    setTimeout(function() { if(document.getElementById('inline-edit-bar')) bar.innerHTML = prev; }, 1400);
+    setTimeout(function() { if (document.getElementById('inline-edit-bar')) bar.innerHTML = prev; }, 1400);
   }
+
+
+  var allLangs    = ['fr', 'en', 'pt', 'es'];
+  var otherLangs  = allLangs.filter(function(l) { return l !== lang; });
+  if (savedKeys.length > 0 && otherLangs.length > 0) {
+    setTimeout(function() {
+      _showTranslateDialog(savedKeys, lang, pendingSnap, otherLangs);
+    }, 1700);
+  }
+}
+
+function _showTranslateDialog(keys, sourceLang, pendingSnap, targetLangs) {
+  var existing = document.getElementById('harmonia-translate-dialog');
+  if (existing) existing.remove();
+  var LN = { fr:'Français', en:'English', pt:'Português', es:'Español' };
+
+  var overlay = document.createElement('div');
+  overlay.id = 'harmonia-translate-dialog';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:199999;background:rgba(0,0,0,0.78);'
+    + 'display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;';
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#030f07;border:1px solid rgba(46,204,128,0.4);border-radius:4px;'
+    + 'padding:32px 36px;max-width:460px;width:90%;box-shadow:0 8px 48px rgba(0,0,0,0.9);';
+
+  box.innerHTML =
+    '<div style="font-size:8px;letter-spacing:3px;color:rgba(46,204,128,0.65);text-transform:uppercase;margin-bottom:10px;">Traduction automatique</div>'
+    + '<div style="font-size:15px;color:#fff;font-weight:600;margin-bottom:10px;">Propager les modifications ?</div>'
+    + '<div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.7;margin-bottom:18px;">'
+    + '<b style="color:#c8e0cc">' + keys.length + ' champ' + (keys.length > 1 ? 's' : '') + '</b>'
+    + ' modifié' + (keys.length > 1 ? 's' : '') + ' en <b style="color:#c8e0cc">' + LN[sourceLang] + '</b>.<br>'
+    + 'Traduire automatiquement vers : '
+    + targetLangs.map(function(l) { return '<b style="color:#c8e0cc">' + LN[l] + '</b>'; }).join(', ')
+    + ' ?<br><span style="font-size:10px;opacity:0.45;">Via MyMemory API · gratuit · les versions existantes dans ces langues seront remplacées.</span>'
+    + '</div>'
+    + '<div id="translate-progress" style="display:none;min-height:18px;margin-bottom:14px;font-size:11px;color:#2ecc80;letter-spacing:1px;"></div>'
+    + '<div style="display:flex;gap:10px;justify-content:flex-end;">'
+    + '<button id="translate-skip" style="background:none;border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.45);font-family:Arial;font-size:11px;letter-spacing:1px;padding:8px 20px;cursor:pointer;border-radius:3px;">Ignorer</button>'
+    + '<button id="translate-ok" style="background:rgba(46,204,128,0.12);border:1px solid rgba(46,204,128,0.45);color:#2ecc80;font-family:Arial;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:8px 22px;cursor:pointer;border-radius:3px;">Traduire</button>'
+    + '</div>';
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  var skipBtn   = document.getElementById('translate-skip');
+  var okBtn     = document.getElementById('translate-ok');
+  var progressEl = document.getElementById('translate-progress');
+
+  skipBtn.addEventListener('click', function() { overlay.remove(); });
+  okBtn.addEventListener('click', function() {
+    okBtn.disabled = true; okBtn.textContent = '…';
+    skipBtn.disabled = true;
+    progressEl.style.display = 'block';
+    _runTranslation(keys, sourceLang, pendingSnap, targetLangs, progressEl, function(errors) {
+      progressEl.textContent = errors === 0
+        ? '✓ Traduction terminée'
+        : '✓ Terminé (' + errors + ' erreur' + (errors > 1 ? 's' : '') + ')';
+      setTimeout(function() { overlay.remove(); }, 1400);
+    });
+  });
+}
+
+function _runTranslation(keys, sourceLang, pendingSnap, targetLangs, progressEl, onDone) {
+  if (!DB.pageTexts) DB.pageTexts = {};
+  var LN = { fr:'Français', en:'English', pt:'Português', es:'Español' };
+  var tasks = [];
+  keys.forEach(function(key) {
+    var p = pendingSnap[key];
+    if (!p) return;
+
+    var plainText = p.value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!plainText) return;
+    targetLangs.forEach(function(tl) {
+      tasks.push({ key: key, sl: sourceLang, tl: tl, text: plainText });
+    });
+  });
+
+  if (tasks.length === 0) { onDone(0); return; }
+  var errors = 0;
+
+  function runNext(i) {
+    if (i >= tasks.length) { saveData(DB); onDone(errors); return; }
+    var t = tasks[i];
+    progressEl.textContent = (i + 1) + '/' + tasks.length + ' → ' + LN[t.tl] + '…';
+    _translateChunked(t.text, t.sl, t.tl, function(err, translated) {
+      if (!err && translated) {
+        DB.pageTexts[t.tl + ':' + t.key] = translated;
+      } else {
+        errors++;
+      }
+      setTimeout(function() { runNext(i + 1); }, 380);
+    });
+  }
+  runNext(0);
+}
+
+function _translateChunked(text, sourceLang, targetLang, callback) {
+  if (!text || !text.trim()) { callback(null, ''); return; }
+  var CHUNK = 480;
+  if (text.length <= CHUNK) {
+    _translateViaMyMemory(text, sourceLang, targetLang, callback);
+    return;
+  }
+  var parts = text.match(/[^.!?]+[.!?]+\s*/g) || [text];
+  var chunks = [], cur = '';
+  parts.forEach(function(p) {
+    if ((cur + p).length > CHUNK && cur) { chunks.push(cur.trim()); cur = p; }
+    else cur += p;
+  });
+  if (cur.trim()) chunks.push(cur.trim());
+
+  var results = [], idx = 0;
+  function next() {
+    if (idx >= chunks.length) { callback(null, results.join(' ')); return; }
+    _translateViaMyMemory(chunks[idx], sourceLang, targetLang, function(err, t) {
+      if (err) { callback(err, null); return; }
+      results.push(t); idx++;
+      setTimeout(next, 340);
+    });
+  }
+  next();
+}
+
+function _translateViaMyMemory(text, sourceLang, targetLang, callback) {
+  var LM = { fr:'fr-FR', en:'en-US', pt:'pt-PT', es:'es-ES' };
+  var url = 'https://api.mymemory.translated.net/get?q='
+    + encodeURIComponent(text.substring(0, 490))
+    + '&langpair=' + (LM[sourceLang] || sourceLang) + '|' + (LM[targetLang] || targetLang);
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.timeout = 12000;
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      try {
+        var d = JSON.parse(xhr.responseText);
+        var tr = d.responseData && d.responseData.translatedText;
+        if (tr && tr.toLowerCase() !== 'invalid language pair') callback(null, tr);
+        else callback(new Error('no_translation'), null);
+      } catch(e) { callback(e, null); }
+    } else { callback(new Error('http_' + xhr.status), null); }
+  };
+  xhr.onerror   = function() { callback(new Error('network'), null); };
+  xhr.ontimeout = function() { callback(new Error('timeout'), null); };
+  xhr.send();
 }
 
 function _cancelAllEdits() { _exitEditMode(); }
