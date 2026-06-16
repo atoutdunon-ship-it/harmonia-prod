@@ -2,3 +2,9 @@
 harmonia-shared.src.js
 harmonia-shared.src.css
 build.py
+
+# Fichiers système et cache
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
