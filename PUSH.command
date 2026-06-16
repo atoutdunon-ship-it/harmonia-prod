@@ -6,6 +6,9 @@ echo "  HARMONIA · Push vers GitHub Pages"
 echo "═══════════════════════════════════════════"
 echo ""
 
+# Supprimer le verrou git si présent (évite les blocages)
+rm -f .git/index.lock
+
 # S'assurer que le remote est correct (sans token)
 git remote set-url origin "https://github.com/atoutdunon-ship-it/harmonia-prod.git"
 

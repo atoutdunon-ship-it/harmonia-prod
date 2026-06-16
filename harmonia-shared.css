@@ -1,5 +1,7 @@
-
-  :root {
+/*!
+ * © 2025 HARMONIA — Maison de Production. Tous droits réservés.
+ */
+:root {
     --navy: #061a10;
     --navy2: #091f13;
     --navy3: #0d2618;
@@ -26,7 +28,6 @@
   }
 
 
-  /* ===== TEXTES GLOBAUX EN BLANC ===== */
   body, p, span, div, li, td, th, label, input, textarea, select,
   .section-label, .section-title, .hero-sub, .hero-desc,
   .artist-bio, .artist-origin, .artist-style, .artist-name,
@@ -43,7 +44,7 @@
     color: var(--white) !important;
   }
 
-  /* Exceptions : accents et éléments colorés intentionnels */
+
   .section-label, .artist-style, .format-badge,
   .shop-price, .track-num, .news-date,
   .admin-nav-item.active, .order-status,
@@ -52,20 +53,20 @@
   .admin-sidebar-logo span, .nav-logo span,
   .hero-line, .section-divider { color: inherit !important; }
 
-  /* Placeholders */
+
   ::placeholder { color: rgba(255,255,255,0.45) !important; }
 
-  /* Liens */
+
   a { color: var(--white) !important; }
   a:hover { color: var(--accent2) !important; }
 
-  /* Inputs et selects */
+
   input, textarea, select {
     color: var(--white) !important;
     background: rgba(255,255,255,0.05) !important;
   }
 
-  /* ========== TYPOGRAPHIE GLOBALE ========== */
+
   p, .artist-bio, .news-excerpt, .modal-bio,
   .about-text p, .contact-text p,
   .inline-player-title, .track-info,
@@ -90,7 +91,7 @@
     text-align: left;
   }
 
-  /* ========== NAV ========== */
+
   nav {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -115,8 +116,12 @@
   .nav-logo {
     display: flex;
     align-items: center;
+    align-self: stretch;
     text-decoration: none;
     flex-shrink: 0;
+    position: relative;
+    z-index: 9999;
+    padding: 0 12px 0 0;
   }
 
   .nav-logo img {
@@ -152,7 +157,7 @@
     flex-shrink: 0;
   }
 
-  /* Sections — caps serrées */
+
   .nav-links a {
     color: rgba(255,255,255,0.72);
     text-decoration: none;
@@ -163,26 +168,15 @@
     font-weight: 400;
     transition: color 0.25s;
     white-space: nowrap;
+    padding: 16px 8px;
+    margin: -16px -8px;
   }
 
-  /* Artistes — italique serif, casse naturelle */
-  .nav-links li[data-module-nav="artists"] a,
-  .nav-links li[data-module-nav="cesaria"] a {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 12px;
-    letter-spacing: 0.3px;
-    text-transform: none;
-    font-style: italic;
-    color: rgba(255,255,255,0.78);
+  .nav-links a:hover {
+    color: var(--accent2);
   }
 
-  .nav-links a:hover,
-  .nav-links li[data-module-nav="artists"] a:hover,
-  .nav-links li[data-module-nav="cesaria"] a:hover {
-    color: var(--accent2) !important;
-  }
 
-  /* ========== HERO ========== */
   #hero {
     height: 100vh;
     display: flex;
@@ -224,7 +218,7 @@
     z-index: 2;
   }
 
-  /* Halo blanc autour du titre */
+
   .hero-title-wrap {
     position: relative;
     display: inline-block;
@@ -288,7 +282,6 @@
     background-clip: text;
     margin-bottom: 24px;
   }
-
 
   .hero-production {
     font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, 'Times New Roman', Georgia, serif;
@@ -366,7 +359,7 @@
     50% { transform: translateX(-50%) translateY(8px); }
   }
 
-  /* ========== SECTIONS ========== */
+
   section { padding: 120px 80px; }
 
   .section-label {
@@ -393,7 +386,7 @@
     margin-bottom: 60px;
   }
 
-  /* ========== ABOUT ========== */
+
   #about {
     background: var(--navy);
     display: grid;
@@ -442,12 +435,12 @@
     z-index: 1;
   }
 
-  /* ========== ARTISTES ========== */
+
   #artists {
     background: var(--dark);
   }
 
-  /* ========== ROSTER ========== */
+
   .artists-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -455,7 +448,7 @@
     background: var(--dark);
   }
 
-  /* Featured first card spans 2 cols */
+
   .artist-card {
     position: relative;
     overflow: hidden;
@@ -503,7 +496,6 @@
     margin-bottom: 3px;
   }
 
-
   .artist-origin {
     font-family: 'Arial', sans-serif;
     font-size: 9px; letter-spacing: 3px;
@@ -547,7 +539,7 @@
     color: var(--white);
   }
 
-  /* placeholder no-photo */
+
   .artist-no-photo {
     width: 100%; height: 100%;
     background: linear-gradient(135deg, var(--navy) 0%, var(--blue2) 100%);
@@ -555,7 +547,7 @@
     font-size: 56px; color: rgba(46,204,128,0.12);
   }
 
-  /* ── ARTIST MODAL ── */
+
   .artist-modal-overlay {
     position: fixed; inset: 0; z-index: 7000;
     background: rgba(0,0,0,0.9); backdrop-filter: blur(8px);
@@ -644,7 +636,7 @@
   }
   .modal-close-btn:hover { color: var(--white); }
 
-  /* ======= MOBILE ======= */
+
   @media (max-width: 768px) {
     .artists-grid {
       grid-template-columns: 1fr 1fr;
@@ -661,11 +653,33 @@
   }
 
   @media (max-width: 480px) {
-    .artists-grid { grid-template-columns: 1fr; gap: 2px; }
-.artist-card { aspect-ratio: 1/1.2; }
+
+    .artists-grid {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 4px !important;
+    }
+    .artist-card {
+      display: block !important;
+      aspect-ratio: 2/3 !important;
+    }
+    .artist-overlay {
+      padding: 10px 8px !important;
+    }
+    .artist-name {
+      font-size: 11px !important;
+      letter-spacing: 0.5px !important;
+      margin-bottom: 3px !important;
+    }
+    .artist-origin,
+    .artist-style { display: none !important; }
+    .artist-more {
+      font-size: 7px !important;
+      padding: 4px 8px !important;
+      margin-top: 6px !important;
+    }
   }
 
-    /* ========== MUSIC ========== */
+
   #music {
     background: var(--navy2);
   }
@@ -754,7 +768,7 @@
     letter-spacing: 2px;
   }
 
-  /* AUDIO PLAYER BAR */
+
   #player-bar {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -830,7 +844,7 @@
     white-space: nowrap;
   }
 
-  /* ========== ACTUALITES ========== */
+
   #news {
     background: var(--dark);
   }
@@ -899,7 +913,7 @@
     text-transform: uppercase;
   }
 
-  /* ========== CONTACT ========== */
+
   #contact {
     background: var(--navy);
     text-align: center;
@@ -963,7 +977,7 @@
     color: var(--white);
   }
 
-  /* ========== FOOTER ========== */
+
   footer {
     background: var(--dark);
     padding: 56px 80px 32px;
@@ -974,7 +988,7 @@
     gap: 0;
   }
 
-  /* Logo centré en haut */
+
   .footer-logo {
     margin-bottom: 12px;
   }
@@ -986,27 +1000,27 @@
     opacity: 0.9;
   }
 
-  /* Tagline sous le logo */
+
   .footer-tagline {
     text-align: center;
     margin-bottom: 40px;
   }
 
-  /* Bloc d'adresses — 3 colonnes */
+
   .footer-addresses {
     width: 100%;
     max-width: 860px;
     margin-bottom: 36px;
   }
 
-  /* Séparateur horizontal */
+
   .footer-addresses + div,
   .footer-copy {
     width: 100%;
     max-width: 860px;
   }
 
-  /* Ligne de séparation avant copyright */
+
   .footer-copy {
     font-family: 'Arial', sans-serif;
     font-size: 10px;
@@ -1020,7 +1034,6 @@
   }
 
 
-  /* ========== LEGAL MODAL ========== */
   .legal-overlay {
     display: none; position: fixed; inset: 0; z-index: 9000;
     background: rgba(0,0,0,0.85); backdrop-filter: blur(6px);
@@ -1062,7 +1075,7 @@
     color: rgba(200,200,200,0.35); text-transform: uppercase;
   }
 
-  /* ========== COOKIE BANNER ========== */
+
   #cookie-banner {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 8500;
     background: var(--navy3); border-top: 1px solid rgba(46,204,128,0.25);
@@ -1086,7 +1099,7 @@
   }
   .cookie-refuse:hover { color: var(--white); border-color: var(--white); }
 
-  /* ========== FOOTER LEGAL LINKS ========== */
+
   .footer-legal { display: flex; gap: 24px; align-items: center; }
   .footer-legal a {
     font-family: 'Arial', sans-serif; font-size: 10px;
@@ -1102,7 +1115,7 @@
     .footer-legal { justify-content: center; flex-wrap: wrap; gap: 16px; }
   }
 
-  /* ========== MODAL ARTISTE ========== */
+
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -1202,8 +1215,8 @@
 
   .social-link:hover { color: var(--accent2); border-color: var(--accent2); }
 
-  /* ========== ADMIN ========== */
-  /* ===== ADMIN DRAWER SIDEBAR ===== */
+
+
   #admin-overlay {
     position: fixed;
     left: -400px;
@@ -1222,7 +1235,7 @@
   #admin-overlay.active { left: 0; }
   #admin-overlay.active.collapsed { left: -316px; }
 
-  /* Drawer toggle tab (injected by JS) */
+
   #admin-drawer-tab {
     position: fixed;
     top: 50%;
@@ -1338,7 +1351,7 @@
 
   .admin-btn:hover { background: var(--accent2); }
 
-  /* ADMIN PANEL */
+
   .admin-panel {
     display: none;
     flex-direction: column;
@@ -1365,7 +1378,7 @@
   }
 
   .admin-sidebar-logo {
-    display: none; /* masqué en mode drawer */
+    display: none;
   }
   .admin-sidebar-logo span { color: var(--accent2); }
 
@@ -1403,7 +1416,7 @@
     padding: 20px 20px 40px;
     overflow-y: auto;
     overflow-x: hidden;
-    height: 0; /* force flex scroll */
+    height: 0;
   }
 
   .admin-page { display: none; }
@@ -1537,7 +1550,7 @@
   }
   .admin-btn-secondary:hover { color: var(--white); border-color: var(--white); }
 
-  /* Lists */
+
   .admin-list-item {
     display: flex;
     align-items: center;
@@ -1615,7 +1628,7 @@
     text-transform: uppercase;
   }
 
-  /* File upload */
+
   .file-upload-zone {
     border: 1px dashed rgba(31,158,92,0.4);
     padding: 32px;
@@ -1659,8 +1672,6 @@
 
 
 
-  /* ========== LANG SWITCHER ========== */
-  /* ========== LANG DROPDOWN ========== */
   .lang-dropdown {
     position: relative;
     margin-right: 16px;
@@ -1683,6 +1694,13 @@
     cursor: pointer;
     transition: all 0.25s;
     white-space: nowrap;
+    position: relative;
+  }
+
+  .lang-current::after {
+    content: '';
+    position: absolute;
+    inset: -10px;
   }
 
   .lang-current:hover {
@@ -1740,7 +1758,7 @@
     border-left: 2px solid var(--accent2);
   }
 
-  /* ========== RBAC ========== */
+
   .role-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -1820,8 +1838,7 @@
   }
 
 
-  /* ========== NAV CONNECT BTN ========== */
-  /* Masquer les éléments mobile-only sur desktop */
+
   #mobile-connect-li,
   #mobile-cart-li { display: none !important; }
 
@@ -1830,6 +1847,7 @@
     align-items: center;
     gap: 8px;
     padding: 7px 18px;
+    position: relative;
     background: transparent;
     border: 1px solid rgba(31,158,92,0.4);
     color: var(--white);
@@ -1841,6 +1859,16 @@
     transition: all 0.25s;
     white-space: nowrap;
     flex-shrink: 0;
+  }
+
+  .nav-connect-btn::after {
+    content: '';
+    position: absolute;
+    inset: -10px;
+  }
+
+  .nav-connect-btn.connected::after {
+    pointer-events: none;
   }
 
   .nav-connect-btn:hover {
@@ -1860,7 +1888,7 @@
     color: #50c878;
   }
 
-  /* ========== PASSWORD MODALS ========== */
+
   .pwd-modal-overlay {
     position: fixed;
     inset: 0;
@@ -1963,7 +1991,6 @@
   .pwd-link:hover { border-bottom-color: var(--accent2); }
 
 
-  /* ========== CATALOGUE CATEGORIES ========== */
   .cat-tabs {
     display: flex;
     gap: 0;
@@ -1989,7 +2016,7 @@
   .cat-panel { display: none; }
   .cat-panel.active { display: block; }
 
-  /* Grille albums */
+
   .albums-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -2075,11 +2102,11 @@
     margin-top: 8px;
   }
   .badge-traditional { background: rgba(31,158,92,0.15); color: var(--accent2); border: 1px solid rgba(31,158,92,0.3); }
-  
+
   .badge-custom { background: rgba(200,200,200,0.1); color: var(--white); border: 1px solid rgba(200,200,200,0.2); }
   .badge-urban { background: rgba(100,150,255,0.12); color: #7ab0f0; border: 1px solid rgba(100,150,255,0.25); }
 
-  /* ========== MUSIC SHOWCASE ========== */
+
   .music-tabs {
     display: flex;
     gap: 0;
@@ -2110,7 +2137,6 @@
   .music-tab.active { color: var(--white); border-bottom-color: var(--accent); }
 
 
-  /* ========== INLINE MUSIC PLAYER ========== */
   .music-player-wrap {
     margin: 0 0 3px 0;
     background: var(--navy2);
@@ -2183,7 +2209,7 @@
   }
   .inline-player-close:hover { color: var(--white); background: var(--accent); }
 
-  /* playing state on card */
+
   .showcase-card.playing { border: 2px solid var(--accent2); }
   .showcase-card.playing .showcase-play { background: var(--accent); }
 
@@ -2266,7 +2292,7 @@
     text-transform: uppercase;
   }
 
-  /* YouTube Modal */
+
   .yt-modal-overlay {
     position: fixed;
     inset: 0;
@@ -2340,8 +2366,8 @@
   .yt-open-yt:hover { border-bottom-color: var(--accent2); }
 
   @media (max-width: 900px) {
-  
-  /* ========== INLINE MUSIC PLAYER ========== */
+
+
   .music-player-wrap {
     margin: 0 0 3px 0;
     background: var(--navy2);
@@ -2414,7 +2440,7 @@
   }
   .inline-player-close:hover { color: var(--white); background: var(--accent); }
 
-  /* playing state on card */
+
   .showcase-card.playing { border: 2px solid var(--accent2); }
   .showcase-card.playing .showcase-play { background: var(--accent); }
 
@@ -2427,7 +2453,7 @@
   .music-showcase-grid { grid-template-columns: 1fr 1fr; }
   }
 
-  /* ========== RESPONSIVE ========== */
+
   @media (max-width: 900px) {
     nav { padding: 0 24px; }
     .nav-links { gap: 20px; }
@@ -2457,7 +2483,6 @@
     .admin-sidebar { width: 220px; }
   }
 
-/* ========== HAMBURGER MENU ========== */
 .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; padding:8px; }
 .hamburger span { display:block; width:24px; height:2px; background:var(--white); transition:all 0.3s; border-radius:2px; }
 .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
@@ -2465,13 +2490,13 @@
 .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
 @media (max-width:900px) {
   nav { padding:0 16px; height:56px; }
-  /* Logo réduit sur mobile */
+
   .nav-logo img { height:20px !important; }
   .hamburger { display:flex; }
-  /* Masquer éléments desktop inutiles sur mobile */
+
   .nav-connect-btn, .nav-cart-btn,
   .nav-search-btn, .lang-dropdown { display:none !important; }
-  /* Afficher le bouton connexion EN BAS du menu mobile */
+
   #mobile-connect-li { display:block !important; margin-top:8px; border-top:1px solid rgba(31,158,92,0.15); }
   .nav-links {
     display:none; flex-direction:column; position:absolute;
@@ -2486,7 +2511,7 @@
   .nav-links li + li::before { display:none; }
   .nav-links a { display:block; padding:14px 32px; font-size:13px; letter-spacing:2px; border-bottom:1px solid rgba(31,158,92,0.08); }
   .nav-links a:hover { color:var(--accent2); background:rgba(31,158,92,0.05); }
-  /* Bouton connexion dans le dropdown : style distinct */
+
   #mobile-connect-li { padding:16px 32px; }
   #mobile-connect-li button,
   #mobile-connect-li a {
@@ -2499,9 +2524,7 @@
     text-align:center !important; cursor:pointer !important; border-radius:2px !important;
   }
 }
-/* ═══════════════════════════════════════════
-   BOUTIQUE — SHOP MODULE
-═══════════════════════════════════════════ */
+
 #shop { padding: 120px 40px; max-width: 1400px; margin: 0 auto; }
 .shop-tabs { display:flex; gap:0; border-bottom:1px solid rgba(31,158,92,0.2); margin-bottom:48px; }
 .shop-tab { font-family:'Arial',sans-serif; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--gray); padding:14px 32px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; transition:all 0.3s; background:none; border-top:none; border-left:none; border-right:none; }
@@ -2558,7 +2581,7 @@
 .plan-price { font-family:Georgia,serif; font-size:28px; color:var(--accent2); }
 .plan-price span { font-size:14px; color:var(--gray); font-family:Arial,sans-serif; }
 .plan-saving { font-family:Arial,sans-serif; font-size:11px; color:#a8e6c8; margin-top:4px; }
-/* PANIER SIDEBAR */
+
 #cart-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9000; backdrop-filter:blur(2px); }
 #cart-overlay.active { display:block; }
 #cart-sidebar { position:fixed; top:0; right:-480px; width:440px; max-width:100vw; height:100vh; background:var(--navy2,#091f12); border-left:1px solid rgba(31,158,92,0.2); z-index:9001; display:flex; flex-direction:column; transition:right 0.4s cubic-bezier(0.4,0,0.2,1); overflow:hidden; }
@@ -2591,11 +2614,12 @@
 .cart-checkout-btn { width:100%; background:var(--accent2); color:var(--dark); border:none; font-family:Arial,sans-serif; font-size:11px; letter-spacing:4px; text-transform:uppercase; padding:16px; cursor:pointer; transition:all 0.3s; font-weight:700; }
 .cart-checkout-btn:hover { background:var(--accent); }
 .cart-checkout-btn:disabled { opacity:0.4; cursor:not-allowed; }
-.nav-cart-btn { background:transparent; border:1px solid rgba(31,158,92,0.4); color:var(--accent2); cursor:pointer; padding:8px 14px; font-size:16px; position:relative; transition:all 0.3s; display:flex; align-items:center; gap:6px; margin-left:8px; white-space:nowrap; }
+.nav-cart-btn { background:transparent; border:1px solid rgba(31,158,92,0.4); color:var(--accent2); cursor:pointer; padding:12px 18px; font-size:16px; position:relative; transition:all 0.3s; display:flex; align-items:center; gap:6px; margin-left:8px; white-space:nowrap; }
+.nav-cart-btn::after { content:''; position:absolute; inset:-16px; }
 .nav-cart-btn:hover { background:rgba(31,158,92,0.1); border-color:var(--accent2); }
 .cart-badge { position:absolute; top:-6px; right:-6px; background:var(--accent2); color:var(--dark); font-family:Arial,sans-serif; font-size:9px; font-weight:700; min-width:18px; height:18px; border-radius:9px; display:none; align-items:center; justify-content:center; padding:0 4px; }
 .cart-badge.visible { display:flex; }
-/* CHECKOUT */
+
 #checkout-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9100; backdrop-filter:blur(4px); align-items:center; justify-content:center; }
 #checkout-overlay.active { display:flex; }
 #checkout-modal { background:var(--navy2,#091f12); border:1px solid rgba(31,158,92,0.25); width:580px; max-width:calc(100vw - 40px); max-height:calc(100vh - 80px); overflow-y:auto; padding:48px; position:relative; }
@@ -2635,7 +2659,7 @@
 .checkout-success-title { font-family:Georgia,serif; font-size:28px; color:var(--accent2); margin-bottom:12px; }
 .checkout-success-sub { font-family:Arial,sans-serif; font-size:12px; color:var(--gray); line-height:1.8; }
 .checkout-order-num { font-family:Arial,sans-serif; font-size:10px; letter-spacing:3px; color:var(--accent2); text-transform:uppercase; margin-top:20px; }
-/* ADMIN ORDERS */
+
 .orders-stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:32px; }
 .shop-admin-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:32px; }
 .admin-product-thumb { width:48px; height:48px; object-fit:cover; border-radius:2px; }
@@ -2668,7 +2692,6 @@
 @media(max-width:600px){#shop{padding:80px 20px}.shop-tabs{overflow-x:auto}.concert-card{flex-direction:column;gap:16px}}
 
 
-  /* ===== BOUTON PREVIEW SITE ===== */
   .admin-preview-btn {
     display: flex;
     align-items: center;
@@ -2700,7 +2723,7 @@
     border-color: var(--accent2);
     color: var(--white);
   }
-  /* Overlay site en mode preview (admin connecté) */
+
   #admin-preview-bar {
     display: none;
     position: fixed;
@@ -2741,12 +2764,8 @@
   .preview-bar-back:hover { background: var(--accent); color: var(--white); }
 
 
-  
 
 
-  /* ══════════════════════════════════════
-     SPLASH — Page d'accueil
-  ══════════════════════════════════════ */
   #splash {
     position: fixed;
     inset: 0;
@@ -2764,7 +2783,7 @@
     pointer-events: none;
   }
 
-  /* Titre HARMONIA avec halo radiatif */
+
   .splash-title {
     font-family: 'Georgia', serif;
     font-size: clamp(38px, 7vw, 88px);
@@ -2796,7 +2815,7 @@
     to   { opacity:1; transform:translateY(0); }
   }
 
-  /* Médaillon photo avec halo */
+
   .splash-medallion {
     position: relative;
     width: clamp(288px, 45vw, 480px);
@@ -2809,7 +2828,7 @@
     from { opacity:0; transform:scale(0.88); }
     to   { opacity:1; transform:scale(1); }
   }
-  /* Halo lumineux derrière */
+
   .splash-medallion::before {
     content: '';
     position: absolute;
@@ -2825,7 +2844,7 @@
     from { transform: scale(1);    opacity: 0.7; }
     to   { transform: scale(1.08); opacity: 1;   }
   }
-  /* Anneau fin */
+
   .splash-medallion::after {
     content: '';
     position: absolute;
@@ -2847,7 +2866,7 @@
     z-index: 1;
   }
 
-  /* Bouton Découvrir */
+
   .splash-discover {
     font-family: 'Arial', sans-serif;
     font-size: 14px;
@@ -2876,11 +2895,8 @@
   }
 
 
-  /* ══════════════════════════════════════
-     TRANSITION LOGO — Animation vinyle
-  ══════════════════════════════════════ */
 
-  /* Disque vinyle qui tourne dans le logo splash */
+
   @keyframes diskSpin {
     from { transform: translate(288px,36px) rotate(0deg) translate(-288px,-36px); }
     to   { transform: translate(288px,36px) rotate(360deg) translate(-288px,-36px); }
@@ -2890,13 +2906,13 @@
     to   { transform: translate(107px,20px) rotate(360deg) translate(-107px,-20px); }
   }
 
-  /* Classe appliquée au groupe disque pendant la transition */
+
   .disk-spinning {
     animation: diskSpin 0.6s linear infinite;
     transform-origin: center;
   }
 
-  /* Cercle de transition qui s'étend depuis le disque */
+
   #vinyl-transition {
     position: fixed;
     border-radius: 50%;
@@ -2920,7 +2936,7 @@
     opacity: 0;
   }
 
-  /* Trou central du disque animé */
+
   #vinyl-transition::after {
     content: '';
     position: absolute;
@@ -2932,7 +2948,7 @@
     background: #051a0c;
   }
 
-  /* Sillons sur le disque de transition */
+
   #vinyl-transition::before {
     content: '';
     position: absolute;
@@ -2949,7 +2965,7 @@
       0 0 0 24px rgba(0,0,0,0.04);
   }
 
-  /* Splash sort en fondu après expansion du disque */
+
   #splash.spinning {
     transition: none;
   }
@@ -2958,7 +2974,6 @@
     transition: opacity 0.25s ease;
   }
 
-/* ===== ARTIST DEDICATED PAGE ===== */
 #artist-page {
   position: fixed; inset: 0; z-index: 5000;
   background: var(--dark);
@@ -2983,7 +2998,7 @@
 .ap-social a:hover { background:var(--accent2); color:var(--dark); }
 .ap-section { padding:60px 48px; max-width:1200px; margin:0 auto; }
 .ap-section-title { font-family:Arial,sans-serif; font-size:10px; letter-spacing:5px; text-transform:uppercase; color:var(--accent2); margin-bottom:32px; padding-bottom:12px; border-bottom:1px solid rgba(31,158,92,0.2); }
-/* Discographie */
+
 .ap-disco-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:24px; }
 .ap-album { background:var(--navy2); border:1px solid rgba(31,158,92,0.1); transition:all 0.3s; }
 .ap-album:hover { border-color:var(--accent2); transform:translateY(-4px); }
@@ -2994,7 +3009,7 @@
 .ap-album-year { font-family:Arial,sans-serif; font-size:10px; letter-spacing:2px; color:var(--accent2); margin-bottom:8px; }
 .ap-album-desc { font-family:Arial,sans-serif; font-size:12px; color:var(--gray); line-height:1.6; }
 .ap-album-spotify { display:inline-block; margin-top:10px; font-family:Arial,sans-serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--accent2); text-decoration:none; border-bottom:1px solid rgba(46,204,128,0.3); padding-bottom:2px; }
-/* YouTube */
+
 .ap-yt-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:24px; }
 .ap-yt-card { background:var(--navy2); border:1px solid rgba(31,158,92,0.1); overflow:hidden; cursor:pointer; transition:all 0.3s; }
 .ap-yt-card:hover { border-color:var(--accent2); }
@@ -3006,7 +3021,7 @@
 .ap-yt-play-btn svg { width:20px; height:20px; fill:#000; margin-left:4px; }
 .ap-yt-info { padding:14px 16px; }
 .ap-yt-title { font-family:Georgia,serif; font-size:14px; color:var(--white); }
-/* iframe player */
+
 .ap-yt-iframe-wrap { aspect-ratio:16/9; background:#000; }
 .ap-yt-iframe-wrap iframe { width:100%; height:100%; border:none; }
 @media(max-width:768px){
@@ -3019,8 +3034,6 @@
   .cat-tab { padding:12px 18px; font-size:10px; letter-spacing:2px; }
 }
 
-
-/* ========== ACCORDÉON ALBUMS — FICHE ARTISTE ========== */
 .ap-albums-accordion { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
 
 .ap-album-item { border: 1px solid rgba(46,204,128,0.15); border-radius: 4px; overflow: hidden; transition: border-color 0.3s; }
@@ -3046,7 +3059,6 @@
 .ap-album-links { display: flex; gap: 8px; flex-shrink: 0; }
 .ap-album-chevron { font-size: 18px; color: var(--accent2); flex-shrink: 0; transition: transform 0.3s; margin-left: 8px; }
 
-/* Tracks list */
 .ap-album-tracks { padding: 0 20px 16px; background: rgba(0,0,0,0.2); }
 .ap-tracks-header {
   display: flex; align-items: center; gap: 12px; padding: 10px 0;
@@ -3083,8 +3095,6 @@
 .ap-track-sp { background: rgba(30,215,96,0.12); color: #1ed760; border: 1px solid rgba(30,215,96,0.25); }
 .ap-track-sp:hover { background: rgba(30,215,96,0.25); color: #1ed760 !important; }
 
-/* ========== MOTEUR DE RECHERCHE ========== */
-/* ── SEARCH DROPDOWN ── */
 #search-overlay {
   display: none;
   position: fixed;
@@ -3144,7 +3154,6 @@
 .search-result-tag { font-family: Arial,sans-serif; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent2); padding: 3px 8px; border: 1px solid rgba(46,204,128,0.2); border-radius: 2px; flex-shrink: 0; }
 .search-empty { text-align: center; color: var(--gray); font-family: Arial,sans-serif; font-size: 13px; letter-spacing: 2px; padding: 48px 0; }
 
-/* Bouton Rechercher dans nav */
 .nav-search-btn {
   background: none;
   border: 1px solid rgba(46,204,128,0.35);
@@ -3161,16 +3170,15 @@
   border-radius: 2px;
   padding: 0 16px;
   white-space: nowrap;
+  position: relative;
 }
+.nav-search-btn::after { content:''; position:absolute; inset:-10px; }
 .nav-search-btn:hover {
   border-color: var(--accent2);
   background: rgba(46,204,128,0.08);
-  transform: scale(1.1);
+  color: var(--accent2);
 }
 
-/* ═══════════════════════════════════════════════════════
-   ITEM TOGGLE SWITCH (edit mode)
-═══════════════════════════════════════════════════════ */
 .item-toggle-wrap {
   position: absolute;
   top: 10px;
@@ -3219,9 +3227,6 @@
   white-space: nowrap;
 }
 
-/* ═══════════════════════════════════════════════════════
-   INACTIVE ITEM STATE
-═══════════════════════════════════════════════════════ */
 .item-card-inactive {
   opacity: 0.45;
   filter: grayscale(0.7);
@@ -3246,14 +3251,11 @@
   white-space: nowrap;
 }
 
-/* ═══════════════════════════════════════════════════════
-   EDIT MODE — artist card stacking context fix
-═══════════════════════════════════════════════════════ */
 body.edit-mode-active .artist-card {
-  z-index: 0;    /* crée un stacking context local */
+  z-index: 0;
 }
 body.edit-mode-active .artist-overlay {
-  z-index: 1;    /* overlay explicitement à z-index:1 */
+  z-index: 1;
 }
 body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   z-index: 9999 !important;
@@ -3262,20 +3264,19 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   opacity: 1 !important;
 }
 
-/* ═══════════════════════════════════════════════════════
-   MODULE PANIER — mini-cart dropdown panel
-═══════════════════════════════════════════════════════ */
 #mini-cart-panel {
   position: fixed;
   top: 70px;
   right: 20px;
-  width: 320px;
-  background: var(--navy2, #091020);
-  border: 1px solid rgba(255,255,255,0.1);
+  width: 360px;
+  background: #0b1628;
+  border: 1px solid rgba(255,255,255,0.22);
+  border-top: 3px solid var(--accent2, #1f9e5c);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.75), 0 0 0 1px rgba(31,158,92,0.15);
   z-index: 90000;
   display: flex;
   flex-direction: column;
-  max-height: 480px;
+  max-height: 520px;
   overflow: hidden;
   transform: translateY(-8px);
   opacity: 0;
@@ -3291,9 +3292,10 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
   flex-shrink: 0;
+  background: rgba(255,255,255,0.03);
 }
 .mini-cart-title {
   font-family: Arial, sans-serif;
@@ -3383,9 +3385,10 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   text-align: center;
 }
 .mini-cart-footer {
-  padding: 14px 18px 16px;
-  border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 16px 20px 20px;
+  border-top: 1px solid rgba(255,255,255,0.15);
   flex-shrink: 0;
+  background: rgba(255,255,255,0.03);
 }
 .mini-cart-total-row {
   display: flex;
@@ -3408,14 +3411,14 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
 .mini-cart-cta {
   display: block;
   width: 100%;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: var(--white, #fff);
+  background: var(--accent2, #1f9e5c);
+  border: 1px solid var(--accent2, #1f9e5c);
+  color: #fff;
   font-family: Arial, sans-serif;
   font-size: 9px;
   letter-spacing: 3px;
   text-transform: uppercase;
-  padding: 12px;
+  padding: 14px;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
@@ -3423,16 +3426,13 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   box-sizing: border-box;
 }
 .mini-cart-cta:hover {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.4);
+  background: #17834c;
+  border-color: #17834c;
 }
 @media (max-width: 600px) {
   #mini-cart-panel { right: 10px; left: 10px; width: auto; }
 }
 
-/* ═══════════════════════════════════════════════════════
-   AUTH — onglets Connexion / Inscription
-═══════════════════════════════════════════════════════ */
 .auth-tabs {
   display: flex;
   gap: 0;
@@ -3460,9 +3460,6 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   border-bottom-color: var(--accent2);
 }
 
-/* ========================
-   PRODUCT DETAIL MODAL
-   ======================== */
 #product-modal-overlay {
   position: fixed; inset: 0; z-index: 2000;
   background: rgba(0,0,0,0.82);
@@ -3531,7 +3528,6 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   .pm-info-col { padding: 28px 24px 28px; }
 }
 
-/* ===== CART TOAST ===== */
 #cart-toast {
   position: fixed;
   bottom: 32px;
@@ -3582,67 +3578,60 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   #cart-toast { bottom: 20px; right: 16px; left: 16px; max-width: none; }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   RESPONSIVE GLOBAL — SITE PUBLIC
-   Breakpoints : 900px (tablette) · 640px (mobile) · 380px (xs)
-═══════════════════════════════════════════════════════════ */
-
-/* ── Tablette (≤ 900px) — déjà partiellement couvert, on complète ── */
 @media (max-width: 900px) {
-  /* Padding latéral + bas seulement — le padding-top est géré par chaque section */
+
   section { padding-left: 32px !important; padding-right: 32px !important; padding-bottom: 80px !important; }
 
-  /* Hero */
+
   .hero-content   { padding: 100px 32px 60px !important; }
   .hero-title     { font-size: clamp(28px,7vw,48px) !important; }
   .hero-glow      { width: 400px; height: 400px; }
   .hero-production{ padding-left: 0 !important; }
   .hero-production::before { display: none; }
 
-  /* About */
+
   #about { grid-template-columns: 1fr !important; }
   .about-text { padding: 48px 32px !important; }
   .about-visual { min-height: 280px; }
 
-  /* Artistes */
+
   .artists-grid   { grid-template-columns: repeat(2,1fr) !important; gap: 20px; }
 
-  /* Albums */
+
   .albums-grid    { grid-template-columns: repeat(2,1fr) !important; gap: 16px; }
 
-  /* News */
+
   .news-grid      { grid-template-columns: 1fr !important; }
 
-  /* Events */
+
   .events-grid    { grid-template-columns: 1fr !important; }
 
-  /* Fiche artiste */
+
   .ap-hero        { grid-template-columns: 1fr !important; }
   .ap-photo       { min-height: 240px; max-height: 300px; }
 
-  /* Musique */
+
   .music-hero-grid { grid-template-columns: 1fr !important; }
   .music-cover     { max-width: 260px; margin: 0 auto; }
 
-  /* Panier / checkout */
+
   .checkout-grid  { grid-template-columns: 1fr !important; }
 
-  /* Mon compte */
+
   .account-grid   { grid-template-columns: 1fr !important; }
 }
 
-/* ── Mobile (≤ 640px) ── */
 @media (max-width: 640px) {
-  /* Base — padding-top préservé par section, on réduit latéral + bas */
+
   section { padding-left: 20px !important; padding-right: 20px !important; padding-bottom: 60px !important; }
   body    { font-size: 15px; }
 
-  /* Nav */
+
   nav     { padding: 0 16px !important; height: 56px; }
   .nav-logo img { height: 20px !important; }
   .nav-links { top: 56px; }
 
-  /* Hero */
+
   .hero-content   { padding: 80px 20px 48px !important; }
   .hero-title     { font-size: clamp(24px,8vw,36px) !important; letter-spacing: 2px !important; }
   .hero-sub       { font-size: 10px !important; letter-spacing: 3px !important; }
@@ -3651,33 +3640,33 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   .hero-glow      { display: none; }
   .hero-bg-grid   { opacity: 0.3; }
 
-  /* Section titles */
+
   .section-title  { font-size: 24px !important; letter-spacing: 2px !important; }
   .section-label  { font-size: 9px !important; }
   .section-divider{ margin-bottom: 32px; }
 
-  /* Artistes : 1 colonne */
+
   .artists-grid   { grid-template-columns: 1fr !important; gap: 16px; }
   .artist-card    { display: flex; flex-direction: row; align-items: center; gap: 16px; }
   .artist-photo   { width: 80px; height: 80px; flex-shrink: 0; }
   .artist-info    { padding: 12px 0 !important; }
 
-  /* Albums : 1 colonne */
+
   .albums-grid    { grid-template-columns: 1fr !important; }
   .album-card     { display: flex; flex-direction: row; gap: 16px; align-items: center; }
   .album-cover    { width: 80px; height: 80px; flex-shrink: 0; }
 
-  /* News */
+
   .news-grid      { grid-template-columns: 1fr !important; }
   .news-card      { padding: 20px !important; }
   .news-date      { font-size: 9px; }
 
-  /* Events */
+
   .events-grid    { grid-template-columns: 1fr !important; }
   .concert-card   { flex-direction: column; align-items: flex-start; gap: 12px; padding: 20px; }
   .concert-prices { align-items: flex-start; flex-direction: row; gap: 16px; }
 
-  /* Boutique */
+
   .shop-grid      { grid-template-columns: repeat(2,1fr) !important; gap: 12px; }
   .shop-card-body { padding: 12px; }
   .shop-card-title{ font-size: 14px !important; }
@@ -3685,11 +3674,11 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   .shop-tab       { white-space: nowrap; padding: 10px 18px !important; }
   #shop           { padding: 80px 16px !important; }
 
-  /* Streaming */
+
   .streaming-section { grid-template-columns: 1fr !important; }
   .streaming-hero    { padding: 28px 20px !important; }
 
-  /* Fiche artiste */
+
   .ap-hero        { grid-template-columns: 1fr !important; }
   .ap-section     { padding: 32px 16px !important; }
   .ap-disco-grid  { grid-template-columns: 1fr 1fr !important; }
@@ -3700,54 +3689,52 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   .ap-album-cover-sm { width: 52px; height: 52px; }
   .ap-album-title-acc { font-size: 14px; }
 
-  /* Musique */
+
   .music-filter-tabs { overflow-x: auto; flex-wrap: nowrap; }
   .cat-tab        { white-space: nowrap; padding: 10px 14px !important; }
   .music-track-row { flex-wrap: wrap; gap: 8px; padding: 10px 0; }
 
-  /* Contact */
+
   .contact-grid   { grid-template-columns: 1fr !important; }
   .contact-form   { padding: 28px 20px !important; }
 
-  /* Footer */
+
   .footer-grid    { grid-template-columns: 1fr !important; gap: 32px; }
   .footer-bottom  { flex-direction: column; gap: 12px; text-align: center; }
 
-  /* Panier sidebar */
+
   #cart-sidebar   { width: 100vw !important; right: -100vw !important; }
 
-  /* Mon compte */
+
   .account-tabs   { overflow-x: auto; flex-wrap: nowrap; }
   .account-tab    { white-space: nowrap; }
 
-  /* Panier page */
+
   .cart-table-wrap{ overflow-x: auto; }
   .cart-table     { min-width: 480px; }
   .checkout-grid  { grid-template-columns: 1fr !important; }
 
-  /* Modales produit */
+
   #product-modal  { flex-direction: column; width: 95%; max-height: 88vh; }
   .pm-img-col     { width: 100%; min-height: 180px; }
   .pm-info-col    { padding: 20px !important; }
 
-  /* Player bar */
+
   .player-bar     { padding: 0 12px; gap: 10px; }
   .player-title   { font-size: 11px; }
   .player-controls{ gap: 8px; }
   .player-progress{ display: none; }
 
-  /* Qui sommes-nous */
+
   .about-team-grid { grid-template-columns: 1fr !important; }
   .team-photo      { height: 180px; }
 
-  /* Labels / badges */
+
   .section-label  { letter-spacing: 2px; }
 
-  /* ══════════════════════════════════════════
-     SCROLLBARS MOBILES — tous les modules
-  ══════════════════════════════════════════ */
 
-  /* Tout tableau : scroll horizontal avec barre visible */
+
+
   .cart-table-wrap,
   .orders-table-wrap,
   .checkout-recap-table,
@@ -3765,11 +3752,11 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   .cart-table-wrap::-webkit-scrollbar-thumb,
   .orders-table-wrap::-webkit-scrollbar-thumb { background: rgba(31,158,92,0.5); border-radius: 3px; }
 
-  /* Tableaux internes : largeur minimale pour forcer le scroll */
+
   .cart-table     { min-width: 540px; }
   .orders-table   { min-width: 640px; }
 
-  /* Onglets (shop, musique, compte) : scrollbar horizontale discrète */
+
   .shop-tabs,
   .music-filter-tabs,
   .account-tabs {
@@ -3777,10 +3764,10 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
     scrollbar-color: rgba(31,158,92,0.3) transparent;
   }
 
-  /* Sections publiques : jamais couper le contenu horizontalement */
+
   section { overflow-x: hidden; }
 
-  /* Fiche artiste — tracklist scroll si trop longue */
+
   .ap-tracks-list {
     max-height: 60vh;
     overflow-y: auto;
@@ -3790,7 +3777,7 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   .ap-tracks-list::-webkit-scrollbar { width: 4px; }
   .ap-tracks-list::-webkit-scrollbar-thumb { background: rgba(31,158,92,0.5); border-radius: 2px; }
 
-  /* Discographie scroll vertical */
+
   .ap-disco-grid {
     max-height: 70vh;
     overflow-y: auto;
@@ -3798,7 +3785,7 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
     scrollbar-color: rgba(31,158,92,0.4) rgba(255,255,255,0.04);
   }
 
-  /* Panier sidebar items */
+
   .cart-items {
     overflow-y: auto;
     scrollbar-width: thin;
@@ -3808,7 +3795,6 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   .cart-items::-webkit-scrollbar-thumb { background: rgba(31,158,92,0.5); border-radius: 2px; }
 }
 
-/* ── Très petit (≤ 380px) ── */
 @media (max-width: 380px) {
   section         { padding: 48px 14px !important; }
   .hero-title     { font-size: 22px !important; }
@@ -3818,34 +3804,64 @@ body.edit-mode-active [data-item-type] > .item-toggle-wrap {
   nav             { padding: 0 12px !important; }
 }
 
-/* ══════════════════════════════════════
-   iOS SAFARI — Fixes spécifiques
-══════════════════════════════════════ */
-/* Supprime le highlight bleu au tap */
 * { -webkit-tap-highlight-color: transparent; }
 
-/* Hauteur plein écran fiable sur iOS */
 html { height: -webkit-fill-available; }
 
-/* Évite zoom auto sur les inputs iOS */
 @media (max-width: 900px) {
   input, select, textarea {
     font-size: 16px !important;
   }
-  /* Panier sidebar : plein écran iOS avec safe-area */
+
   #cart-sidebar {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
-  /* Nav hauteur safe-area en haut */
+
   nav {
     padding-top: max(0px, env(safe-area-inset-top));
   }
-  /* Boutons tactiles nav : taille minimum Apple HIG */
+
   .hamburger, .nav-connect-btn, .nav-search-btn, .nav-cart-btn, #mobile-connect-li button {
     min-height: 44px;
   }
-  /* Scroll fluide iOS */
+
   body, .nav-links {
     -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 1023px) {
+  .lp-txt {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .lp-txt.lp-expanded {
+    display: block;
+    overflow: visible;
+  }
+  .lp-btn {
+    display: inline-block;
+    background: none;
+    border: none;
+    color: var(--accent2, #1f9e5c);
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 6px 0 2px;
+    margin: 0;
+    line-height: 1;
+  }
+  .lp-btn:hover { opacity: 0.75; }
+}
+@media (min-width: 1024px) {
+  .lp-btn { display: none !important; }
+  .lp-txt {
+    display: block !important;
+    -webkit-line-clamp: unset !important;
+    overflow: visible !important;
   }
 }

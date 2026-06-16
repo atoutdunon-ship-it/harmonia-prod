@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Administration — HARMONIA</title>
-<link rel="stylesheet" href="harmonia-shared.css?v=35">
+<link rel="stylesheet" href="harmonia-shared.css?v=46">
 <style>
 /* ── Variables autonomes — charte Navy / Blanc / Noir ── */
 :root {
@@ -644,29 +644,29 @@ html, body {
 .tst-resolu   { color: var(--main-label); background: #e8edf5; }
 
 .ticket-meta {
-  font-size: 11px; color: #000000; margin-bottom: 6px;
+  font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 6px;
 }
-.ticket-meta strong { color: #000000; }
+.ticket-meta strong { color: #ffffff; }
 .ticket-desc {
   font-family: Georgia, serif; font-size: 13px;
-  color: #000000; line-height: 1.6;
+  color: rgba(255,255,255,0.85); line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   overflow: hidden; margin-bottom: 10px;
 }
 .ticket-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .ticket-action-btn {
-  background: none; border: 1px solid rgba(10,22,40,0.3);
-  color: var(--main-label);
+  background: none; border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.7);
   font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
   padding: 6px 14px; cursor: pointer; font-family: Arial, sans-serif;
   transition: all 0.2s;
 }
-.ticket-action-btn:hover { border-color: var(--sidebar-bg); color: var(--sidebar-bg); }
-.ticket-action-btn.btn-encours { border-color: rgba(225,112,85,0.4); color: var(--orange); }
-.ticket-action-btn.btn-resolu  { border-color: rgba(26,77,138,0.4); color: var(--sidebar-bg); }
+.ticket-action-btn:hover { border-color: rgba(255,255,255,0.6); color: #ffffff; }
+.ticket-action-btn.btn-encours { border-color: rgba(225,112,85,0.5); color: var(--orange); }
+.ticket-action-btn.btn-resolu  { border-color: rgba(26,77,138,0.5); color: rgba(100,160,255,0.9); }
 .ticket-resolved {
-  font-size: 10px; color: var(--main-label);
+  font-size: 10px; color: rgba(255,255,255,0.5);
   margin-top: 6px; font-style: italic;
 }
 .ticket-thumb {
@@ -1506,12 +1506,12 @@ td.editable:hover { background: #eaf1fb !important; }
           <div class="a-card-title">Nouvelle demande</div>
 
           <!-- Méta auteur -->
-          <div style="display:flex;gap:24px;font-size:11px;color:#000000;
+          <div style="display:flex;gap:24px;font-size:11px;color:#0a1628;
                       letter-spacing:1px;margin-bottom:20px;padding:10px 14px;
-                      background:var(--main-bg2);border-left:2px solid var(--main-border);">
-            <div>Auteur : <span id="assist-author" style="color:var(--main-text);font-weight:bold;">—</span></div>
-            <div>Rôle : <span id="assist-role" style="color:var(--main-text);font-weight:bold;">—</span></div>
-            <div>Date : <span id="assist-date" style="color:var(--main-text);">—</span></div>
+                      background:#f4f6fa;border-left:2px solid #0a1628;">
+            <div>Auteur : <span id="assist-author" style="color:#0a1628;font-weight:bold;">—</span></div>
+            <div>Rôle : <span id="assist-role" style="color:#0a1628;font-weight:bold;">—</span></div>
+            <div>Date : <span id="assist-date" style="color:#0a1628;">—</span></div>
           </div>
 
           <div class="a-field">
@@ -1645,7 +1645,7 @@ td.editable:hover { background: #eaf1fb !important; }
 })();
 </script>
 
-<script src="harmonia-shared.js?v=35"></script>
+<script src="harmonia-shared.js?v=52"></script>
 
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -2774,7 +2774,7 @@ function renderTicketsAdmin(filter, tabEl) {
       + '<div class="ticket-urgency-bar tub-' + (t.urgency || 'normal') + '"></div>'
       + '<div class="ticket-body">'
       + '<div class="ticket-header">'
-      + '<span style="font-size:10px;color:#000000;">#' + ref + '</span>'
+      + '<span style="font-size:10px;color:rgba(255,255,255,0.45);">#' + ref + '</span>'
       + '<span class="ticket-cat">' + (_CAT_LABELS[t.category] || t.category) + '</span>'
       + '<span class="ticket-urg urg-' + (t.urgency || 'normal') + '">'
       + (t.urgency || 'normal').toUpperCase() + '</span>'
