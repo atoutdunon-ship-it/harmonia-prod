@@ -1674,12 +1674,33 @@
 
 <script src="harmonia-shared.js?v=57"></script>
 <script>
+// ── Langue + Mode Édition ──
 document.addEventListener('DOMContentLoaded', function() {
   try {
     var lang = sessionStorage.getItem('harmonia_lang') || 'pt';
     if (typeof setLang === 'function') setLang(lang);
   } catch(e) {}
+  // Activation directe (synchrone) si le flag est présent
+  try {
+    if (sessionStorage.getItem('harmonia_edit_mode') === '1' &&
+        typeof _editModeActive !== 'undefined' && !_editModeActive &&
+        typeof _activateEditModeNow === 'function') {
+      _activateEditModeNow();
+    }
+  } catch(e) {}
 });
+
+// ── Filet : polling garanti 150ms pendant 10s ──
+(function() {
+  if (sessionStorage.getItem('harmonia_edit_mode') !== '1') return;
+  var _t = setInterval(function() {
+    try {
+      if (typeof _editModeActive !== 'undefined' && _editModeActive) { clearInterval(_t); return; }
+      if (typeof _activateEditModeNow === 'function') { _activateEditModeNow(); clearInterval(_t); }
+    } catch(e) { clearInterval(_t); }
+  }, 150);
+  setTimeout(function() { clearInterval(_t); }, 10000);
+})();
 </script>
 </body>
 </html>
