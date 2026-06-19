@@ -433,6 +433,11 @@ function applyLang() {
   if (typeof updateNavConnectBtn === 'function') updateNavConnectBtn();
 
   applyPageTexts();
+
+
+  if (typeof _editModeActive !== 'undefined' && _editModeActive && typeof _hookEditablesIn === 'function') {
+    setTimeout(function() { _hookEditablesIn(document); }, 30);
+  }
 }
 
 function setLang(lang) {
@@ -994,6 +999,13 @@ var currentUser = null;
       if (typeof updateNavConnectBtn === 'function') updateNavConnectBtn();
       if (typeof window._adminPageShowPanel === 'function') {
         window._adminPageShowPanel();
+      }
+
+      if (sessionStorage.getItem('harmonia_edit_mode') === '1' && !window.location.pathname.match(/admin\.html$/i)) {
+        if (typeof initInlineEditBtn === 'function') initInlineEditBtn();
+        setTimeout(function() {
+          if (!_editModeActive && typeof _activateEditModeNow === 'function') _activateEditModeNow();
+        }, 300);
       }
     } else {
 
@@ -1653,7 +1665,8 @@ function _activateEditModeNow() {
   _showEditBar();
   _activateEditHovers();
   _rerenderItemSections();
-  setTimeout(function() { _injectItemToggles(); _activateImageImport(); }, 100);
+
+  setTimeout(function() { _injectItemToggles(); _activateImageImport(); _hookEditablesIn(document); }, 150);
   var fab = document.getElementById('inline-edit-fab');
   if (fab) { fab.innerHTML = '&#9998; Mode &Eacute;diteur ON'; fab.style.background='rgba(46,204,128,0.12)'; }
 }
@@ -5994,9 +6007,20 @@ document.addEventListener('keydown', function(e) {
 (function() {
   if (sessionStorage.getItem('harmonia_edit_mode') !== '1') return;
   if (window.location.pathname.match(/admin\.html$/i)) return;
+
+
   setTimeout(function() {
     if (!_editModeActive && typeof _activateEditModeNow === 'function') {
       _activateEditModeNow();
     }
-  }, 400);
+  }, 500);
+
+
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      if (!_editModeActive && typeof _activateEditModeNow === 'function') {
+        _activateEditModeNow();
+      }
+    }, 200);
+  });
 })();
