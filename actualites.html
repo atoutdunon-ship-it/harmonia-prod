@@ -11,7 +11,7 @@
 <body>
 
 <nav>
-  <a href="index.html" class="nav-logo" style="display:flex;align-items:center;">
+  <a href="index.html" class="nav-logo" style="display:flex;align-items:center;position:relative;" data-editable-img="logo_nav">
     <img src="images/logo-base.png" alt="HARMONIA" style="height:36px;">
   </a>
   <button class="hamburger" id="hamburger-btn" aria-label="Menu" onclick="toggleMenu()">
@@ -69,7 +69,7 @@
 <footer>
 
   <!-- Logo -->
-  <div class="footer-logo">
+  <div class="footer-logo" data-editable-img="logo_footer" style="position:relative;">
     <img src="images/logo-base.png" alt="HARMONIA" style="height:40px;">
   </div>
 
@@ -1413,7 +1413,7 @@
   </div>
 </div>
 
-<script src="harmonia-shared.js?v=59"></script>
+<script src="harmonia-shared.js?v=60"></script>
 <script>
 // Backup : garantir l'application de la langue après chargement complet
 document.addEventListener('DOMContentLoaded', function() {

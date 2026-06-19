@@ -526,6 +526,8 @@ function applyLang() {
 
   applyPageTexts();
 
+  applyImages();
+
 
   if (typeof _editModeActive !== 'undefined' && _editModeActive && typeof _hookEditablesIn === 'function') {
     setTimeout(function() { _hookEditablesIn(document); }, 30);
@@ -1629,6 +1631,17 @@ function _attachItemToggles() {
 var _editModeActive = false;
 var _pendingEdits   = {};
 var _activeEditEl   = null;
+
+function applyImages() {
+  if (!DB || !DB.images) return;
+  document.querySelectorAll('[data-editable-img]').forEach(function(el) {
+    var key = el.dataset.editableImg;
+    var src = DB.images[key];
+    if (!src) return;
+    var imgEl = (el.tagName === 'IMG') ? el : el.querySelector('img');
+    if (imgEl) imgEl.src = src;
+  });
+}
 
 function applyPageTexts() {
   if (!DB || !DB.pageTexts) return;
