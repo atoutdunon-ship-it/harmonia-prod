@@ -1759,6 +1759,9 @@ function _onDocMouseDown(e) {
   var toolbar = document.getElementById('edit-floating-toolbar');
   if (toolbar && toolbar.contains(e.target)) return;
   if (_activeEditEl && _activeEditEl.contains(e.target)) return;
+
+  var dialog = document.getElementById('harmonia-translate-dialog');
+  if (dialog && dialog.contains(e.target)) return;
   _closeActiveEditable();
 }
 
@@ -2089,18 +2092,19 @@ function _showTranslateDialog(keys, sourceLang, pendingSnap, targetLangs) {
     + targetLangs.map(function(l) { return '<b style="color:#c8e0cc">' + LN[l] + '</b>'; }).join(', ')
     + ' ?<br><span style="font-size:10px;opacity:0.45;">Via MyMemory API · gratuit · les versions existantes dans ces langues seront remplacées.</span>'
     + '</div>'
-    + '<div id="translate-progress" style="display:none;min-height:18px;margin-bottom:14px;font-size:11px;color:#2ecc80;letter-spacing:1px;"></div>'
+    + '<div class="tr-progress" style="display:none;min-height:18px;margin-bottom:14px;font-size:11px;color:#2ecc80;letter-spacing:1px;"></div>'
     + '<div style="display:flex;gap:10px;justify-content:flex-end;">'
-    + '<button id="translate-skip" style="background:none;border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.45);font-family:Arial;font-size:11px;letter-spacing:1px;padding:8px 20px;cursor:pointer;border-radius:3px;">Ignorer</button>'
-    + '<button id="translate-ok" style="background:rgba(46,204,128,0.12);border:1px solid rgba(46,204,128,0.45);color:#2ecc80;font-family:Arial;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:8px 22px;cursor:pointer;border-radius:3px;">Traduire</button>'
+    + '<button class="tr-skip" style="background:none;border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.45);font-family:Arial;font-size:11px;letter-spacing:1px;padding:8px 20px;cursor:pointer;border-radius:3px;">Ignorer</button>'
+    + '<button class="tr-ok" style="background:rgba(46,204,128,0.12);border:1px solid rgba(46,204,128,0.45);color:#2ecc80;font-family:Arial;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:8px 22px;cursor:pointer;border-radius:3px;">Traduire</button>'
     + '</div>';
 
   overlay.appendChild(box);
   document.body.appendChild(overlay);
 
-  var skipBtn   = document.getElementById('translate-skip');
-  var okBtn     = document.getElementById('translate-ok');
-  var progressEl = document.getElementById('translate-progress');
+
+  var skipBtn    = box.querySelector('.tr-skip');
+  var okBtn      = box.querySelector('.tr-ok');
+  var progressEl = box.querySelector('.tr-progress');
 
   skipBtn.addEventListener('click', function() { overlay.remove(); });
   okBtn.addEventListener('click', function() {
