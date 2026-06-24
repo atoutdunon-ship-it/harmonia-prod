@@ -757,6 +757,7 @@ if (!DB.modules)     { DB.modules = defaultModules(); saveData(DB); }
 if (!DB.pageTexts)   { DB.pageTexts = {}; saveData(DB); }
 if (!DB.musicCategories || !DB.musicCategories.length) { DB.musicCategories = defaultMusicCategories(); saveData(DB); }
 applyModules();
+try { applyMaintenanceMode(); } catch(e) {}
 
 (function migrateCeuzany() {
   var changed = false;
@@ -2497,14 +2498,19 @@ function _triggerKeyedImgImport(imgKey, container) {
 
 function defaultModules() {
   return {
-    about:    { enabled: true,  label: 'QUI SOMMES-NOUS',  icon: '&#127968;', page: 'qui-sommes-nous.html' },
-    cesaria:  { enabled: true,  label: 'Section Cesária',  icon: '&#127911;', page: 'cesaria.html' },
-    artists:  { enabled: true,  label: 'Artistes / Roster',icon: '&#127932;', page: 'artistes.html' },
-    music:    { enabled: true,  label: 'Catalogue Musique',icon: '&#127925;', page: 'musique.html' },
-    shop:     { enabled: true,  label: 'Boutique / Shop',  icon: '&#128722;', page: 'boutique.html' },
-    concerts: { enabled: true,  label: 'Concerts (nav)',   icon: '&#127914;', page: null },
-    news:     { enabled: true,  label: 'Actualités',       icon: '&#128240;', page: 'actualites.html' },
-    contact:  { enabled: true,  label: 'Contact',          icon: '&#128386;', page: 'contact.html' }
+
+    about:      { enabled:true, label:'QUI SOMMES-NOUS',  page:'qui-sommes-nous.html', group:'nav' },
+    cesaria:    { enabled:true, label:'Cesária Évora',     page:'cesaria.html',          group:'nav' },
+    jose:       { enabled:true, label:'José da Silva',     page:'jose-da-silva.html',    group:'nav' },
+    artists:    { enabled:true, label:'Artistes',          page:'artistes.html',         group:'nav' },
+    music:      { enabled:true, label:'Musique',           page:'musique.html',          group:'nav' },
+    shop:       { enabled:true, label:'Boutique',          page:'boutique.html',         group:'nav' },
+    events:     { enabled:true, label:'Événements',        page:'evenements.html',       group:'nav' },
+    news:       { enabled:true, label:'Actualités',        page:'actualites.html',       group:'nav' },
+    contact:    { enabled:true, label:'Contact',           page:'contact.html',          group:'nav' },
+
+    moncompte:  { enabled:true, label:'Mon Compte',        page:'mon-compte.html',       group:'util' },
+    panier:     { enabled:true, label:'Panier',            page:'panier.html',           group:'util' }
   };
 }
 
@@ -2519,36 +2525,243 @@ function applyModules() {
   });
 }
 
+var _pendingDisableKey = null;
+var _pendingDisableImgData = null;
+
 function toggleModule(key) {
   if (!isSuperAdmin()) return;
+  if (!DB.modules) DB.modules = defaultModules();
   if (!DB.modules[key]) return;
-  DB.modules[key].enabled = !DB.modules[key].enabled;
+  var m = DB.modules[key];
+  if (!m.enabled) {
+
+    m.enabled = true;
+    m.mode = 'hidden';
+    saveData(DB); applyModules(); renderModulesAdmin();
+  } else {
+
+    _pendingDisableKey = key;
+    _pendingDisableImgData = null;
+    _showDisableModal(key, m);
+  }
+}
+
+function _showDisableModal(key, m) {
+  var existing = document.getElementById('disable-module-modal');
+  if (existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'disable-module-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);';
+  modal.innerHTML =
+    '<div style="background:var(--navy2,#091f13);border:1px solid rgba(46,204,128,0.25);max-width:480px;width:90%;padding:36px 32px;">'
+    + '<div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--accent2,#2ecc80);margin-bottom:8px;">Gestion des modules</div>'
+    + '<div style="font-family:Georgia;font-size:20px;color:#fff;margin-bottom:6px;">Désactiver</div>'
+    + '<div style="font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin-bottom:28px;">'+esc(m.label)+'</div>'
+
+    + '<label id="dm-opt1-label" style="display:block;border:1px solid rgba(46,204,128,0.15);padding:18px 20px;margin-bottom:12px;cursor:pointer;transition:border-color 0.2s;">'
+    +   '<div style="display:flex;align-items:flex-start;gap:14px;">'
+    +     '<input type="radio" name="dm-mode" id="dm-opt1" value="maintenance" style="margin-top:3px;accent-color:#2ecc80;">'
+    +     '<div>'
+    +       '<div style="font-family:Arial;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#fff;margin-bottom:4px;">Mise à jour en cours</div>'
+    +       '<div style="font-family:Arial;font-size:11px;color:rgba(255,255,255,0.45);line-height:1.5;">Afficher une page de maintenance avec titre et image personnalisée.</div>'
+    +       '<div id="dm-img-zone" style="margin-top:14px;display:none;">'
+    +         '<div style="font-size:10px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:8px;">Image de fond (optionnelle)</div>'
+    +         '<input type="file" accept="image/*" id="dm-img-input" onchange="_dmPreviewImg(this)" style="color:rgba(255,255,255,0.6);font-size:11px;background:none;border:none;padding:0;">'
+    +         '<div id="dm-img-preview-wrap" style="margin-top:10px;display:none;">'
+    +           '<img id="dm-img-preview" style="max-width:100%;max-height:120px;object-fit:cover;display:block;border:1px solid rgba(46,204,128,0.2);">'
+    +         '</div>'
+    +       '</div>'
+    +     '</div>'
+    +   '</div>'
+    + '</label>'
+
+    + '<label id="dm-opt2-label" style="display:block;border:1px solid rgba(46,204,128,0.15);padding:18px 20px;margin-bottom:24px;cursor:pointer;transition:border-color 0.2s;">'
+    +   '<div style="display:flex;align-items:flex-start;gap:14px;">'
+    +     '<input type="radio" name="dm-mode" id="dm-opt2" value="hidden" style="margin-top:3px;accent-color:#2ecc80;" checked>'
+    +     '<div>'
+    +       '<div style="font-family:Arial;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:#fff;margin-bottom:4px;">Retirer uniquement les liens</div>'
+    +       '<div style="font-family:Arial;font-size:11px;color:rgba(255,255,255,0.45);line-height:1.5;">La page disparaît du menu. Elle reste accessible via son URL directe.</div>'
+    +     '</div>'
+    +   '</div>'
+    + '</label>'
+
+    + '<div style="display:flex;gap:10px;justify-content:flex-end;">'
+    +   '<button onclick="document.getElementById(\'disable-module-modal\').remove();_pendingDisableKey=null;" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);padding:10px 20px;font-family:Arial;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">Annuler</button>'
+    +   '<button onclick="_confirmDisableModule()" style="background:rgba(200,60,60,0.15);border:1px solid rgba(200,60,60,0.4);color:#e07070;padding:10px 24px;font-family:Arial;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">Désactiver</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(modal);
+
+
+  modal.querySelector('#dm-opt1').addEventListener('change', function(){
+    document.getElementById('dm-img-zone').style.display = 'block';
+    document.getElementById('dm-opt1-label').style.borderColor = 'rgba(46,204,128,0.4)';
+    document.getElementById('dm-opt2-label').style.borderColor = 'rgba(46,204,128,0.15)';
+  });
+  modal.querySelector('#dm-opt2').addEventListener('change', function(){
+    document.getElementById('dm-img-zone').style.display = 'none';
+    document.getElementById('dm-opt2-label').style.borderColor = 'rgba(46,204,128,0.4)';
+    document.getElementById('dm-opt1-label').style.borderColor = 'rgba(46,204,128,0.15)';
+  });
+
+  document.getElementById('dm-opt2-label').style.borderColor = 'rgba(46,204,128,0.4)';
+
+
+  modal.addEventListener('click', function(e){ if (e.target === modal){ modal.remove(); _pendingDisableKey=null; } });
+}
+
+function _dmPreviewImg(input) {
+  var f = input.files[0]; if (!f) return;
+  _resizeImageToBase64(f, 1200, 0.88, function(b64){
+    _pendingDisableImgData = b64;
+    var wrap = document.getElementById('dm-img-preview-wrap');
+    var img  = document.getElementById('dm-img-preview');
+    if (wrap && img) { img.src = b64; wrap.style.display = 'block'; }
+  });
+}
+
+function _confirmDisableModule() {
+  var key = _pendingDisableKey;
+  if (!key || !DB.modules[key]) return;
+  var mode = document.querySelector('input[name="dm-mode"]:checked');
+  mode = mode ? mode.value : 'hidden';
+  DB.modules[key].enabled = false;
+  DB.modules[key].mode = mode;
+  if (mode === 'maintenance' && _pendingDisableImgData) {
+    DB.images = DB.images || {};
+    DB.images['maintenance_'+key] = _pendingDisableImgData;
+  }
   saveData(DB);
   applyModules();
   renderModulesAdmin();
+  document.getElementById('disable-module-modal').remove();
+  _pendingDisableKey = null; _pendingDisableImgData = null;
+}
+
+function _changeMaintenanceImg(key) {
+  var inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = function() {
+    var f = inp.files[0]; if (!f) return;
+    _resizeImageToBase64(f, 1200, 0.88, function(b64){
+      DB.images = DB.images || {};
+      DB.images['maintenance_'+key] = b64;
+      saveData(DB);
+      renderModulesAdmin();
+    });
+  };
+  inp.click();
+}
+
+function applyMaintenanceMode() {
+  if (!DB || !DB.modules) return;
+  var page = window.location.pathname.split('/').pop() || 'index.html';
+  var key = null;
+  Object.keys(DB.modules).forEach(function(k){
+    if (DB.modules[k].page === page) key = k;
+  });
+  if (!key) return;
+  var m = DB.modules[key];
+  if (m.enabled !== false) return;
+  if ((m.mode || 'hidden') !== 'maintenance') return;
+
+  var imgSrc = (DB.images && DB.images['maintenance_'+key]) || '';
+  var overlay = document.createElement('div');
+  overlay.id = 'maintenance-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+  overlay.innerHTML =
+    (imgSrc ? '<img src="'+imgSrc+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.35;">' : '')
+    + '<div style="position:absolute;inset:0;background:rgba(4,12,8,0.82);"></div>'
+    + '<div style="position:relative;z-index:2;text-align:center;padding:40px 24px;">'
+    +   '<div style="font-size:9px;letter-spacing:5px;text-transform:uppercase;color:#2ecc80;margin-bottom:20px;">HARMONIA</div>'
+    +   '<div style="font-family:Georgia;font-size:clamp(26px,5vw,48px);color:#fff;font-weight:normal;line-height:1.2;margin-bottom:16px;">Mise à jour<br>en cours</div>'
+    +   '<div style="width:48px;height:1px;background:#2ecc80;margin:0 auto 20px;"></div>'
+    +   '<div style="font-family:Arial;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.45);">Cette page sera bientôt disponible</div>'
+    + '</div>';
+  if (!document.getElementById('maintenance-overlay')) document.body.appendChild(overlay);
 }
 
 function renderModulesAdmin() {
   if (!isSuperAdmin()) return;
-  var grid = document.getElementById('modules-grid');
-  if (!grid) return;
+  var wrap = document.getElementById('modules-grid');
+  if (!wrap) return;
   if (!DB.modules) DB.modules = defaultModules();
   var def = defaultModules();
   Object.keys(def).forEach(function(k){ if (!DB.modules[k]) DB.modules[k] = def[k]; });
-  grid.innerHTML = Object.keys(DB.modules).map(function(key) {
-    var m = DB.modules[key];
+
+
+  if (DB.modules.concerts && !DB.modules.events) { DB.modules.events = DB.modules.concerts; delete DB.modules.concerts; }
+
+  function toggleRow(key, m) {
     var on = m.enabled;
-    return '<div style="background:var(--card,#0d1f14);border:1px solid '+(on?'rgba(31,158,92,0.4)':'rgba(255,255,255,0.06)')+';padding:20px 24px;border-radius:4px;display:flex;align-items:center;justify-content:space-between;gap:12px;">'
-      +'<div>'
-        +'<div style="font-size:20px;margin-bottom:6px;">'+m.icon+'</div>'
-        +'<div style="font-family:Arial,sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#fff;font-weight:600;">'+m.label+'</div>'
-        +'<div style="font-family:Arial,sans-serif;font-size:10px;color:'+(on?'#2ecc80':'#8a9bb5')+';letter-spacing:1px;margin-top:4px;">'+(on?'ACTIF':'DÉSACTIVÉ')+'</div>'
-      +'</div>'
-      +'<div data-modkey="'+key+'" title="'+(on?'Désactiver':'Activer')+'" style="width:52px;height:28px;border-radius:14px;background:'+(on?'#2ecc80':'rgba(255,255,255,0.1)')+';position:relative;cursor:pointer;transition:background 0.3s;flex-shrink:0;" onclick="toggleModule(this.dataset.modkey)">'
-        +'<div style="position:absolute;top:4px;'+(on?'right:4px':'left:4px')+';width:20px;height:20px;border-radius:50%;background:#fff;transition:all 0.3s;"></div>'
-      +'</div>'
-    +'</div>';
-  }).join('');
+    var mode = m.mode || 'hidden';
+    var pageLink = m.page ? '<a href="'+m.page+'" target="_blank" style="font-size:9px;letter-spacing:1px;color:var(--accent2);text-decoration:none;padding:4px 8px;border:1px solid rgba(46,204,128,0.3);white-space:nowrap;">↗ Voir</a>' : '';
+    var modeBadge = '';
+    if (!on) {
+      modeBadge = mode === 'maintenance'
+        ? '<span style="font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;border:1px solid rgba(230,150,40,0.5);color:rgba(230,180,60,0.8);white-space:nowrap;">&#9888; Maintenance</span>'
+        : '<span style="font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.3);white-space:nowrap;">Caché</span>';
+    }
+    var imgBtn = (!on && mode === 'maintenance')
+      ? '<button onclick="_changeMaintenanceImg(\''+key+'\')" style="font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border:1px solid rgba(46,204,128,0.25);color:rgba(46,204,128,0.7);background:none;cursor:pointer;white-space:nowrap;">&#128247; Image</button>'
+      : '';
+    return '<div class="mod-tree-row '+(on?'mod-on':'mod-off')+'" id="modrow-'+key+'">'
+      + '<div class="mod-tree-indent"></div>'
+      + '<div class="mod-tree-label">'
+      +   '<span class="mod-status-dot" style="background:'+(on?'#2ecc80':'rgba(255,255,255,0.15)')+'"></span>'
+      +   '<span style="font-family:Arial;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:'+(on?'var(--white)':'rgba(255,255,255,0.35)')+'">'+esc(m.label)+'</span>'
+      +   (m.page ? '<span style="font-family:monospace;font-size:10px;color:rgba(255,255,255,0.25);margin-left:10px;">'+m.page+'</span>' : '')
+      + '</div>'
+      + '<div class="mod-tree-actions">'
+      +   modeBadge
+      +   imgBtn
+      +   pageLink
+      +   '<button class="mod-toggle-btn" onclick="toggleModule(\''+key+'\')">'
+      +     '<span class="mod-toggle-track" style="background:'+(on?'#2ecc80':'rgba(255,255,255,0.12)')+'">'
+      +       '<span class="mod-toggle-knob" style="transform:translateX('+(on?'24':'2')+'px)"></span>'
+      +     '</span>'
+      +     '<span style="font-family:Arial;font-size:9px;letter-spacing:1px;color:'+(on?'#2ecc80':'rgba(255,255,255,0.35)')+'">'+( on?'ACTIF':'INACTIF')+'</span>'
+      +   '</button>'
+      + '</div>'
+      + '</div>';
+  }
+
+  function section(title, keys) {
+    var rows = keys.filter(function(k){ return DB.modules[k]; }).map(function(k){ return toggleRow(k, DB.modules[k]); }).join('');
+    if (!rows) return '';
+    return '<div class="mod-tree-section">'
+      + '<div class="mod-tree-section-title">'+title+'</div>'
+      + rows
+      + '</div>';
+  }
+
+  var homeRow = '<div class="mod-tree-row mod-on" style="opacity:0.5;">'
+    + '<div class="mod-tree-indent"></div>'
+    + '<div class="mod-tree-label">'
+    +   '<span class="mod-status-dot" style="background:#2ecc80"></span>'
+    +   '<span style="font-family:Arial;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--white);">Accueil</span>'
+    +   '<span style="font-family:monospace;font-size:10px;color:rgba(255,255,255,0.25);margin-left:10px;">index.html</span>'
+    + '</div>'
+    + '<div class="mod-tree-actions">'
+    +   '<a href="index.html" target="_blank" style="font-size:9px;letter-spacing:1px;color:var(--accent2);text-decoration:none;padding:4px 8px;border:1px solid rgba(46,204,128,0.3);">↗ Voir</a>'
+    +   '<span style="font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.25);padding:4px 8px;border:1px solid rgba(255,255,255,0.08);">FIXE</span>'
+    + '</div>'
+    + '</div>';
+
+  var navKeys   = ['about','cesaria','jose','artists','music','shop','events','news','contact'];
+  var utilKeys  = ['moncompte','panier'];
+
+  wrap.innerHTML =
+    '<div class="mod-tree-header">'
+    + '<div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);margin-bottom:4px;">HARMONIA</div>'
+    + '<div style="font-family:Georgia;font-size:20px;color:var(--white);margin-bottom:20px;">Arborescence du site</div>'
+    + '</div>'
+    + '<div class="mod-tree-section">'
+    +   '<div class="mod-tree-section-title">Page d\'entrée</div>'
+    +   homeRow
+    + '</div>'
+    + section('Navigation principale', navKeys)
+    + section('Pages utilitaires', utilKeys);
 }
 
 function isAdministrateur() {
