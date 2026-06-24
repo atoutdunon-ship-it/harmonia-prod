@@ -37,43 +37,75 @@ git add -A
 if git diff --cached --quiet; then
   echo "ℹ️   Aucune modification locale à envoyer."
 else
-  # ── Liste détaillée des fichiers à pousser ───────────────
-  echo "📋  Fichiers inclus dans ce push :"
-  echo "───────────────────────────────────"
-  git diff --cached --name-status | while IFS=$'\t' read STATUS FILE; do
+  # ── 1. Résumé détaillé des fichiers modifiés ─────────────
+  echo "╔═══════════════════════════════════════════╗"
+  echo "║   FICHIERS MODIFIÉS (avant commit)        ║"
+  echo "╚═══════════════════════════════════════════╝"
+  echo ""
+  git diff --cached --name-status | while IFS=$'\t' read STATUS FILE REST; do
     case "$STATUS" in
-      A) LABEL="[NOUVEAU ]" ;;
-      M) LABEL="[MODIFIÉ ]" ;;
-      D) LABEL="[SUPPRIMÉ]" ;;
-      R*) LABEL="[RENOMMÉ ]" ;;
-      *) LABEL="[$STATUS      ]" ;;
+      A)  TAG="✚ NOUVEAU" ;;
+      M)  TAG="✎ MODIFIÉ" ;;
+      D)  TAG="✖ SUPPRIMÉ" ;;
+      R*) TAG="↷ RENOMMÉ" ;;
+      *)  TAG="? $STATUS" ;;
     esac
-    SIZE=""
+    TAILLE=""
     if [ -f "$FILE" ]; then
-      BYTES=$(wc -c < "$FILE" | tr -d ' ')
-      if [ "$BYTES" -ge 1024 ]; then
-        KB=$(( BYTES / 1024 ))
-        SIZE="  (${KB} Ko)"
-      else
-        SIZE="  (${BYTES} o)"
-      fi
+      B=$(wc -c < "$FILE" | tr -d ' ')
+      [ "$B" -ge 1048576 ] && TAILLE="($(( B/1048576 )) Mo)" \
+        || [ "$B" -ge 1024 ] && TAILLE="($(( B/1024 )) Ko)" \
+        || TAILLE="(${B} o)"
     fi
-    echo "  $LABEL  $FILE$SIZE"
+    echo ""
+    echo "  ┌─ $TAG  $FILE  $TAILLE"
+    # Lignes modifiées (sans contexte, max 30 lignes par fichier)
+    git diff --cached --unified=0 -- "$FILE" \
+      | grep -E "^[+\-][^+\-]" \
+      | head -30 \
+      | while IFS= read -r LINE; do
+          FIRST="${LINE:0:1}"
+          CONTENT="${LINE:1}"
+          # Tronquer les lignes trop longues
+          if [ ${#CONTENT} -gt 110 ]; then
+            CONTENT="${CONTENT:0:107}..."
+          fi
+          if [ "$FIRST" = "+" ]; then
+            printf "  │  \033[32m+ %s\033[0m\n" "$CONTENT"
+          else
+            printf "  │  \033[31m- %s\033[0m\n" "$CONTENT"
+          fi
+        done
+    # Compter les lignes réelles +/-
+    PLUS=$(git diff --cached --unified=0 -- "$FILE" | grep -c "^+[^+]" 2>/dev/null || echo 0)
+    MINUS=$(git diff --cached --unified=0 -- "$FILE" | grep -c "^-[^-]" 2>/dev/null || echo 0)
+    echo "  └─ +${PLUS} lignes ajoutées  -${MINUS} lignes supprimées"
   done
-  echo "───────────────────────────────────"
-  TOTAL=$(git diff --cached --name-only | wc -l | tr -d ' ')
-  echo "  Total : $TOTAL fichier(s)"
+  echo ""
+  echo "─────────────────────────────────────────────"
+  echo "  Résumé des lignes changées :"
+  git diff --cached --stat | tail -1
+  echo "─────────────────────────────────────────────"
   echo ""
 
-  git commit -m "MAJHARMO — $(date '+%Y-%m-%d %H:%M')"
+  # ── 2. Commit ────────────────────────────────────────────
+  MSG="MAJHARMO — $(date '+%Y-%m-%d %H:%M')"
+  git commit -m "$MSG"
+  HASH=$(git rev-parse --short HEAD)
   echo ""
-  echo "🚀  Envoi vers GitHub..."
-  echo "    (Si demandé : login = atoutdunon-ship-it"
-  echo "                  mot de passe = token GitHub personnel)"
+  echo "  ✅ Commit créé : [$HASH] $MSG"
   echo ""
-  git push --progress origin main 2>&1
+
+  # ── 3. Push verbose ──────────────────────────────────────
+  echo "╔═══════════════════════════════════════════╗"
+  echo "║   ENVOI VERS GITHUB (détail complet)      ║"
+  echo "╚═══════════════════════════════════════════╝"
   echo ""
-  echo "✅  Modifications envoyées"
+  GIT_TRACE_PACKET=0 git push --progress --verbose origin main 2>&1
+  echo ""
+  echo "─────────────────────────────────────────────"
+  echo "  ✅ Push terminé → commit $HASH en ligne"
+  echo "─────────────────────────────────────────────"
 fi
 
 echo ""
