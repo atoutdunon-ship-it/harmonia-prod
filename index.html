@@ -276,10 +276,10 @@ body {
 
 .home-flags-line span {
   font-family: Arial, sans-serif;
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 4px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.72);
 }
 
 /* ===== TRANSITION ENTRÉE ===== */
@@ -405,6 +405,16 @@ body {
   }
   .flag-btn .flag-img { width: 38px; height: 26px; font-size: 24px; }
   .home-flags { gap: 16px; }
+  /* Lisibilité renforcée sur mobile */
+  .flag-btn .flag-label          { color: rgba(255,255,255,0.78); font-size: 9px; }
+  .home-flags-line span          { font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.78); }
+  .home-flags-line::before,
+  .home-flags-line::after        { width: 36px; }
+  .home-medallion-caption        { color: rgba(255,255,255,0.65); font-size: 9px; }
+  .hf-name                       { color: rgba(255,255,255,0.82); font-size: 10px; }
+  .hf-tag                        { color: rgba(255,255,255,0.52); font-size: 9px; }
+  .hf-addr                       { color: rgba(255,255,255,0.60); font-size: 9px; }
+  .home-footer-row3              { color: rgba(255,255,255,0.30); font-size: 8px; }
   /* Sur mobile : footer sur 2 lignes seulement */
   .home-footer-row2 { display: none; }
   #home-page { padding-bottom: 52px; }
