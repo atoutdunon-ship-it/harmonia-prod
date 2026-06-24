@@ -212,7 +212,7 @@
           <div class="artist-tab-content" id="atab-content-disco" style="display:none;">
             <div id="disco-list-inline" style="margin-bottom:16px;"></div>
             <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:4px;">
-              <div class="admin-card-title" style="font-size:11px;margin-bottom:12px;">Ajouter un album</div>
+              <div class="admin-card-title" id="disco-form-title" style="font-size:11px;margin-bottom:12px;">Ajouter un album</div>
               <div class="admin-form-row">
                 <div><label class="admin-label">Titre</label><input class="admin-input" id="disco-title" type="text" placeholder="Nom de l'album"></div>
                 <div><label class="admin-label">Année</label><input class="admin-input" id="disco-year" type="number" placeholder="2024"></div>
@@ -223,11 +223,16 @@
                 <div><label class="admin-label">Apple Music</label><input class="admin-input" id="disco-apple" type="url" placeholder="https://music.apple.com/..."></div>
               </div>
               <div><label class="admin-label">Deezer</label><input class="admin-input" id="disco-deezer" type="url" placeholder="https://www.deezer.com/album/..."></div>
-              <div style="margin-top:12px;"><label class="admin-label">Pochette (image)</label>
-                <input type="file" accept="image/*" id="disco-cover-input" onchange="previewUpload(this,'disco-cover-preview')" style="background:none;border:none;color:var(--white);padding:0;">
+              <div style="margin-top:12px;display:flex;align-items:flex-start;gap:16px;">
+                <div style="flex:1;"><label class="admin-label">Pochette (image)</label>
+                  <input type="file" accept="image/*" id="disco-cover-input" onchange="previewUpload(this,'disco-cover-preview')" style="background:none;border:none;color:var(--white);padding:0;">
+                </div>
+                <img id="disco-cover-preview" class="admin-upload-preview" alt="" style="width:80px;height:80px;object-fit:cover;display:none;">
               </div>
-              <img id="disco-cover-preview" class="admin-upload-preview" alt="">
-              <button class="admin-btn-primary" style="margin-top:12px;" onclick="addDiscoAlbumInline()">Ajouter cet album</button>
+              <div style="display:flex;gap:8px;margin-top:12px;">
+                <button class="admin-btn-ghost" style="font-size:9px;" onclick="_editDiscoIdx=null;document.getElementById('disco-form-title').textContent='Ajouter un album';document.getElementById('disco-save-btn').textContent='Ajouter cet album';">Annuler</button>
+                <button class="admin-btn-primary" id="disco-save-btn" onclick="addDiscoAlbumInline()">Ajouter cet album</button>
+              </div>
             </div>
             <!-- YouTube section -->
             <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:20px;">
