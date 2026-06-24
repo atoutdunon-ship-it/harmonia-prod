@@ -3326,6 +3326,8 @@ function saveArtist() {
       DB.artists[idx].bioLong = document.getElementById('a-bio-long').value.trim();
       DB.artists[idx].instagram = document.getElementById('a-insta').value.trim();
       DB.artists[idx].spotify = document.getElementById('a-spotify').value.trim();
+      DB.artists[idx].appleMusic = (document.getElementById('a-apple-music')||{value:''}).value.trim();
+      DB.artists[idx].deezer = (document.getElementById('a-deezer')||{value:''}).value.trim();
       if (artistPhotoData) DB.artists[idx].photo = artistPhotoData;
     }
     currentEditArtistId = null;
@@ -3337,7 +3339,12 @@ function saveArtist() {
       bioLong: document.getElementById('a-bio-long').value.trim(),
       instagram: document.getElementById('a-insta').value.trim(),
       spotify: document.getElementById('a-spotify').value.trim(),
-      photo: artistPhotoData || null
+      appleMusic: (document.getElementById('a-apple-music')||{value:''}).value.trim(),
+      deezer: (document.getElementById('a-deezer')||{value:''}).value.trim(),
+      photo: artistPhotoData || null,
+      discography: [],
+      youtubeVideos: [],
+      photos: []
     };
     DB.artists.push(artist);
   }
@@ -3346,9 +3353,13 @@ function saveArtist() {
 }
 
 function resetArtistForm() {
-  ['a-name','a-origin','a-bio-short','a-bio-long','a-insta','a-spotify'].forEach(id => document.getElementById(id).value='');
+  ['a-name','a-origin','a-bio-short','a-bio-long','a-insta','a-spotify'].forEach(id => { var el=document.getElementById(id); if(el) el.value=''; });
+  var am = document.getElementById('a-apple-music'); if(am) am.value='';
+  var dz = document.getElementById('a-deezer'); if(dz) dz.value='';
   artistPhotoData = null;
-  document.getElementById('a-photo-preview').textContent = '';
+  var prev = document.getElementById('a-photo-preview'); if(prev) prev.textContent = '';
+  currentEditArtistId = null;
+  var ft = document.getElementById('artist-form-title'); if(ft) ft.textContent='Ajouter / Modifier un artiste';
 }
 
 function deleteArtist(id) {
@@ -3364,11 +3375,12 @@ function renderArtistsAdminList() {
     <div class="admin-list-item">
       <div class="admin-item-info">
         <div class="admin-item-title">${a.name}</div>
-        <div class="admin-item-meta">${a.origin}</div>
+        <div class="admin-item-meta">${a.origin||''}${(a.discography||[]).length?' · '+(a.discography||[]).length+' album(s)':''}</div>
       </div>
       <div class="admin-item-actions">
         ${can('artists','edit') ? `<button class="admin-btn-sm" style="padding:6px 14px;font-size:9px;" onclick="editArtist(${a.id})">Modifier</button>` : ''}
-        <button class="admin-btn-sm" style="padding:6px 14px;font-size:9px;" onclick="openDiscoAdmin(${a.id})">Discographie</button>
+        <button class="admin-btn-sm" style="padding:6px 14px;font-size:9px;" onclick="openArtistTabAdmin(${a.id},'disco')">Discographie</button>
+        <button class="admin-btn-sm" style="padding:6px 14px;font-size:9px;" onclick="openArtistTabAdmin(${a.id},'photos')">Photos</button>
         ${can('artists','delete') ? `<button class="admin-btn-del perm-del-artists" onclick="deleteArtist(${a.id})">Supprimer</button>` : ''}
       </div>
     </div>`).join('') || '<div style="color:var(--gray);font-size:12px;">Aucun artiste.</div>';
@@ -3600,8 +3612,12 @@ function editArtist(id) {
   document.getElementById('a-bio-long').value = a.bioLong || '';
   document.getElementById('a-insta').value = a.instagram || '';
   document.getElementById('a-spotify').value = a.spotify || '';
+  var am = document.getElementById('a-apple-music'); if(am) am.value = a.appleMusic || '';
+  var dz = document.getElementById('a-deezer'); if(dz) dz.value = a.deezer || '';
   currentEditArtistId = id;
+  var ft = document.getElementById('artist-form-title'); if(ft) ft.textContent = 'Modifier : ' + a.name;
   showAdminPage('artists-admin');
+  showArtistTab('info');
   document.getElementById('a-name').scrollIntoView({behavior:'smooth'});
 }
 
@@ -4801,7 +4817,8 @@ function resetEvtForm() {
   const d=document.getElementById('evt-date'); if(d) d.value='';
   const t=document.getElementById('evt-time'); if(t) t.value='20:00';
   ['evt-price','evt-vip','evt-capacity'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
-  document.getElementById('evt-status').value='active';
+  const st=document.getElementById('evt-status'); if(st) st.value='active';
+  const tp=document.getElementById('evt-type'); if(tp) tp.value='concert';
   const prev=document.getElementById('evt-img-preview'); if(prev){prev.src='';prev.style.display='none';}
   const imgIn=document.getElementById('evt-img-input'); if(imgIn) imgIn.value='';
   const editId=document.getElementById('evt-edit-id'); if(editId) editId.value='';
@@ -4823,6 +4840,7 @@ function saveEvt() {
   const desc = (document.getElementById('evt-desc').value||'').trim();
   const stripeLink = (document.getElementById('evt-stripe-link') ? document.getElementById('evt-stripe-link').value.trim() : '');
   const status = document.getElementById('evt-status').value;
+  const type = (document.getElementById('evt-type') ? document.getElementById('evt-type').value : 'concert') || 'concert';
   const editId = document.getElementById('evt-edit-id').value;
   if (!venue || !date) { alert('Venue et date sont requis.'); return; }
   const imgInput = document.getElementById('evt-img-input');
@@ -4830,11 +4848,11 @@ function saveEvt() {
     if (editId) {
       const idx = DB.events.findIndex(e => String(e.id) === editId);
       if (idx >= 0) {
-        DB.events[idx] = Object.assign(DB.events[idx], {artist, venue, city, country, date, time, price, vip, capacity, desc, stripeLink, status});
+        DB.events[idx] = Object.assign(DB.events[idx], {artist, venue, city, country, date, time, price, vip, capacity, desc, stripeLink, status, type});
         if (imgData) DB.events[idx].img = imgData;
       }
     } else {
-      const newEvt = { id: Date.now(), artist, venue, city, country, date, time, price, vip, capacity, available: capacity, desc, stripeLink, img: imgData||null, status };
+      const newEvt = { id: Date.now(), artist, venue, city, country, date, time, price, vip, capacity, available: capacity, desc, stripeLink, img: imgData||null, status, type };
       DB.events.unshift(newEvt);
     }
     saveData(DB); renderEvts(); resetEvtForm();
@@ -4897,12 +4915,18 @@ function editEvt(id) {
   document.getElementById('evt-capacity').value = e.capacity||'';
   document.getElementById('evt-desc').value = e.desc||'';
   document.getElementById('evt-status').value = e.status||'active';
+  var evtType = document.getElementById('evt-type'); if(evtType) evtType.value = e.type||'concert';
   document.getElementById('evt-edit-id').value = id;
   if (e.img) { const prev=document.getElementById('evt-img-preview'); if(prev){prev.src=e.img;prev.style.display='block';} }
   const title=document.getElementById('evt-form-title'); if(title) title.textContent="Modifier l'événement";
   const btn=document.querySelector('#page-shop-events .admin-btn-primary'); if(btn) btn.textContent='Enregistrer';
   const cancel=document.getElementById('evt-cancel-btn'); if(cancel) cancel.style.display='';
   document.getElementById('page-shop-events').scrollIntoView({behavior:'smooth'});
+}
+
+function editEvtAdmin(id) {
+  editEvt(id);
+  showAdminPage('shop-events');
 }
 
 function cycleEvtStatus(id) {
@@ -5673,95 +5697,235 @@ function playArtistYT(ytId, cardId) {
 
 var _discoArtistId = null;
 
-function openDiscoAdmin(artistId) {
-  _discoArtistId = artistId;
+function openArtistTabAdmin(artistId, tab) {
   var a = DB.artists.find(function(x){ return x.id === artistId; });
   if (!a) return;
-  var sec = document.getElementById('disco-admin-section');
-  var ytSec = document.getElementById('yt-admin-section');
-  if (sec) { sec.style.display = 'block'; document.getElementById('disco-artist-name').textContent = a.name; }
-  if (ytSec) { ytSec.style.display = 'block'; document.getElementById('yt-artist-name').textContent = a.name; }
-  renderDiscoList(artistId);
-  renderYTList(artistId);
-  sec && sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  currentEditArtistId = artistId;
+  _discoArtistId = artistId;
+  document.getElementById('a-name').value = a.name || '';
+  document.getElementById('a-origin').value = a.origin || '';
+  document.getElementById('a-bio-short').value = a.bioShort || '';
+  document.getElementById('a-bio-long').value = a.bioLong || '';
+  document.getElementById('a-insta').value = a.instagram || '';
+  document.getElementById('a-spotify').value = a.spotify || '';
+  var am = document.getElementById('a-apple-music'); if(am) am.value = a.appleMusic || '';
+  var dz = document.getElementById('a-deezer'); if(dz) dz.value = a.deezer || '';
+  var ft = document.getElementById('artist-form-title'); if(ft) ft.textContent = 'Modifier : ' + a.name;
+  showAdminPage('artists-admin');
+  showArtistTab(tab || 'disco');
+  var card = document.getElementById('artist-edit-card');
+  if (card) card.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
-function renderDiscoList(artistId) {
+function openDiscoAdmin(artistId) {
+  openArtistTabAdmin(artistId, 'disco');
+}
+
+function showArtistTab(tab) {
+  var tabs = ['info','disco','events','photos'];
+  tabs.forEach(function(t) {
+    var btn = document.getElementById('atab-'+t);
+    var cnt = document.getElementById('atab-content-'+t);
+    if (btn) btn.classList.toggle('active', t === tab);
+    if (cnt) cnt.style.display = (t === tab) ? '' : 'none';
+  });
+  if (tab === 'disco' && _discoArtistId) {
+    renderDiscoListInline(_discoArtistId);
+    renderYTListInline(_discoArtistId);
+  } else if (tab === 'events' && _discoArtistId) {
+    renderArtistEventsAdmin(_discoArtistId);
+  } else if (tab === 'photos' && _discoArtistId) {
+    renderArtistPhotosAdmin(_discoArtistId);
+  }
+}
+
+function renderDiscoListInline(artistId) {
   var a = DB.artists.find(function(x){ return x.id === artistId; });
   if (!a) return;
-  var el = document.getElementById('disco-list');
+  var el = document.getElementById('disco-list-inline');
   if (!el) return;
   if (!(a.discography||[]).length) { el.innerHTML = '<p style="color:var(--gray);font-size:12px;">Aucun album.</p>'; return; }
   el.innerHTML = a.discography.map(function(al, i){
+    var streamLinks = '';
+    if (al.spotify) streamLinks += '<a href="'+al.spotify+'" target="_blank" style="color:var(--accent2);font-size:10px;margin-right:8px;">Spotify</a>';
+    if (al.appleMusic) streamLinks += '<a href="'+al.appleMusic+'" target="_blank" style="color:var(--accent2);font-size:10px;margin-right:8px;">Apple</a>';
+    if (al.deezer) streamLinks += '<a href="'+al.deezer+'" target="_blank" style="color:var(--accent2);font-size:10px;">Deezer</a>';
     return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(31,158,92,0.08);">'
-      + (al.cover ? '<img src="'+al.cover+'" style="width:40px;height:40px;object-fit:cover;">' : '<div style="width:40px;height:40px;background:var(--navy2);"></div>')
-      + '<div style="flex:1;"><div style="font-family:Georgia;font-size:13px;color:var(--white);">'+esc(al.title)+'</div><div style="font-size:11px;color:var(--accent2);">'+al.year+'</div></div>'
-      + '<button class="admin-btn-sm danger" onclick="removeDiscoAlbum('+artistId+','+i+')">Supprimer</button>'
+      + (al.cover ? '<img src="'+al.cover+'" style="width:48px;height:48px;object-fit:cover;border-radius:2px;">' : '<div style="width:48px;height:48px;background:var(--navy2);border-radius:2px;display:flex;align-items:center;justify-content:center;"><span style="font-size:18px;color:var(--accent2);">&#9835;</span></div>')
+      + '<div style="flex:1;min-width:0;"><div style="font-family:Georgia;font-size:13px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(al.title)+'</div><div style="font-size:11px;color:var(--accent2);">'+al.year+'</div><div style="margin-top:2px;">'+streamLinks+'</div></div>'
+      + '<button class="admin-btn-sm" style="font-size:9px;padding:4px 10px;color:#e07070;border-color:rgba(200,80,80,0.3);" onclick="removeDiscoAlbum('+artistId+','+i+')">Suppr.</button>'
       + '</div>';
   }).join('');
 }
 
-function renderYTList(artistId) {
+function renderDiscoList(artistId) { renderDiscoListInline(artistId); }
+
+function renderYTListInline(artistId) {
   var a = DB.artists.find(function(x){ return x.id === artistId; });
   if (!a) return;
-  var el = document.getElementById('yt-list');
+  var el = document.getElementById('yt-list-inline');
   if (!el) return;
-  if (!(a.youtubeVideos||[]).length) { el.innerHTML = '<p style="color:var(--gray);font-size:12px;">Aucune vid\u00e9o.</p>'; return; }
+  if (!(a.youtubeVideos||[]).length) { el.innerHTML = '<p style="color:var(--gray);font-size:12px;">Aucune vidéo.</p>'; return; }
   el.innerHTML = (a.youtubeVideos||[]).map(function(v, i){
     return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(31,158,92,0.08);">'
       + '<img src="https://img.youtube.com/vi/'+v.ytId+'/default.jpg" style="width:60px;height:40px;object-fit:cover;">'
       + '<div style="flex:1;font-family:Arial;font-size:12px;color:var(--white);">'+esc(v.title)+'<br><span style="color:var(--accent2);font-size:10px;">'+v.ytId+'</span></div>'
-      + '<button class="admin-btn-sm danger" onclick="removeArtistYT('+artistId+','+i+')">Supprimer</button>'
+      + '<button class="admin-btn-sm" style="font-size:9px;padding:4px 10px;color:#e07070;border-color:rgba(200,80,80,0.3);" onclick="removeArtistYT('+artistId+','+i+')">Suppr.</button>'
       + '</div>';
   }).join('');
 }
 
-function addDiscoAlbum() {
+function renderYTList(artistId) { renderYTListInline(artistId); }
+
+function addDiscoAlbumInline() {
   var title = (document.getElementById('disco-title').value||'').trim();
   var year  = parseInt(document.getElementById('disco-year').value)||new Date().getFullYear();
   var desc  = (document.getElementById('disco-desc').value||'').trim();
   var spot  = (document.getElementById('disco-spotify').value||'').trim();
+  var apple = ((document.getElementById('disco-apple')||{}).value||'').trim();
+  var deezer= ((document.getElementById('disco-deezer')||{}).value||'').trim();
   var prev  = document.getElementById('disco-cover-preview');
   var cover = (prev && prev.src && prev.src.startsWith('data:')) ? prev.src : '';
   if (!title) { alert('Titre requis.'); return; }
+  if (!_discoArtistId) { alert("Sélectionnez d'abord un artiste dans la liste."); return; }
   var a = DB.artists.find(function(x){ return x.id === _discoArtistId; });
   if (!a) return;
   a.discography = a.discography || [];
-  a.discography.push({ title:title, year:year, cover:cover, desc:desc, spotify:spot });
+  a.discography.push({ title:title, year:year, cover:cover, desc:desc, spotify:spot, appleMusic:apple, deezer:deezer });
   saveData(DB);
-  renderDiscoList(_discoArtistId);
-  ['disco-title','disco-year','disco-desc','disco-spotify'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  renderDiscoListInline(_discoArtistId);
+  renderArtistsAdminList();
+  ['disco-title','disco-year','disco-desc','disco-spotify','disco-apple','disco-deezer'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
   if(prev){ prev.src=''; prev.style.display='none'; }
 }
+
+function addDiscoAlbum() { addDiscoAlbumInline(); }
 
 function removeDiscoAlbum(artistId, idx) {
   if (!confirm('Supprimer cet album ?')) return;
   var a = DB.artists.find(function(x){ return x.id === artistId; });
   if (!a || !a.discography) return;
   a.discography.splice(idx, 1);
-  saveData(DB); renderDiscoList(artistId);
+  saveData(DB); renderDiscoListInline(artistId); renderArtistsAdminList();
 }
 
-function addArtistYT() {
+function addArtistYTInline() {
   var ytId  = (document.getElementById('yt-id-input').value||'').trim();
   var title = (document.getElementById('yt-title-input').value||'').trim();
   if (!ytId) { alert('ID YouTube requis.'); return; }
+  if (!_discoArtistId) { alert("Sélectionnez d'abord un artiste."); return; }
   var a = DB.artists.find(function(x){ return x.id === _discoArtistId; });
   if (!a) return;
   a.youtubeVideos = a.youtubeVideos || [];
   a.youtubeVideos.push({ ytId:ytId, title:title||ytId });
   saveData(DB);
-  renderYTList(_discoArtistId);
+  renderYTListInline(_discoArtistId);
   document.getElementById('yt-id-input').value = '';
   document.getElementById('yt-title-input').value = '';
 }
 
+function addArtistYT() { addArtistYTInline(); }
+
 function removeArtistYT(artistId, idx) {
-  if (!confirm('Supprimer cette vid\u00e9o ?')) return;
+  if (!confirm('Supprimer cette vidéo ?')) return;
   var a = DB.artists.find(function(x){ return x.id === artistId; });
   if (!a || !a.youtubeVideos) return;
   a.youtubeVideos.splice(idx, 1);
-  saveData(DB); renderYTList(artistId);
+  saveData(DB); renderYTListInline(artistId);
+}
+
+function renderArtistEventsAdmin(artistId) {
+  var a = DB.artists.find(function(x){ return x.id === artistId; });
+  if (!a) return;
+  var el = document.getElementById('artist-events-list');
+  if (!el) return;
+  var evts = (DB.events||[]).filter(function(e){ return e.artist === a.name; });
+  if (!evts.length) {
+    el.innerHTML = '<p style="color:var(--gray);font-size:12px;margin-bottom:8px;">Aucun événement pour cet artiste.</p>';
+    return;
+  }
+  var typeLabels = { concert:'Concert', showcase:'Showcase', festival:'Festival' };
+  el.innerHTML = evts.map(function(e){
+    var d = e.date ? new Date(e.date).toLocaleDateString('fr-FR') : '—';
+    var typeLbl = typeLabels[e.type||'concert'] || 'Concert';
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(31,158,92,0.08);">'
+      + '<div style="flex:1;">'
+      +   '<div style="font-family:Georgia;font-size:13px;color:var(--white);">'+esc(e.venue)+'</div>'
+      +   '<div style="font-size:11px;color:var(--accent2);">'+d+' · '+esc(e.city)+'</div>'
+      +   '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-top:2px;">'+typeLbl+'</div>'
+      + '</div>'
+      + '<button class="admin-btn-sm" style="font-size:9px;padding:4px 12px;" onclick="editEvtAdmin('+e.id+')">Modifier</button>'
+      + '</div>';
+  }).join('');
+}
+
+function addEventForCurrentArtist() {
+  var a = currentEditArtistId ? DB.artists.find(function(x){ return x.id === currentEditArtistId; }) : null;
+  showAdminPage('shop-events');
+  if (a) {
+    setTimeout(function() {
+      refreshEvtArtistSelect();
+      var sel = document.getElementById('evt-artist');
+      if (sel) {
+        for (var i=0; i<sel.options.length; i++) {
+          if (sel.options[i].value === a.name) { sel.selectedIndex = i; break; }
+        }
+      }
+    }, 100);
+  }
+}
+
+function renderArtistPhotosAdmin(artistId) {
+  var a = DB.artists.find(function(x){ return x.id === artistId; });
+  if (!a) return;
+  var el = document.getElementById('artist-photos-grid');
+  if (!el) return;
+  var photos = a.photos || [];
+  if (!photos.length) {
+    el.innerHTML = '<p style="color:var(--gray);font-size:12px;grid-column:1/-1;">Aucune photo.</p>';
+    return;
+  }
+  el.innerHTML = photos.map(function(p, i){
+    return '<div style="position:relative;background:var(--navy2);border-radius:2px;overflow:hidden;">'
+      + '<img src="'+p.url+'" style="width:100%;height:120px;object-fit:cover;display:block;">'
+      + '<div style="padding:6px 8px;">'
+      +   '<input type="text" value="'+esc(p.caption||'')+'" placeholder="Légende..." style="width:100%;background:none;border:none;border-bottom:1px solid rgba(31,158,92,0.2);color:var(--white);font-family:Arial;font-size:10px;padding:2px 0;outline:none;box-sizing:border-box;" onchange="updateArtistPhotoCaption('+artistId+','+i+',this.value)">'
+      + '</div>'
+      + '<button onclick="removeArtistPhoto('+artistId+','+i+')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);border:none;color:#e07070;width:20px;height:20px;border-radius:2px;cursor:pointer;font-size:13px;line-height:20px;text-align:center;padding:0;">×</button>'
+      + '</div>';
+  }).join('');
+}
+
+function addArtistPhoto() {
+  if (!_discoArtistId) { alert("Sélectionnez d'abord un artiste."); return; }
+  var inp = document.getElementById('artist-photo-upload');
+  var caption = ((document.getElementById('artist-photo-caption')||{}).value||'').trim();
+  if (!inp || !inp.files || !inp.files[0]) { alert('Sélectionnez une image.'); return; }
+  var a = DB.artists.find(function(x){ return x.id === _discoArtistId; });
+  if (!a) return;
+  _resizeImageToBase64(inp.files[0], 1200, 0.82, function(base64) {
+    a.photos = a.photos || [];
+    a.photos.push({ url: base64, caption: caption });
+    saveData(DB);
+    renderArtistPhotosAdmin(_discoArtistId);
+    inp.value = '';
+    var cap = document.getElementById('artist-photo-caption'); if(cap) cap.value='';
+  });
+}
+
+function removeArtistPhoto(artistId, idx) {
+  if (!confirm('Supprimer cette photo ?')) return;
+  var a = DB.artists.find(function(x){ return x.id === artistId; });
+  if (!a || !a.photos) return;
+  a.photos.splice(idx, 1);
+  saveData(DB); renderArtistPhotosAdmin(artistId);
+}
+
+function updateArtistPhotoCaption(artistId, idx, caption) {
+  var a = DB.artists.find(function(x){ return x.id === artistId; });
+  if (!a || !a.photos || !a.photos[idx]) return;
+  a.photos[idx].caption = caption;
+  saveData(DB);
 }
 
 function renderMusicCategoriesList() {

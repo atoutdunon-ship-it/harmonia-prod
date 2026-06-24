@@ -141,82 +141,138 @@
         <div class="admin-page-sub">Gérer le roster HARMONIA</div>
         <div class="admin-divider"></div>
         <div class="admin-success" id="artists-success">Artiste enregistré avec succès.</div>
-        <div class="admin-card">
-          <div class="admin-card-title">Ajouter / Modifier un artiste</div>
-          <div class="admin-grid-2">
-            <div class="admin-field">
-              <label>Nom de l'artiste</label>
-              <input type="text" id="a-name" placeholder="Nom complet">
+
+        <!-- Formulaire artiste avec onglets -->
+        <div class="admin-card" id="artist-edit-card">
+          <div class="admin-card-title" id="artist-form-title">Ajouter / Modifier un artiste</div>
+
+          <!-- Onglets -->
+          <div class="artist-admin-tabs">
+            <button class="artist-tab-btn active" onclick="showArtistTab('info')" id="atab-info">Informations</button>
+            <button class="artist-tab-btn" onclick="showArtistTab('disco')" id="atab-disco">Discographie</button>
+            <button class="artist-tab-btn" onclick="showArtistTab('events')" id="atab-events">Événements</button>
+            <button class="artist-tab-btn" onclick="showArtistTab('photos')" id="atab-photos">Photos</button>
+          </div>
+
+          <!-- Onglet : Informations -->
+          <div class="artist-tab-content active" id="atab-content-info">
+            <div class="admin-grid-2">
+              <div class="admin-field">
+                <label>Nom de l'artiste</label>
+                <input type="text" id="a-name" placeholder="Nom complet">
+              </div>
+              <div class="admin-field">
+                <label>Origine / Pays</label>
+                <input type="text" id="a-origin" placeholder="Ex: Cabo Verde">
+              </div>
             </div>
             <div class="admin-field">
-              <label>Origine / Pays</label>
-              <input type="text" id="a-origin" placeholder="Ex: Cabo Verde">
-            </div>
-          </div>
-          <div class="admin-field">
-            <label>Biographie courte</label>
-            <textarea id="a-bio-short" rows="2" placeholder="Résumé (affiché sur la carte)"></textarea>
-          </div>
-          <div class="admin-field">
-            <label>Biographie longue</label>
-            <textarea id="a-bio-long" rows="5" placeholder="Biographie complète (modale)"></textarea>
-          </div>
-          <div class="admin-grid-2">
-            <div class="admin-field">
-              <label>Instagram</label>
-              <input type="text" id="a-insta" placeholder="@handle">
+              <label>Biographie courte</label>
+              <textarea id="a-bio-short" rows="2" placeholder="Résumé (affiché sur la carte)"></textarea>
             </div>
             <div class="admin-field">
-              <label>Spotify / Streaming</label>
-              <input type="text" id="a-spotify" placeholder="URL Spotify">
+              <label>Biographie longue</label>
+              <textarea id="a-bio-long" rows="5" placeholder="Biographie complète (modale)"></textarea>
+            </div>
+            <div class="admin-grid-2">
+              <div class="admin-field">
+                <label>Instagram</label>
+                <input type="text" id="a-insta" placeholder="@handle">
+              </div>
+              <div class="admin-field">
+                <label>Spotify</label>
+                <input type="text" id="a-spotify" placeholder="https://open.spotify.com/artist/...">
+              </div>
+            </div>
+            <div class="admin-grid-2">
+              <div class="admin-field">
+                <label>Apple Music</label>
+                <input type="text" id="a-apple-music" placeholder="https://music.apple.com/...">
+              </div>
+              <div class="admin-field">
+                <label>Deezer</label>
+                <input type="text" id="a-deezer" placeholder="https://www.deezer.com/artist/...">
+              </div>
+            </div>
+            <div class="admin-field">
+              <label>Photo</label>
+              <div class="file-upload-zone">
+                <input type="file" id="a-photo-file" accept="image/*" onchange="handleArtistPhoto(this)">
+                <div class="file-upload-text">Glisser une photo ou cliquer pour parcourir</div>
+                <div class="file-name-preview" id="a-photo-preview"></div>
+              </div>
+            </div>
+            <div class="admin-submit-row">
+              <button class="admin-btn-ghost" onclick="resetArtistForm()">Réinitialiser</button>
+              <button class="admin-btn-sm" onclick="saveArtist()">Enregistrer l'artiste</button>
             </div>
           </div>
-          <div class="admin-field">
-            <label>Photo (URL ou base64)</label>
-            <div class="file-upload-zone">
-              <input type="file" id="a-photo-file" accept="image/*" onchange="handleArtistPhoto(this)">
-              <div class="file-upload-text">Glisser une photo ou cliquer pour parcourir</div>
-              <div class="file-name-preview" id="a-photo-preview"></div>
+
+          <!-- Onglet : Discographie -->
+          <div class="artist-tab-content" id="atab-content-disco" style="display:none;">
+            <div id="disco-list-inline" style="margin-bottom:16px;"></div>
+            <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:4px;">
+              <div class="admin-card-title" style="font-size:11px;margin-bottom:12px;">Ajouter un album</div>
+              <div class="admin-form-row">
+                <div><label class="admin-label">Titre</label><input class="admin-input" id="disco-title" type="text" placeholder="Nom de l'album"></div>
+                <div><label class="admin-label">Année</label><input class="admin-input" id="disco-year" type="number" placeholder="2024"></div>
+              </div>
+              <div><label class="admin-label">Description</label><textarea class="admin-input" id="disco-desc" rows="2" placeholder="Courte description..."></textarea></div>
+              <div class="admin-form-row" style="margin-top:8px;">
+                <div><label class="admin-label">Spotify</label><input class="admin-input" id="disco-spotify" type="url" placeholder="https://open.spotify.com/..."></div>
+                <div><label class="admin-label">Apple Music</label><input class="admin-input" id="disco-apple" type="url" placeholder="https://music.apple.com/..."></div>
+              </div>
+              <div><label class="admin-label">Deezer</label><input class="admin-input" id="disco-deezer" type="url" placeholder="https://www.deezer.com/album/..."></div>
+              <div style="margin-top:12px;"><label class="admin-label">Pochette (image)</label>
+                <input type="file" accept="image/*" id="disco-cover-input" onchange="previewUpload(this,'disco-cover-preview')" style="background:none;border:none;color:var(--white);padding:0;">
+              </div>
+              <img id="disco-cover-preview" class="admin-upload-preview" alt="">
+              <button class="admin-btn-primary" style="margin-top:12px;" onclick="addDiscoAlbumInline()">Ajouter cet album</button>
+            </div>
+            <!-- YouTube section -->
+            <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:20px;">
+              <div class="admin-card-title" style="font-size:11px;margin-bottom:12px;">Vidéos YouTube</div>
+              <div id="yt-list-inline" style="margin-bottom:12px;"></div>
+              <div class="admin-form-row">
+                <div><label class="admin-label">ID YouTube</label><input class="admin-input" id="yt-id-input" type="text" placeholder="ex: D6vBMXSFbfg"></div>
+                <div><label class="admin-label">Titre</label><input class="admin-input" id="yt-title-input" type="text" placeholder="Titre de la vidéo"></div>
+              </div>
+              <button class="admin-btn-primary" onclick="addArtistYTInline()">Ajouter cette vidéo</button>
             </div>
           </div>
-          <div class="admin-submit-row">
-            <button class="admin-btn-ghost" onclick="resetArtistForm()">Réinitialiser</button>
-            <button class="admin-btn-sm" onclick="saveArtist()">Enregistrer l'artiste</button>
+
+          <!-- Onglet : Événements -->
+          <div class="artist-tab-content" id="atab-content-events" style="display:none;">
+            <div id="artist-events-list" style="margin-bottom:16px;"></div>
+            <button class="admin-btn-sm" onclick="addEventForCurrentArtist()" style="margin-top:8px;">+ Ajouter un événement</button>
+          </div>
+
+          <!-- Onglet : Photos -->
+          <div class="artist-tab-content" id="atab-content-photos" style="display:none;">
+            <div id="artist-photos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:16px;"></div>
+            <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:4px;">
+              <div class="admin-card-title" style="font-size:11px;margin-bottom:12px;">Ajouter une photo</div>
+              <input type="file" accept="image/*" id="artist-photo-upload" style="background:none;border:none;color:var(--white);padding:0;margin-bottom:8px;">
+              <div><label class="admin-label">Légende (optionnelle)</label><input class="admin-input" id="artist-photo-caption" type="text" placeholder="Légende de la photo..."></div>
+              <button class="admin-btn-primary" style="margin-top:12px;" onclick="addArtistPhoto()">Ajouter cette photo</button>
+            </div>
           </div>
         </div>
+
+        <!-- Liste des artistes -->
         <div class="admin-card">
           <div class="admin-card-title">Artistes enregistrés</div>
           <div id="artists-admin-list"></div>
         </div>
 
-        <div class="admin-card" id="disco-admin-section" style="display:none;">
-          <div class="admin-card-title">Discographie de <span id="disco-artist-name"></span></div>
+        <!-- Sections cachées conservées pour compatibilité avec openDiscoAdmin() -->
+        <div id="disco-admin-section" style="display:none;">
+          <span id="disco-artist-name"></span>
           <div id="disco-list"></div>
-          <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:16px;">
-            <div class="admin-card-title" style="font-size:11px;">Ajouter un album</div>
-            <div class="admin-form-row">
-              <div><label class="admin-label">Titre</label><input class="admin-input" id="disco-title" type="text" placeholder="Nom de l'album"></div>
-              <div><label class="admin-label">Année</label><input class="admin-input" id="disco-year" type="number" placeholder="2024"></div>
-            </div>
-            <div><label class="admin-label">Description</label><textarea class="admin-input" id="disco-desc" rows="2" placeholder="Courte description..."></textarea></div>
-            <div><label class="admin-label">Lien Spotify</label><input class="admin-input" id="disco-spotify" type="url" placeholder="https://open.spotify.com/..."></div>
-            <div style="margin-top:8px;"><label class="admin-label">Pochette (image)</label><input type="file" accept="image/*" id="disco-cover-input" onchange="previewUpload(this,'disco-cover-preview')" style="background:none;border:none;color:var(--white);padding:0;"></div>
-            <img id="disco-cover-preview" class="admin-upload-preview" alt="">
-            <button class="admin-btn-primary" style="margin-top:12px;" onclick="addDiscoAlbum()">Ajouter cet album</button>
-          </div>
         </div>
-
-        <div class="admin-card" id="yt-admin-section" style="display:none;">
-          <div class="admin-card-title">Vidéos YouTube de <span id="yt-artist-name"></span></div>
+        <div id="yt-admin-section" style="display:none;">
+          <span id="yt-artist-name"></span>
           <div id="yt-list"></div>
-          <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:16px;">
-            <div class="admin-card-title" style="font-size:11px;">Ajouter une vidéo</div>
-            <div class="admin-form-row">
-              <div><label class="admin-label">ID YouTube</label><input class="admin-input" id="yt-id-input" type="text" placeholder="ex: D6vBMXSFbfg"></div>
-              <div><label class="admin-label">Titre</label><input class="admin-input" id="yt-title-input" type="text" placeholder="Titre de la vidéo"></div>
-            </div>
-            <button class="admin-btn-primary" onclick="addArtistYT()">Ajouter cette vidéo</button>
-          </div>
         </div>
       </div>
 
@@ -668,6 +724,16 @@
                 <label class="admin-label">Artiste</label>
                 <select class="admin-input" id="evt-artist"></select>
               </div>
+              <div>
+                <label class="admin-label">Type d'événement</label>
+                <select class="admin-input" id="evt-type">
+                  <option value="concert">Concert</option>
+                  <option value="showcase">Showcase</option>
+                  <option value="festival">Festival</option>
+                </select>
+              </div>
+            </div>
+            <div class="admin-form-row">
               <div>
                 <label class="admin-label">Venue (salle)</label>
                 <input class="admin-input" id="evt-venue" type="text" placeholder="Olympia...">
