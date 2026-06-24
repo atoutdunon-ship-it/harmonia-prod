@@ -2719,6 +2719,40 @@ function openArtistModal(id) {
       `<a class="modal-social-btn" href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`
     ).join('');
   }
+
+  if (el('modal-disco')) {
+    const disco = a.discography || [];
+    if (!disco.length) {
+      el('modal-disco').innerHTML = '';
+    } else {
+      el('modal-disco').innerHTML =
+        '<div class="modal-disco-title">Discographie</div>'
+        + '<div class="modal-disco-grid">'
+        + disco.map(function(al, i) {
+          var coverKey = 'disc_' + a.id + '_' + i;
+          var coverSrc = (DB.images && DB.images[coverKey]) || al.cover || '';
+          var coverHtml = coverSrc
+            ? '<img src="' + coverSrc + '" alt="' + esc(al.title) + '" class="disco-cover-img">'
+            : '<div class="disco-cover-placeholder">♪</div>';
+          var streamLinks = [
+            al.spotify    && '<a class="disco-stream-btn disco-spotify" href="' + al.spotify + '" target="_blank" rel="noopener">Spotify</a>',
+            al.appleMusic && '<a class="disco-stream-btn disco-apple" href="' + al.appleMusic + '" target="_blank" rel="noopener">Apple Music</a>',
+            al.deezer     && '<a class="disco-stream-btn disco-deezer" href="' + al.deezer + '" target="_blank" rel="noopener">Deezer</a>'
+          ].filter(Boolean).join('');
+          return '<div class="disco-album-card">'
+            + '<div class="disco-cover-wrap">' + coverHtml + '</div>'
+            + '<div class="disco-album-info">'
+            + '<div class="disco-album-title">' + esc(al.title) + '</div>'
+            + '<div class="disco-album-year">' + (al.year || '') + '</div>'
+            + (al.desc ? '<div class="disco-album-desc">' + esc(al.desc) + '</div>' : '')
+            + (streamLinks ? '<div class="disco-stream-row">' + streamLinks + '</div>' : '')
+            + '</div>'
+            + '</div>';
+        }).join('')
+        + '</div>';
+    }
+  }
+
   const ov = document.getElementById('artist-modal');
   if (ov) { ov.classList.add('active'); document.body.style.overflow = 'hidden'; }
 
