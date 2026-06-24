@@ -754,11 +754,15 @@ if (!DB.promoArtists){ DB.promoArtists = [null, null, null]; saveData(DB); }
   var _dm = defaultModules();
   if (!DB.modules) DB.modules = _dm;
 
-  ['shop','concerts','about','artists','cesaria','music','news','contact'].forEach(function(k) {
+  ['about','artists','cesaria','music','news','contact'].forEach(function(k) {
     if (!DB.modules[k]) DB.modules[k] = _dm[k] || { enabled: true };
     DB.modules[k].enabled = true;
   });
-  DB._shopModulesReset = true;
+
+  if (!DB.modules.shop)   DB.modules.shop   = _dm.shop;
+  if (!DB.modules.panier) DB.modules.panier = _dm.panier;
+  DB.modules.shop.enabled   = false;
+  DB.modules.panier.enabled = false;
   saveData(DB);
 })();
 if (!DB.pageTexts)   { DB.pageTexts = {}; saveData(DB); }
@@ -2546,7 +2550,7 @@ function defaultModules() {
     jose:       { enabled:true, label:'José da Silva',     page:'jose-da-silva.html',    group:'nav' },
     artists:    { enabled:true, label:'Artistes',          page:'artistes.html',         group:'nav' },
     music:      { enabled:true, label:'Musique',           page:'musique.html',          group:'nav' },
-    shop:       { enabled:true, label:'Boutique',          page:'boutique.html',         group:'nav' },
+    shop:       { enabled:false, label:'Boutique',          page:'boutique.html',         group:'nav' },
     events:     { enabled:true, label:'Événements',        page:'evenements.html',       group:'nav' },
     news:       { enabled:true, label:'Actualités',        page:'actualites.html',       group:'nav' },
     contact:    { enabled:true, label:'Contact',           page:'contact.html',          group:'nav' },
@@ -2565,6 +2569,10 @@ function applyModules() {
     document.querySelectorAll('[data-module="'+key+'"]').forEach(function(el){ el.style.display = show ? '' : 'none'; });
     document.querySelectorAll('[data-module-nav="'+key+'"]').forEach(function(el){ el.style.display = show ? '' : 'none'; });
   });
+
+  var shopOn = DB.modules.shop && DB.modules.shop.enabled;
+  var cartBtn = document.getElementById('nav-cart-btn');
+  if (cartBtn) cartBtn.style.display = shopOn ? '' : 'none';
 }
 
 var _pendingDisableKey = null;
