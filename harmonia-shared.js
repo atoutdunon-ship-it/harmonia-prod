@@ -482,7 +482,11 @@ const LANGS = {
   }
 };
 
-let currentLang = (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('harmonia_lang')) || 'pt';
+let currentLang = (function() {
+  try { var s = sessionStorage.getItem('harmonia_lang'); if (s && LANGS[s]) return s; } catch(e) {}
+  try { var l = localStorage.getItem('harmonia_lang');  if (l && LANGS[l]) return l; } catch(e) {}
+  return 'pt';
+})();
 
 function T(key) {
   return (LANGS[currentLang] && LANGS[currentLang][key]) || (LANGS['fr'][key]) || key;
@@ -536,7 +540,9 @@ function applyLang() {
 
 function setLang(lang) {
   currentLang = lang;
-  if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('harmonia_lang', lang);
+
+  try { sessionStorage.setItem('harmonia_lang', lang); } catch(e) {}
+  try { localStorage.setItem('harmonia_lang', lang); } catch(e) {}
   applyLang();
 }
 
@@ -889,9 +895,15 @@ try { if(typeof renderShopConcerts==='function') renderShopConcerts(); } catch(e
 
 (function initLang() {
   try {
-    var saved = (typeof sessionStorage !== 'undefined') ? sessionStorage.getItem('harmonia_lang') : null;
+    var saved = null;
+    try { saved = sessionStorage.getItem('harmonia_lang'); } catch(e) {}
+    if (!saved || !LANGS[saved]) {
+      try { saved = localStorage.getItem('harmonia_lang'); } catch(e) {}
+    }
     if (saved && LANGS[saved]) {
       currentLang = saved;
+
+      try { sessionStorage.setItem('harmonia_lang', saved); } catch(e) {}
     }
   } catch(e) {}
 

@@ -541,8 +541,12 @@ const HOME_LANGS = {
   }
 };
 
-// Langue par défaut : Portugais, ou dernière langue choisie
-var defaultLang = sessionStorage.getItem('harmonia_lang') || 'pt';
+// Langue par défaut — cascade sessionStorage → localStorage → 'pt'
+var defaultLang = (function() {
+  try { var s = sessionStorage.getItem('harmonia_lang'); if (s) return s; } catch(e) {}
+  try { var l = localStorage.getItem('harmonia_lang');  if (l) return l; } catch(e) {}
+  return 'pt';
+})();
 
 function applyHomeLang(lang) {
   var t = HOME_LANGS[lang] || HOME_LANGS.pt;
@@ -583,8 +587,9 @@ window.addEventListener('resize', adjustLayout);
 
 // Entrer dans le site avec la langue choisie
 function enterSite(lang) {
-  // Sauvegarder la langue
-  sessionStorage.setItem('harmonia_lang', lang);
+  // Sauvegarder la langue — double-write pour persistance mobile (iOS backgrounded tab)
+  try { sessionStorage.setItem('harmonia_lang', lang); } catch(e) {}
+  try { localStorage.setItem('harmonia_lang', lang); } catch(e) {}
 
   // Animation de transition
   var trans = document.getElementById('page-transition');
@@ -1470,6 +1475,6 @@ function enterSite(lang) {
     </div><!-- /admin-main -->
   </div><!-- /admin-panel -->
 </div><!-- /admin-overlay -->
-<script src="harmonia-shared.js?v=74"></script>
+<script src="harmonia-shared.js?v=75"></script>
 </body>
 </html>
