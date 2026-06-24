@@ -742,6 +742,7 @@ if (!DB.events   || !DB.events.length)        { DB.events   = defaultEvents();  
 if (!DB.customers)   { DB.customers   = []; saveData(DB); }
 if (!DB.paymentLinks){ DB.paymentLinks = []; saveData(DB); }
 if (!DB.modules)     { DB.modules = defaultModules(); saveData(DB); }
+if (!DB.promoArtists){ DB.promoArtists = [null, null, null]; saveData(DB); }
 
 (function() {
   var _dm = defaultModules();
@@ -880,6 +881,7 @@ try { applyMaintenanceMode(); } catch(e) {}
 updateNavConnectBtn();
 
 try { renderArtists(); } catch(e) {}
+try { renderPromoArtists(); } catch(e) {}
 try { renderCatalogueByCategory(); } catch(e) {}
 try { renderNews(); } catch(e) {}
 try { if(typeof renderShopAlbums==='function') renderShopAlbums(); } catch(e) {}
@@ -3072,6 +3074,34 @@ function closeModal() {
 var _am=document.getElementById('artist-modal'); if(_am) _am.addEventListener('click', e => {
   if (e.target === document.getElementById('artist-modal')) closeModal();
 });
+
+function renderPromoArtists() {
+  var grid = document.getElementById('promo-artists-grid');
+  if (!grid || typeof DB === 'undefined') return;
+  var ids = (DB.promoArtists || [null, null, null]);
+
+  while (ids.length < 3) ids.push(null);
+  grid.innerHTML = ids.slice(0, 3).map(function(id) {
+    if (!id) {
+      return '<div class="promo-artist-slot-empty"><span>Emplacement vide</span></div>';
+    }
+    var a = (DB.artists || []).find(function(x) { return x.id === id; });
+    if (!a) {
+      return '<div class="promo-artist-slot-empty"><span>Artiste introuvable</span></div>';
+    }
+    var img = (typeof artistImg === 'function') ? artistImg(a) : null;
+    var photoEl = img
+      ? '<img src="' + img + '" alt="' + esc(a.name) + '" loading="lazy">'
+      : '<div class="promo-artist-no-photo">&#9834;</div>';
+    return '<div class="promo-artist-card">'
+      + '<div class="promo-artist-photo">' + photoEl + '</div>'
+      + '<div class="promo-artist-info">'
+      +   '<div class="promo-artist-name">' + esc(a.name) + '</div>'
+      +   '<a href="artistes.html?artist=' + a.id + '" class="promo-artist-btn">Découvrir</a>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
 
 function renderTracks() {
   const list = document.getElementById('tracks-list');

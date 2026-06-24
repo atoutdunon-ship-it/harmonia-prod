@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Administration — HARMONIA</title>
-<link rel="stylesheet" href="harmonia-shared.css?v=73">
+<link rel="stylesheet" href="harmonia-shared.css?v=74">
 <style>
 /* ── Variables autonomes — charte Navy / Blanc / Noir ── */
 :root {
@@ -1492,6 +1492,7 @@ td.editable:hover { background: #eaf1fb !important; }
       <div class="page-sub">Activer ou désactiver les sections du site</div>
       <div class="a-card" style="max-width:600px;">
         <div id="modules-grid-custom"></div>
+        <div id="promo-artists-admin"></div>
       </div>
     </div>
 
@@ -1645,7 +1646,7 @@ td.editable:hover { background: #eaf1fb !important; }
 })();
 </script>
 
-<script src="harmonia-shared.js?v=73"></script>
+<script src="harmonia-shared.js?v=74"></script>
 
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -2626,7 +2627,73 @@ function _renderModulesCustom() {
   }
 
   el.innerHTML = section('Navigation principale', navKeys) + section('Pages utilitaires', utilKeys);
+  // Injecter le module Artistes en Promo juste en dessous
+  _renderPromoArtistsAdmin();
 }
+
+// ── Module Artistes en Promo ──────────────────────────────
+function _renderPromoArtistsAdmin() {
+  var container = document.getElementById('promo-artists-admin');
+  if (!container || typeof DB === 'undefined') return;
+  var ids = DB.promoArtists || [null, null, null];
+  while (ids.length < 3) ids.push(null);
+  var artists = DB.artists || [];
+
+  function optionsHtml(selectedId) {
+    var opts = '<option value="">— Emplacement vide —</option>';
+    artists.forEach(function(a) {
+      var sel = (a.id === selectedId) ? ' selected' : '';
+      opts += '<option value="' + a.id + '"' + sel + '>' + _esc(a.name) + '</option>';
+    });
+    return opts;
+  }
+
+  var selectStyle = 'width:100%;background:#0a1628;border:1px solid rgba(255,255,255,0.12);'
+    + 'color:rgba(255,255,255,0.85);font-family:Arial;font-size:11px;letter-spacing:1px;'
+    + 'padding:10px 12px;outline:none;cursor:pointer;';
+
+  var html = '<div style="margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.07);">'
+    + '<div style="font-family:Arial;font-size:8px;letter-spacing:3px;text-transform:uppercase;'
+      + 'color:#2ecc80;margin-bottom:16px;padding-bottom:6px;border-bottom:1px solid rgba(46,204,128,0.2);">'
+      + 'Artistes en Promo — Qui sommes-nous</div>'
+    + '<div style="font-family:Arial;font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:16px;">'
+      + 'Sélectionnez jusqu\'à 3 artistes à mettre en avant en bas de la page "Qui sommes-nous".</div>';
+
+  [0, 1, 2].forEach(function(i) {
+    html += '<div style="margin-bottom:12px;">'
+      + '<div style="font-family:Arial;font-size:8px;letter-spacing:2px;text-transform:uppercase;'
+        + 'color:rgba(255,255,255,0.3);margin-bottom:6px;">Emplacement ' + (i + 1) + '</div>'
+      + '<select style="' + selectStyle + '" onchange="_savePromoArtist(' + i + ', this.value)">'
+      + optionsHtml(ids[i])
+      + '</select>'
+      + '</div>';
+  });
+
+  html += '<button onclick="_saveAllPromoArtists()" style="margin-top:8px;font-family:Arial;font-size:9px;'
+    + 'letter-spacing:2px;text-transform:uppercase;background:rgba(46,204,128,0.15);'
+    + 'color:#2ecc80;border:1px solid rgba(46,204,128,0.35);padding:10px 24px;cursor:pointer;">'
+    + '✓ Enregistrer la sélection</button>';
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+window._savePromoArtist = function(index, val) {
+  if (typeof DB === 'undefined') return;
+  if (!DB.promoArtists) DB.promoArtists = [null, null, null];
+  DB.promoArtists[index] = val ? parseInt(val, 10) : null;
+};
+
+window._saveAllPromoArtists = function() {
+  if (typeof DB === 'undefined') return;
+  if (typeof saveData === 'function') saveData(DB);
+  // Feedback visuel
+  var btn = event.target;
+  var orig = btn.textContent;
+  btn.textContent = '✓ Sauvegardé !';
+  btn.style.background = 'rgba(46,204,128,0.3)';
+  setTimeout(function() { btn.textContent = orig; btn.style.background = 'rgba(46,204,128,0.15)'; }, 2000);
+};
 
 function _toggleModuleCustom(key) {
   // Auto-contenu : pas de dépendance à isSuperAdmin() de shared.js

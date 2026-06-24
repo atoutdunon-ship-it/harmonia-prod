@@ -444,8 +444,9 @@
   .artists-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 3px;
+    gap: 16px;
     background: var(--dark);
+    padding: 16px;
   }
 
 
@@ -545,6 +546,92 @@
     background: linear-gradient(135deg, var(--navy) 0%, var(--blue2) 100%);
     display: flex; align-items: center; justify-content: center;
     font-size: 56px; color: rgba(46,204,128,0.12);
+  }
+
+
+  .promo-artists-section {
+    padding: 80px 48px 100px;
+    background: var(--navy2);
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .promo-artists-section .section-label {
+    margin-bottom: 8px;
+  }
+  .promo-artists-section .section-title {
+    margin-bottom: 48px;
+  }
+  .promo-artists-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .promo-artist-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: var(--navy3);
+    border: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .promo-artist-card:hover { border-color: rgba(46,204,128,0.3); }
+  .promo-artist-photo {
+    width: 100%;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    background: var(--navy3);
+  }
+  .promo-artist-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top center;
+    transition: transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94);
+    filter: grayscale(15%) brightness(0.9);
+    display: block;
+  }
+  .promo-artist-card:hover .promo-artist-photo img {
+    transform: scale(1.05);
+    filter: grayscale(0%) brightness(1);
+  }
+  .promo-artist-no-photo {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(46,204,128,0.15); font-size: 56px;
+  }
+  .promo-artist-info {
+    padding: 24px 20px 28px;
+    width: 100%;
+  }
+  .promo-artist-name {
+    font-family: Georgia, serif;
+    font-size: clamp(18px, 2vw, 22px);
+    color: var(--white);
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+  }
+  .promo-artist-btn {
+    display: inline-block;
+    font-family: Arial, sans-serif;
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--accent2);
+    border: 1px solid rgba(46,204,128,0.4);
+    padding: 10px 24px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+  }
+  .promo-artist-btn:hover {
+    background: var(--accent2);
+    color: var(--dark);
+  }
+  .promo-artist-slot-empty {
+    display: flex; align-items: center; justify-content: center;
+    aspect-ratio: 3/4;
+    border: 1px dashed rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.15);
+    font-family: Arial, sans-serif;
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
   }
 
 
@@ -4295,4 +4382,15 @@ html { height: -webkit-fill-available; }
 
 .artist-photo-item:hover .artist-photo-caption {
   opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .promo-artists-section { padding: 60px 24px 80px; }
+  .promo-artists-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .promo-artist-name { font-size: 15px; }
+  .promo-artist-info { padding: 16px 12px 20px; }
+}
+@media (max-width: 640px) {
+  .promo-artists-grid { grid-template-columns: 1fr; gap: 20px; max-width: 360px; }
+  .promo-artists-section { padding: 48px 20px 60px; }
 }
