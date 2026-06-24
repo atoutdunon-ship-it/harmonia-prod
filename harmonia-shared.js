@@ -759,6 +759,34 @@ if (!DB.musicCategories || !DB.musicCategories.length) { DB.musicCategories = de
 applyModules();
 try { applyMaintenanceMode(); } catch(e) {}
 
+(function injectAdminReturnBtn() {
+  if (window.location.search.indexOf('from=admin') === -1) return;
+  var btn = document.createElement('a');
+  btn.href = 'admin.html';
+  btn.id   = 'admin-return-btn';
+  btn.innerHTML = '&#8592; Admin';
+  btn.style.cssText = [
+    'position:fixed',
+    'bottom:24px',
+    'left:24px',
+    'z-index:99990',
+    'background:#0a1628',
+    'color:#2ecc80',
+    'border:1px solid rgba(46,204,128,0.4)',
+    'font-family:Arial,sans-serif',
+    'font-size:10px',
+    'letter-spacing:2px',
+    'text-transform:uppercase',
+    'text-decoration:none',
+    'padding:10px 18px',
+    'box-shadow:0 4px 24px rgba(0,0,0,0.5)',
+    'transition:background 0.2s,border-color 0.2s'
+  ].join(';');
+  btn.addEventListener('mouseenter', function(){ btn.style.background='#0d2618'; btn.style.borderColor='rgba(46,204,128,0.8)'; });
+  btn.addEventListener('mouseleave', function(){ btn.style.background='#0a1628'; btn.style.borderColor='rgba(46,204,128,0.4)'; });
+  document.body.appendChild(btn);
+})();
+
 (function migrateCeuzany() {
   var changed = false;
 
@@ -2656,29 +2684,60 @@ function _changeMaintenanceImg(key) {
 function applyMaintenanceMode() {
   if (!DB || !DB.modules) return;
   var page = window.location.pathname.split('/').pop() || 'index.html';
+  if (!page || page === 'index.html' || page === 'admin.html') return;
+
   var key = null;
   Object.keys(DB.modules).forEach(function(k){
     if (DB.modules[k].page === page) key = k;
   });
   if (!key) return;
+
   var m = DB.modules[key];
   if (m.enabled !== false) return;
-  if ((m.mode || 'hidden') !== 'maintenance') return;
 
-  var imgSrc = (DB.images && DB.images['maintenance_'+key]) || '';
-  var overlay = document.createElement('div');
-  overlay.id = 'maintenance-overlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;';
-  overlay.innerHTML =
-    (imgSrc ? '<img src="'+imgSrc+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.35;">' : '')
-    + '<div style="position:absolute;inset:0;background:rgba(4,12,8,0.82);"></div>'
-    + '<div style="position:relative;z-index:2;text-align:center;padding:40px 24px;">'
-    +   '<div style="font-size:9px;letter-spacing:5px;text-transform:uppercase;color:#2ecc80;margin-bottom:20px;">HARMONIA</div>'
-    +   '<div style="font-family:Georgia;font-size:clamp(26px,5vw,48px);color:#fff;font-weight:normal;line-height:1.2;margin-bottom:16px;">Mise à jour<br>en cours</div>'
-    +   '<div style="width:48px;height:1px;background:#2ecc80;margin:0 auto 20px;"></div>'
-    +   '<div style="font-family:Arial;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.45);">Cette page sera bientôt disponible</div>'
-    + '</div>';
-  if (!document.getElementById('maintenance-overlay')) document.body.appendChild(overlay);
+
+
+  var _isAdmin = false;
+  if (typeof currentUser !== 'undefined' && currentUser &&
+      (currentUser.role === 'superadmin' || currentUser.role === 'administrateur')) {
+    _isAdmin = true;
+  } else {
+    try {
+      var _sess = sessionStorage.getItem('harmonia_user');
+      if (_sess) {
+        var _u = JSON.parse(_sess);
+        if (_u && (_u.role === 'superadmin' || _u.role === 'administrateur')) _isAdmin = true;
+      }
+    } catch(e) {}
+  }
+  if (_isAdmin) return;
+
+  var mode = m.mode || 'hidden';
+
+  if (mode === 'hidden') {
+
+    window.location.replace('index.html');
+    return;
+  }
+
+  if (mode === 'maintenance') {
+
+    if (document.getElementById('maintenance-overlay')) return;
+    var imgSrc = (DB.images && DB.images['maintenance_'+key]) || '';
+    var overlay = document.createElement('div');
+    overlay.id = 'maintenance-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+    overlay.innerHTML =
+      (imgSrc ? '<img src="'+imgSrc+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.35;">' : '')
+      + '<div style="position:absolute;inset:0;background:rgba(4,12,8,0.82);"></div>'
+      + '<div style="position:relative;z-index:2;text-align:center;padding:40px 24px;">'
+      +   '<div style="font-size:9px;letter-spacing:5px;text-transform:uppercase;color:#2ecc80;margin-bottom:20px;">HARMONIA</div>'
+      +   '<div style="font-family:Georgia;font-size:clamp(26px,5vw,48px);color:#fff;font-weight:normal;line-height:1.2;margin-bottom:16px;">Mise à jour<br>en cours</div>'
+      +   '<div style="width:48px;height:1px;background:#2ecc80;margin:0 auto 20px;"></div>'
+      +   '<div style="font-family:Arial;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.45);">Cette page sera bientôt disponible</div>'
+      + '</div>';
+    document.body.appendChild(overlay);
+  }
 }
 
 function renderModulesAdmin() {
