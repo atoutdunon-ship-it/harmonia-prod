@@ -767,9 +767,9 @@ try { applyMaintenanceMode(); } catch(e) {}
   btn.innerHTML = '&#8592; Admin';
   btn.style.cssText = [
     'position:fixed',
-    'bottom:24px',
+    'bottom:64px',
     'left:24px',
-    'z-index:99990',
+    'z-index:99999',
     'background:#0a1628',
     'color:#2ecc80',
     'border:1px solid rgba(46,204,128,0.4)',
@@ -2699,14 +2699,14 @@ function applyMaintenanceMode() {
 
   var _isAdmin = false;
   if (typeof currentUser !== 'undefined' && currentUser &&
-      (currentUser.role === 'superadmin' || currentUser.role === 'administrateur')) {
+      (['superadmin','administrateur','editor'].indexOf(currentUser.role) !== -1)) {
     _isAdmin = true;
   } else {
     try {
       var _sess = sessionStorage.getItem('harmonia_user');
       if (_sess) {
         var _u = JSON.parse(_sess);
-        if (_u && (_u.role === 'superadmin' || _u.role === 'administrateur')) _isAdmin = true;
+        if (_u && ['superadmin','administrateur','editor'].indexOf(_u.role) !== -1) _isAdmin = true;
       }
     } catch(e) {}
   }
