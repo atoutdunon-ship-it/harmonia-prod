@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Administration — HARMONIA</title>
-<link rel="stylesheet" href="harmonia-shared.css?v=46">
+<link rel="stylesheet" href="harmonia-shared.css?v=67">
 <style>
 /* ── Variables autonomes — charte Navy / Blanc / Noir ── */
 :root {
@@ -1645,7 +1645,7 @@ td.editable:hover { background: #eaf1fb !important; }
 })();
 </script>
 
-<script src="harmonia-shared.js?v=66"></script>
+<script src="harmonia-shared.js?v=67"></script>
 
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -2553,42 +2553,204 @@ window.renderUsersAdminList = function() {
 };
 
 // ─────────────────────────────────────────────────────────
-// MODULES — notre rendu personnalisé
+// MODULES — gestion complète inline (indépendante de shared.js)
 // ─────────────────────────────────────────────────────────
+
+var _modPendingKey = null;
+var _modPendingImg = null;
+
 function _renderModulesCustom() {
   var el = document.getElementById('modules-grid-custom');
   if (!el || typeof DB === 'undefined') return;
-  if (!DB.modules) return;
+  if (!DB.modules) { if (typeof defaultModules === 'function') DB.modules = defaultModules(); else return; }
 
   var mods = DB.modules;
-  el.innerHTML = Object.keys(mods).map(function(key) {
-    var m   = mods[key];
-    var on  = m.enabled !== false;
-    var lbl = m.label || key;
-    return '<div class="mod-toggle">'
-      + '<div>'
-      + '<span style="font-size:12px;letter-spacing:1px;">' + _esc(lbl) + '</span>'
-      + '<span style="display:block;font-size:9px;letter-spacing:1px;margin-top:2px;'
-      + 'color:' + (on ? 'var(--main-text)' : 'var(--main-label)') + ';">'
-      + (on ? 'ACTIF' : 'DÉSACTIVÉ') + '</span>'
+  var navKeys  = ['about','cesaria','jose','artists','music','shop','events','news','contact'];
+  var utilKeys = ['moncompte','panier'];
+
+  function row(key) {
+    var m  = mods[key]; if (!m) return '';
+    var on = m.enabled !== false;
+    var mode = m.mode || 'hidden';
+    var lbl  = m.label || key;
+    var pageLink = m.page
+      ? '<a href="' + m.page + '" target="_blank" style="font-size:9px;letter-spacing:1px;color:#2ecc80;'
+        + 'text-decoration:none;padding:3px 8px;border:1px solid rgba(46,204,128,0.3);white-space:nowrap;">↗ Voir</a>'
+      : '';
+    var badge = !on
+      ? (mode === 'maintenance'
+          ? '<span style="font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;'
+            + 'border:1px solid rgba(230,150,40,0.5);color:rgba(230,180,60,0.8);">⚠ Maintenance</span>'
+          : '<span style="font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;'
+            + 'border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.3);">Caché</span>')
+      : '';
+    var imgBtn = (!on && mode === 'maintenance')
+      ? '<button onclick="_modChangeImg(\'' + key + '\')" style="font-size:8px;letter-spacing:1px;text-transform:uppercase;'
+        + 'padding:3px 8px;border:1px solid rgba(46,204,128,0.25);color:rgba(46,204,128,0.7);background:none;cursor:pointer;">📷 Image</button>'
+      : '';
+    var trackBg  = on ? '#2ecc80' : 'rgba(255,255,255,0.12)';
+    var knobLeft = on ? '20px' : '2px';
+    var dotColor = on ? '#2ecc80' : 'rgba(255,255,255,0.18)';
+    var lblColor = on ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)';
+    return '<div style="display:flex;align-items:center;gap:10px;padding:12px 0;'
+      + 'border-bottom:1px solid rgba(255,255,255,0.07);">'
+      + '<span style="width:7px;height:7px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;"></span>'
+      + '<div style="flex:1;min-width:0;">'
+      +   '<div style="font-family:Arial;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:' + lblColor + ';">' + _esc(lbl) + '</div>'
+      +   (m.page ? '<div style="font-family:monospace;font-size:9px;color:rgba(255,255,255,0.2);margin-top:1px;">' + _esc(m.page) + '</div>' : '')
       + '</div>'
-      + '<div class="toggle-sw ' + (on ? 'on' : '') + '"'
-      + ' onclick="_toggleModuleCustom(\'' + key + '\')"'
-      + ' title="' + (on ? 'Désactiver' : 'Activer') + '"></div>'
+      + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">'
+      +   badge + imgBtn + pageLink
+      +   '<button onclick="_toggleModuleCustom(\'' + key + '\')" style="display:flex;align-items:center;gap:6px;'
+      +     'background:none;border:none;cursor:pointer;padding:4px;">'
+      +     '<span style="display:inline-block;width:34px;height:20px;border-radius:10px;position:relative;'
+      +       'background:' + trackBg + ';transition:background .2s;flex-shrink:0;">'
+      +       '<span style="position:absolute;top:2px;left:' + knobLeft + ';width:16px;height:16px;border-radius:50%;'
+      +         'background:#fff;transition:left .2s;"></span>'
+      +     '</span>'
+      +     '<span style="font-family:Arial;font-size:9px;letter-spacing:1px;color:' + lblColor + ';white-space:nowrap;">'
+      +       (on ? 'ACTIF' : 'INACTIF') + '</span>'
+      +   '</button>'
+      + '</div>'
       + '</div>';
-  }).join('');
+  }
+
+  function section(title, keys) {
+    var rows = keys.filter(function(k){ return mods[k]; }).map(row).join('');
+    if (!rows) return '';
+    return '<div style="margin-bottom:20px;">'
+      + '<div style="font-family:Arial;font-size:8px;letter-spacing:3px;text-transform:uppercase;'
+        + 'color:#2ecc80;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid rgba(46,204,128,0.2);">'
+        + title + '</div>'
+      + rows + '</div>';
+  }
+
+  el.innerHTML = section('Navigation principale', navKeys) + section('Pages utilitaires', utilKeys);
 }
 
 function _toggleModuleCustom(key) {
-  // Utiliser toggleModule de shared.js si disponible (gère save + applyModules)
-  if (typeof toggleModule === 'function') {
-    toggleModule(key);
-  } else {
-    if (typeof DB === 'undefined' || !DB.modules || !DB.modules[key]) return;
-    DB.modules[key].enabled = !DB.modules[key].enabled;
+  // Auto-contenu : pas de dépendance à isSuperAdmin() de shared.js
+  if (typeof DB === 'undefined' || !DB.modules || !DB.modules[key]) return;
+  var m = DB.modules[key];
+  if (!m.enabled) {
+    // Réactivation directe
+    m.enabled = true;
+    m.mode = 'hidden';
     if (typeof saveData === 'function') saveData(DB);
+    if (typeof applyModules === 'function') applyModules();
+    _renderModulesCustom();
+  } else {
+    // Désactivation → modale de choix
+    _modPendingKey = key;
+    _modPendingImg = null;
+    _showModuleDisableModal(key, m);
   }
+}
+
+function _showModuleDisableModal(key, m) {
+  var existing = document.getElementById('mod-disable-modal');
+  if (existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'mod-disable-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.88);'
+    + 'display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);';
+  modal.innerHTML =
+    '<div style="background:#0a1628;border:1px solid rgba(46,204,128,0.25);max-width:460px;width:92%;padding:32px 28px;">'
+    + '<div style="font-family:Arial;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#2ecc80;margin-bottom:6px;">Gestion des modules</div>'
+    + '<div style="font-family:Georgia;font-size:20px;color:#fff;margin-bottom:4px;">Désactiver</div>'
+    + '<div style="font-family:Arial;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:24px;">' + _esc(m.label || key) + '</div>'
+    // Option maintenance
+    + '<label id="mdm-lbl1" style="display:block;border:1px solid rgba(46,204,128,0.15);padding:16px 18px;margin-bottom:10px;cursor:pointer;">'
+    +   '<div style="display:flex;align-items:flex-start;gap:12px;">'
+    +     '<input type="radio" name="mdm-mode" id="mdm-r1" value="maintenance" style="margin-top:2px;accent-color:#2ecc80;">'
+    +     '<div>'
+    +       '<div style="font-family:Arial;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#fff;margin-bottom:3px;">Mise à jour en cours</div>'
+    +       '<div style="font-family:Arial;font-size:10px;color:rgba(255,255,255,0.4);line-height:1.5;">Affiche une page de maintenance avec image personnalisable.</div>'
+    +       '<div id="mdm-img-zone" style="margin-top:12px;display:none;">'
+    +         '<div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:6px;">Image de fond (optionnelle)</div>'
+    +         '<input type="file" accept="image/*" id="mdm-img-input" onchange="_modPreviewImg(this)" style="color:rgba(255,255,255,0.5);font-size:10px;background:none;border:none;padding:0;">'
+    +         '<div id="mdm-img-prev" style="margin-top:8px;display:none;"><img id="mdm-img-src" style="max-width:100%;max-height:100px;object-fit:cover;border:1px solid rgba(46,204,128,0.2);"></div>'
+    +       '</div>'
+    +     '</div>'
+    +   '</div>'
+    + '</label>'
+    // Option masquer
+    + '<label id="mdm-lbl2" style="display:block;border:1px solid rgba(46,204,128,0.4);padding:16px 18px;margin-bottom:22px;cursor:pointer;">'
+    +   '<div style="display:flex;align-items:flex-start;gap:12px;">'
+    +     '<input type="radio" name="mdm-mode" id="mdm-r2" value="hidden" checked style="margin-top:2px;accent-color:#2ecc80;">'
+    +     '<div>'
+    +       '<div style="font-family:Arial;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#fff;margin-bottom:3px;">Retirer uniquement les liens</div>'
+    +       '<div style="font-family:Arial;font-size:10px;color:rgba(255,255,255,0.4);line-height:1.5;">La page disparaît du menu. Accessible via URL directe.</div>'
+    +     '</div>'
+    +   '</div>'
+    + '</label>'
+    // Boutons
+    + '<div style="display:flex;gap:10px;justify-content:flex-end;">'
+    +   '<button onclick="document.getElementById(\'mod-disable-modal\').remove();_modPendingKey=null;" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.45);padding:9px 18px;font-family:Arial;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">Annuler</button>'
+    +   '<button onclick="_confirmModuleDisable()" style="background:rgba(200,50,50,0.15);border:1px solid rgba(200,50,50,0.4);color:#e07070;padding:9px 22px;font-family:Arial;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">Désactiver</button>'
+    + '</div>'
+    + '</div>';
+  document.body.appendChild(modal);
+
+  modal.querySelector('#mdm-r1').addEventListener('change', function(){
+    document.getElementById('mdm-img-zone').style.display = 'block';
+    document.getElementById('mdm-lbl1').style.borderColor = 'rgba(46,204,128,0.4)';
+    document.getElementById('mdm-lbl2').style.borderColor = 'rgba(46,204,128,0.15)';
+  });
+  modal.querySelector('#mdm-r2').addEventListener('change', function(){
+    document.getElementById('mdm-img-zone').style.display = 'none';
+    document.getElementById('mdm-lbl2').style.borderColor = 'rgba(46,204,128,0.4)';
+    document.getElementById('mdm-lbl1').style.borderColor = 'rgba(46,204,128,0.15)';
+  });
+  modal.addEventListener('click', function(e){ if (e.target === modal){ modal.remove(); _modPendingKey = null; } });
+}
+
+function _modPreviewImg(input) {
+  var f = input.files[0]; if (!f) return;
+  if (typeof _resizeImageToBase64 === 'function') {
+    _resizeImageToBase64(f, 1200, 0.88, function(b64){
+      _modPendingImg = b64;
+      var w = document.getElementById('mdm-img-prev');
+      var i = document.getElementById('mdm-img-src');
+      if (w && i) { i.src = b64; w.style.display = 'block'; }
+    });
+  }
+}
+
+function _confirmModuleDisable() {
+  var key = _modPendingKey;
+  if (!key || !DB.modules || !DB.modules[key]) return;
+  var sel = document.querySelector('input[name="mdm-mode"]:checked');
+  var mode = sel ? sel.value : 'hidden';
+  DB.modules[key].enabled = false;
+  DB.modules[key].mode = mode;
+  if (mode === 'maintenance' && _modPendingImg) {
+    DB.images = DB.images || {};
+    DB.images['maintenance_' + key] = _modPendingImg;
+  }
+  if (typeof saveData === 'function') saveData(DB);
+  if (typeof applyModules === 'function') applyModules();
   _renderModulesCustom();
+  var modal = document.getElementById('mod-disable-modal');
+  if (modal) modal.remove();
+  _modPendingKey = null; _modPendingImg = null;
+}
+
+function _modChangeImg(key) {
+  var inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = function() {
+    var f = inp.files[0]; if (!f) return;
+    if (typeof _resizeImageToBase64 === 'function') {
+      _resizeImageToBase64(f, 1200, 0.88, function(b64){
+        DB.images = DB.images || {};
+        DB.images['maintenance_' + key] = b64;
+        if (typeof saveData === 'function') saveData(DB);
+        _renderModulesCustom();
+      });
+    }
+  };
+  inp.click();
 }
 
 // renderModulesAdmin est appelé par shared.js — on le rebranche ici
