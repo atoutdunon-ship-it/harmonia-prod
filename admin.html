@@ -3338,15 +3338,20 @@ function _mGrid(html) {
   return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' + html + '</div>';
 }
 
-function _mImageField(currentSrc) {
+function _mImageField(currentSrc, coverUrl) {
   var preview = currentSrc
     ? '<img id="modal-img-preview" src="' + currentSrc + '" class="modal-img-preview" style="display:block;">'
     : '<img id="modal-img-preview" class="modal-img-preview">';
   return '<div class="a-field" style="margin-bottom:14px;">'
        + '<label style="display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;'
-       + 'color:#000;margin-bottom:6px;">Image</label>'
+       + 'color:#000;margin-bottom:6px;">Pochette</label>'
        + '<input type="file" id="modal-img-input" accept="image/*"'
        + ' style="font-size:12px;color:#000;" onchange="_onModalImgChange(this)">'
+       + '<div style="margin:8px 0 4px;font-size:9px;letter-spacing:1px;color:#666;text-transform:uppercase;">— ou URL image externe —</div>'
+       + '<input type="text" id="modal-cover-url" value="' + _esc(coverUrl || '') + '"'
+       + ' placeholder="https://img.youtube.com/vi/YTID/hqdefault.jpg"'
+       + ' style="width:100%;font-size:12px;padding:6px 8px;border:1px solid #ccc;color:#000;box-sizing:border-box;"'
+       + ' onchange="_onModalCoverUrlChange(this)">'
        + preview
        + '</div>';
 }
@@ -3357,7 +3362,15 @@ function _onModalImgChange(input) {
     var prev = document.getElementById('modal-img-preview');
     if (prev) { prev.src = dataUrl; prev.style.display = 'block'; }
     _modalImageKey = _modalImageKey || ('img_' + Date.now());
+    // Effacer le champ URL si un fichier est sélectionné
+    var urlEl = document.getElementById('modal-cover-url');
+    if (urlEl) urlEl.value = '';
   });
+}
+function _onModalCoverUrlChange(input) {
+  var url = input.value.trim();
+  var prev = document.getElementById('modal-img-preview');
+  if (prev && url) { prev.src = url; prev.style.display = 'block'; }
 }
 
 // ── Récupérer la valeur d'un champ modal ─────────────────
@@ -3383,16 +3396,27 @@ function saveEditModal() {
   }
 }
 
-// ── Sauvegarder l'image en cours si présente ─────────────
+// ── Sauvegarder l'image en cours (upload base64 prioritaire sur URL) ──
 function _persistModalImage(item) {
-  var input = document.getElementById('modal-img-input');
-  if (!input || !input.files || !input.files[0]) return;
-  if (!_modalImageKey) return;
-  var prev = document.getElementById('modal-img-preview');
-  if (!prev || !prev.src || !prev.src.startsWith('data:')) return;
-  if (!DB.images) DB.images = {};
-  DB.images[_modalImageKey] = prev.src;
-  item.imgKey = _modalImageKey;
+  var input  = document.getElementById('modal-img-input');
+  var urlEl  = document.getElementById('modal-cover-url');
+  var coverUrl = urlEl ? urlEl.value.trim() : '';
+  // Upload base64 en priorité
+  if (input && input.files && input.files[0] && _modalImageKey) {
+    var prev = document.getElementById('modal-img-preview');
+    if (prev && prev.src && prev.src.startsWith('data:')) {
+      if (!DB.images) DB.images = {};
+      DB.images[_modalImageKey] = prev.src;
+      item.imgKey = _modalImageKey;
+      item.cover  = '';   // fichier uploadé remplace l'URL
+      return;
+    }
+  }
+  // Sinon : URL externe
+  if (coverUrl) {
+    item.cover  = coverUrl;
+    item.imgKey = '';     // plus de clé base64
+  }
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3621,7 +3645,7 @@ function openAlbumModal(id) {
       _mField('Prix (€)', 'ma-price', 'number', item ? item.price : '') +
       _mField('Stripe Link', 'ma-stripe', 'text', item ? (item.stripeLink || '') : '')
     ) +
-    _mImageField(imgSrc);
+    _mImageField(imgSrc, item ? (item.cover || '') : '');
 
   document.getElementById('edit-modal').classList.add('open');
 }
@@ -3681,6 +3705,7 @@ function _renderAlbums() {
       + '<div class="a-field"><label>Label</label><input type="text" id="add-alb-label" placeholder="HARMONIA"></div>'
       + '<div class="a-field"><label>Nb titres</label><input type="number" id="add-alb-tracks" placeholder="10"></div>'
       + '</div>'
+      + '<div class="a-field"><label>URL Pochette (optionnel)</label><input type="text" id="add-alb-cover" placeholder="https://img.youtube.com/vi/YTID/hqdefault.jpg"></div>'
       + '<button class="a-btn a-btn-primary" onclick="_addAlbum()" style="margin-top:4px;">Ajouter</button>'
       + '</div>';
   }
@@ -3692,9 +3717,10 @@ function _renderAlbums() {
 
   var rows = list.map(function(a) {
     var active = _isActive('album', a.id);
-    var imgSrc = (DB.images && a.imgKey && DB.images[a.imgKey])
-      ? '<img src="' + DB.images[a.imgKey] + '" style="width:32px;height:32px;object-fit:cover;border:1px solid #ccc;">'
-      : '';
+    var thumbSrc = (DB.images && a.imgKey && DB.images[a.imgKey]) || a.cover || '';
+    var imgSrc = thumbSrc
+      ? '<img src="' + thumbSrc + '" style="width:40px;height:40px;object-fit:cover;border:1px solid #ccc;">'
+      : '<div style="width:40px;height:40px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:14px;color:#aaa;">♪</div>';
     var actBtns = '';
     if (canDo('edit')) {
       actBtns += '<button class="a-btn-crud-edit" onclick="openAlbumModal(' + a.id + ')">Modifier</button>';
@@ -3739,7 +3765,8 @@ function _addAlbum() {
     year:   ((document.getElementById('add-alb-year') || {}).value || '').trim(),
     genre:  ((document.getElementById('add-alb-genre') || {}).value || '').trim(),
     label:  ((document.getElementById('add-alb-label') || {}).value || 'HARMONIA').trim(),
-    tracks: parseInt((document.getElementById('add-alb-tracks') || {}).value) || 0
+    tracks: parseInt((document.getElementById('add-alb-tracks') || {}).value) || 0,
+    cover:  ((document.getElementById('add-alb-cover') || {}).value || '').trim()
   });
   _renderAlbums();
 }
@@ -3843,6 +3870,13 @@ function _renderTracks() {
   }
 
   var rows = list.map(function(t) {
+    // Pochette héritée de l'album associé
+    var alb = (DB.albums || []).find(function(a){ return a.title === t.album; });
+    var albCover = alb ? ((DB.images && alb.imgKey && DB.images[alb.imgKey]) || alb.cover || '') : '';
+    var thumbHtml = albCover
+      ? '<img src="' + albCover + '" style="width:36px;height:36px;object-fit:cover;border:1px solid #ccc;">'
+      : '<div style="width:36px;height:36px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:14px;color:#aaa;">♪</div>';
+
     var actBtns = '';
     if (canDo('edit')) {
       actBtns += '<button class="a-btn-crud-edit" onclick="openTrackModal(' + t.id + ')">Modifier</button>';
@@ -3851,6 +3885,7 @@ function _renderTracks() {
       actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'track\',' + t.id + ')">Supprimer</button>';
     }
     return '<tr>'
+      + '<td style="width:44px;">' + thumbHtml + '</td>'
       + '<td class="editable" ondblclick="inlineEdit(this,\'track\',' + t.id + ',\'title\')">'
       + _esc(t.title || '') + '</td>'
       + '<td class="editable" ondblclick="inlineEdit(this,\'track\',' + t.id + ',\'artist\')">'
@@ -3870,7 +3905,7 @@ function _renderTracks() {
   el.innerHTML = addForm
     + '<div class="a-table-wrap"><table class="a-table">'
     + '<thead><tr>'
-    + '<th>Titre</th><th>Artiste</th><th>Album</th>'
+    + '<th style="width:44px;"></th><th>Titre</th><th>Artiste</th><th>Album</th>'
     + '<th>Durée</th><th>Style</th><th>Catégorie</th><th>Actions</th>'
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
