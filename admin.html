@@ -4479,14 +4479,15 @@ function _aeRenderList() {
   // Trier par première date desc
   evs = evs.slice().sort(function(a,b){ return ((b.dates||[])[0]||'') > ((a.dates||[])[0]||'') ? 1 : -1; });
 
-  var html = '<div class="a-table-wrap"><table class="a-table">'
+  var _th = 'color:rgba(255,255,255,0.5)!important;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:12px;border-bottom:1px solid rgba(255,255,255,0.12);text-align:left;';
+  var html = '<div style="background:#0a1628;border:1.5px solid rgba(255,255,255,0.12);overflow-x:auto;margin-bottom:24px;"><table style="width:100%;border-collapse:collapse;font-size:13px;">'
     + '<thead><tr>'
-    + '<th>Type</th>'
-    + '<th>Titre</th>'
-    + '<th>Artistes</th>'
-    + '<th>Dates</th>'
-    + '<th>Lieu</th>'
-    + '<th style="width:120px;"></th>'
+    + '<th style="'+_th+'">Type</th>'
+    + '<th style="'+_th+'">Titre</th>'
+    + '<th style="'+_th+'">Artistes</th>'
+    + '<th style="'+_th+'">Dates</th>'
+    + '<th style="'+_th+'">Lieu</th>'
+    + '<th style="'+_th+'width:120px;"></th>'
     + '</tr></thead><tbody>';
 
   var today = new Date().toISOString().slice(0,10);
@@ -4504,15 +4505,16 @@ function _aeRenderList() {
     var titre = ev.title || (ev.titleI18n && (ev.titleI18n['fr'] || ev.titleI18n['pt'] || ev.titleI18n['en'])) || '';
     var pastBadge = isPast ? '<span style="font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.3);border:1px solid rgba(255,255,255,0.12);padding:2px 6px;margin-left:6px;text-transform:uppercase;">Passé</span>' : '';
 
+    var _td = 'color:#ffffff!important;padding:12px;border-bottom:1px solid rgba(255,255,255,0.07);vertical-align:middle;';
     html += '<tr style="'+(isPast?'opacity:0.5;':'')+'">'
-      + '<td><span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:'+typeColor+';border:1px solid '+typeColor+'55;padding:3px 8px;">'+typeLabel+'</span></td>'
-      + '<td style="font-weight:600;">'+_esc(titre)+pastBadge+'</td>'
-      + '<td style="color:rgba(255,255,255,0.7);">'+_esc(artistNames)+'</td>'
-      + '<td style="color:rgba(255,255,255,0.7);white-space:nowrap;">'+_esc(datesStr)+'</td>'
-      + '<td style="color:rgba(255,255,255,0.7);">'+_esc(location)+'</td>'
-      + '<td style="white-space:nowrap;">'
-      +   '<button class="a-btn-crud-edit" onclick="_aeOpenForm('+ev.id+')">Éditer</button> '
-      +   '<button class="a-btn-crud-del" onclick="_aeDelete('+ev.id+')">✕</button>'
+      + '<td style="'+_td+'"><span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:'+typeColor+'!important;border:1px solid '+typeColor+'55;padding:3px 8px;">'+typeLabel+'</span></td>'
+      + '<td style="'+_td+'font-weight:600;">'+_esc(titre)+pastBadge+'</td>'
+      + '<td style="'+_td+'color:rgba(255,255,255,0.7)!important;">'+_esc(artistNames)+'</td>'
+      + '<td style="'+_td+'color:rgba(255,255,255,0.7)!important;white-space:nowrap;">'+_esc(datesStr)+'</td>'
+      + '<td style="'+_td+'color:rgba(255,255,255,0.7)!important;">'+_esc(location)+'</td>'
+      + '<td style="'+_td+'white-space:nowrap;">'
+      +   '<button style="background:none;border:1px solid rgba(255,255,255,0.3)!important;color:#fff!important;font-size:9px;letter-spacing:1px;padding:5px 10px;cursor:pointer;margin-right:6px;" onclick="_aeOpenForm('+ev.id+')">Éditer</button>'
+      +   '<button style="background:none;border:1px solid rgba(220,60,60,0.5)!important;color:rgba(220,80,80,0.9)!important;font-size:9px;letter-spacing:1px;padding:5px 10px;cursor:pointer;" onclick="_aeDelete('+ev.id+')">✕</button>'
       + '</td>'
       + '</tr>';
   });

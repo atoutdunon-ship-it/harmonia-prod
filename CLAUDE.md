@@ -21,6 +21,7 @@ Site statique de production musicale Cabo Verde, déployé sur **GitHub Pages**.
 - **Pas de favicon** ni de petites icônes décoratives à l'intérieur du site
 - Rendu graphique : qualité pro style grand groupe
 - Code niveau **expert**
+- **RÈGLE ABSOLUE — contraste texte** : tout fond foncé (navy, noir, dark) → texte en `#ffffff`. Toujours appliquer `color:#ffffff!important` en inline sur les éléments générés dynamiquement en JS quand le conteneur a un fond sombre, sans se fier à la cascade CSS.
 
 ---
 
