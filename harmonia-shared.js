@@ -747,7 +747,13 @@ if (!DB.products || !DB.products.length)      { DB.products = defaultProducts();
 if (!DB.events   || !DB.events.length)        { DB.events   = defaultEvents();   saveData(DB); }
 if (!DB.customers)   { DB.customers   = []; saveData(DB); }
 if (!DB.paymentLinks)   { DB.paymentLinks   = []; saveData(DB); }
-if (!DB.artistEvents)   { DB.artistEvents   = []; saveData(DB); }
+if (!DB.artistEvents)   { DB.artistEvents   = defaultArtistEvents(); saveData(DB); }
+
+(function seedDemoEvents() {
+  if (!DB.artistEvents || DB.artistEvents.length > 0) return;
+  DB.artistEvents = defaultArtistEvents();
+  saveData(DB);
+})();
 if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
 
 (function migrateUrbanPhotos() {
@@ -1550,6 +1556,127 @@ function defaultEvents() {
     img: null,
     status: 'active'
   }));
+}
+
+function defaultArtistEvents() {
+  return [
+
+    {
+      id: 1001, demo: true, type: 'showcase',
+      artists: [1, 12],
+      dates: ['2026-09-20'],
+      venue: 'Café de la Danse', city: 'Paris', country: 'France',
+      ticketUrl: 'https://www.cafedaladanse.com',
+      titleI18n: {
+        pt: 'Cabo Verde Night',
+        fr: 'Cabo Verde Night',
+        en: 'Cabo Verde Night',
+        es: 'Cabo Verde Night'
+      },
+      descI18n: {
+        pt: 'Uma noite especial com sonoridades de Cabo Verde — da morna ao R&B contemporâneo.',
+        fr: 'Une soirée exceptionnelle aux sonorités du Cap-Vert — de la morna au R&B contemporain.',
+        en: 'An exceptional evening with Cape Verdean sounds — from morna to contemporary R&B.',
+        es: 'Una velada excepcional con sonidos de Cabo Verde — del morna al R&B contemporáneo.'
+      }
+    },
+    {
+      id: 1002, demo: true, type: 'showcase',
+      artists: [10, 9],
+      dates: ['2026-10-18', '2026-10-19'],
+      venue: 'Le Transbordeur', city: 'Lyon', country: 'France',
+      ticketUrl: 'https://www.letransbordeur.fr',
+      titleI18n: {
+        pt: 'Funaná Urban Session',
+        fr: 'Funaná Urban Session',
+        en: 'Funaná Urban Session',
+        es: 'Funaná Urban Session'
+      },
+      descI18n: {
+        pt: 'Funaná moderno encontra o hip-hop cabo-verdiano numa noite de colaboração única.',
+        fr: 'Le funaná moderne rencontre le hip-hop cap-verdien dans une soirée de collaboration unique.',
+        en: 'Modern funaná meets Cape Verdean hip-hop in a unique collaborative evening.',
+        es: 'El funaná moderno se encuentra con el hip-hop caboverdiano en una noche de colaboración única.'
+      }
+    },
+    {
+      id: 1003, demo: true, type: 'showcase',
+      artists: [3, 5],
+      dates: ['2026-05-10'],
+      venue: 'Ancienne Belgique', city: 'Bruxelles', country: 'Belgique',
+      ticketUrl: '',
+      titleI18n: {
+        pt: 'Morna e Coladeira',
+        fr: 'Morna & Coladeira',
+        en: 'Morna & Coladeira',
+        es: 'Morna y Coladeira'
+      },
+      descI18n: {
+        pt: 'Um dueto intimista entre tradição e modernidade, homenagem à música das ilhas.',
+        fr: 'Un duo intimiste entre tradition et modernité, hommage à la musique des îles.',
+        en: 'An intimate duo between tradition and modernity, a tribute to the music of the islands.',
+        es: 'Un dúo íntimo entre tradición y modernidad, homenaje a la música de las islas.'
+      }
+    },
+
+    {
+      id: 1004, demo: true, type: 'concert',
+      artists: [1],
+      dates: ['2026-08-15', '2026-08-16'],
+      venue: 'L\'Olympia', city: 'Paris', country: 'France',
+      ticketUrl: 'https://www.olympiahall.com',
+      titleI18n: {
+        pt: 'Tour Morabeza 2026',
+        fr: 'Tournée Morabeza 2026',
+        en: 'Morabeza Tour 2026',
+        es: 'Gira Morabeza 2026'
+      },
+      descI18n: {
+        pt: 'Elida Almeida em Paris com o seu novo álbum. Dois espetáculos inesquecíveis.',
+        fr: 'Elida Almeida à Paris pour son nouveau disque. Deux soirées inoubliables.',
+        en: 'Elida Almeida in Paris for her new album. Two unforgettable evenings.',
+        es: 'Elida Almeida en París para su nuevo disco. Dos noches inolvidables.'
+      }
+    },
+    {
+      id: 1005, demo: true, type: 'concert',
+      artists: [2, 6],
+      dates: ['2026-04-05'],
+      venue: 'La Cigale', city: 'Paris', country: 'France',
+      ticketUrl: '',
+      titleI18n: {
+        pt: 'Nha Terra Tour',
+        fr: 'Nha Terra Tour',
+        en: 'Nha Terra Tour',
+        es: 'Nha Terra Tour'
+      },
+      descI18n: {
+        pt: 'Ceuzany e Neuza de Pina em palco juntas pela primeira vez, numa noite dedicada à sua terra natal.',
+        fr: 'Ceuzany et Neuza de Pina sur scène ensemble pour la première fois, une soirée dédiée à leur île natale.',
+        en: 'Ceuzany and Neuza de Pina on stage together for the first time, an evening dedicated to their homeland.',
+        es: 'Ceuzany y Neuza de Pina juntas en escena por primera vez, una noche dedicada a su isla natal.'
+      }
+    },
+    {
+      id: 1006, demo: true, type: 'concert',
+      artists: [9, 8],
+      dates: ['2026-12-05'],
+      venue: 'Le Bataclan', city: 'Paris', country: 'France',
+      ticketUrl: 'https://www.lebataclan.com',
+      titleI18n: {
+        pt: 'Funaná Generation',
+        fr: 'Funaná Generation',
+        en: 'Funaná Generation',
+        es: 'Funaná Generation'
+      },
+      descI18n: {
+        pt: 'A nova geração do funaná toma conta do Bataclan. Uma noite épica entre batuque e groove urbano.',
+        fr: 'La nouvelle génération du funaná s\'empare du Bataclan. Une soirée épique entre batuco et groove urbain.',
+        en: 'The new generation of funaná takes over the Bataclan. An epic evening between batuco and urban groove.',
+        es: 'La nueva generación del funaná toma el Bataclan. Una noche épica entre batuque y groove urbano.'
+      }
+    }
+  ];
 }
 
 function defaultNews() {
@@ -6184,7 +6311,15 @@ function buildArtistEventHtml(events) {
       return ar ? ar.name : '';
     }).filter(Boolean).join(' & ');
 
-    return '<div class="ap-event-card">'
+    var lang = currentLang || 'pt';
+    var title = (ev.titleI18n && ev.titleI18n[lang]) || (ev.titleI18n && ev.titleI18n['fr']) || ev.title || '';
+    var desc  = (ev.descI18n  && ev.descI18n[lang])  || (ev.descI18n  && ev.descI18n['fr'])  || ev.description || '';
+    var badgeLabel = isPast
+      ? T('eventPast') || 'Passé'
+      : T('eventUpcoming') || 'À venir';
+
+    return '<div class="ap-event-card'+(ev.demo?' ap-event-card--demo':'')+'">'
+      + (ev.demo ? '<div class="ap-event-demo-tag">DÉMO</div>' : '')
       + '<div class="ap-event-dates">'
       +   (day   ? '<div class="ap-event-day">'+day+'</div>' : '')
       +   (month ? '<div class="ap-event-month">'+month+'</div>' : '')
@@ -6192,13 +6327,13 @@ function buildArtistEventHtml(events) {
       +   (extraDates ? '<div class="ap-event-multi">'+extraDates+'</div>' : '')
       + '</div>'
       + '<div class="ap-event-body">'
-      +   '<div class="ap-event-title">'+esc(ev.title||'')+'</div>'
+      +   '<div class="ap-event-title">'+esc(title)+'</div>'
       +   (location  ? '<div class="ap-event-location">'+esc(location)+'</div>' : '')
       +   (castNames ? '<div class="ap-event-cast">avec '+esc(castNames)+'</div>' : '')
-      +   (ev.description ? '<div class="ap-event-desc">'+esc(ev.description)+'</div>' : '')
+      +   (desc ? '<div class="ap-event-desc">'+esc(desc)+'</div>' : '')
       + '</div>'
       + '<div class="ap-event-meta">'
-      +   '<div class="ap-event-badge '+(isPast?'past':'upcoming')+'">'+(isPast?'Passé':'À venir')+'</div>'
+      +   '<div class="ap-event-badge '+(isPast?'past':'upcoming')+'">'+esc(badgeLabel)+'</div>'
       +   (ev.ticketUrl ? '<a href="'+ev.ticketUrl+'" target="_blank" rel="noopener" class="ap-event-ticket">Billetterie ↗</a>' : '')
       + '</div>'
       + '</div>';

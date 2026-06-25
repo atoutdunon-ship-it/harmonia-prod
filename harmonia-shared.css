@@ -4459,6 +4459,20 @@ html { height: -webkit-fill-available; }
 .ap-event-badge { font-family:Arial,sans-serif; font-size:9px; letter-spacing:2px; text-transform:uppercase; padding:5px 10px; border:1px solid; }
 .ap-event-badge.past     { color:rgba(255,255,255,0.28); border-color:rgba(255,255,255,0.1); }
 .ap-event-badge.upcoming { color:var(--accent2); border-color:rgba(46,204,128,0.3); }
+
+.ap-event-card { position:relative; }
+.ap-event-card--demo { border-style:dashed; }
+.ap-event-demo-tag {
+  position:absolute; top:8px; right:8px;
+  font-family:Arial,sans-serif; font-size:7px; font-weight:700;
+  letter-spacing:2.5px; text-transform:uppercase;
+  padding:3px 7px;
+  color:rgba(255,255,255,0.35);
+  border:1px dashed rgba(255,255,255,0.18);
+  background:rgba(255,255,255,0.03);
+  pointer-events:none;
+  z-index:1;
+}
 .ap-event-ticket {
   font-family:Arial,sans-serif; font-size:9px; letter-spacing:2px;
   text-transform:uppercase; color:var(--accent2);
