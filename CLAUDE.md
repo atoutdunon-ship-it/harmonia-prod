@@ -43,16 +43,19 @@ harmonia-shared.css      ← généré par build.py
 # Builder après modification des sources
 cd /Users/manu/COWORK/Harmonia && python3 build.py
 
-# Bumper la version (ex: v77 → v78) dans tous les HTML
-sed -i 's/harmonia-shared\.js?v=77/harmonia-shared.js?v=78/g' *.html
-sed -i 's/harmonia-shared\.css?v=77/harmonia-shared.css?v=78/g' *.html
+# Bumper la version (ex: v81 → v82) dans tous les HTML
+OLDV=81; NEWV=82
+for f in *.html; do sed -i "s/harmonia-shared\.js?v=${OLDV}/harmonia-shared.js?v=${NEWV}/g; s/harmonia-shared\.css?v=${OLDV}/harmonia-shared.css?v=${NEWV}/g" "$f"; done
+
+# Vérifier : aucun résidu
+grep -l "v=${OLDV}" *.html   # doit retourner vide
 
 # Pusher vers GitHub Pages
 ./MAJHARMO.command
 ```
 
 ### Version actuelle
-**v80** — vérifier avec `grep "v=" artistes.html | head -1`
+**v83** — vérifier avec `grep "v=" artistes.html | head -1`
 
 ---
 
@@ -61,8 +64,8 @@ sed -i 's/harmonia-shared\.css?v=77/harmonia-shared.css?v=78/g' *.html
 | Fichier | Module key | Statut |
 |---|---|---|
 | `index.html` | — | Toujours actif (page d'accueil) |
-| `qui-sommes-nous.html` | `about` | Actif |
-| `artistes.html` | `artists` | Actif |
+| `qui-sommes-nous.html` | `about` | Actif — section Artistes en Promo en bas |
+| `artistes.html` | `artists` | Actif — galerie + page artiste avec 4 onglets |
 | `cesaria.html` | `cesaria` | Actif |
 | `jose-da-silva.html` | `jose` | Actif |
 | `musique.html` | `music` | Actif |
@@ -81,21 +84,31 @@ sed -i 's/harmonia-shared\.css?v=77/harmonia-shared.css?v=78/g' *.html
 ```javascript
 DB = {
   users:         [],   // { id, login, email, name, pass, role, permissions }
-  artists:       [],   // { id, name, category, photo, bioShort, bioLong, ... }
-  tracks:        [],   // { id, title, artist, ... }
-  albums:        [],   // { id, title, artist, ... }
+  artists:       [],   // { id, name, category, photo, bioShort, bioLong, style, origin, instagram, youtube, spotify, youtubeVideos[], discography[] }
+  tracks:        [],   // { id, title, artist, album, duration, cover, ytId, style, category }
+  albums:        [],   // { id, title, artist, year, cover, genre, label, desc, spotify }
   products:      [],   // { id, name, price, ... }
-  events:        [],   // { id, title, date, ... }
+  events:        [],   // { id, title, date, ... }   ← événements génériques (page événements)
+  artistEvents:  [],   // { id, type, title, artists[], dates[], venue, city, country, description, ticketUrl } ← SHOWCO
   news:          [],   // { id, title, content, ... }
   modules:       {},   // { shop: {enabled, mode, label, page}, ... }
   promoArtists:  [],   // [artistId1, artistId2, artistId3] — section promo qui-sommes-nous
   pageTexts:     {},   // textes édités inline par clé + langue
-  images:        {},   // images uploadées (base64)
+  images:        {},   // images uploadées (base64) — clé 'IMG_XXX', 'disc_id_idx', etc.
   itemStates:    {},   // états on/off des items (artists, news, events)
   customers:     [],
   paymentLinks:  [],
   musicCategories: [],
 }
+```
+
+### Covers discographie — cascade de résolution
+```javascript
+// Dans openArtistModal() et openArtistPage() → buildAlbumsHtml()
+coverSrc = DB.images['disc_'+artistId+'_'+albumIndex]  // override admin
+         || al.cover                                    // URL YouTube thumbnail
+         || artistImg(artist)                           // photo artiste (fallback v78)
+         || ''                                          // → placeholder ♪
 ```
 
 ---
@@ -121,31 +134,79 @@ DB.modules = {
 
 **Masquage nav** : `data-module-nav="shop"` → caché si `enabled:false`
 **Masquage panier** : `#nav-cart-btn` → caché si `shop.enabled:false` (dans `applyModules()`)
+**Force permanente** : `['about','artists','cesaria','music','news','contact']` toujours actifs + `shop/panier` toujours désactivés
 
 ---
 
-## RÔLES UTILISATEURS
+## ARTISTES
 
-| Rôle | Accès |
-|---|---|
-| `superadmin` | Tout — admin complet, modules, users, Music7 |
-| `administrateur` | Admin sans gestion users superadmin |
-| `editor` | Mode édition inline uniquement |
-| `membre` | Compte client, historique commandes |
+12 artistes — 2 catégories :
+- **traditional** : Elida Almeida (id:1), Ceuzany (id:2), Lucibela (id:3), Fábio Ramos (id:4), Jenifer Solidade (id:5), Neuza de Pina (id:6)
+- **urban** : Elly Paris (id:7), Indira (id:8), Ley Lazz (id:9), Mureno (id:10), Neguinho Tivane (id:11), Sonia Sousa (id:12)
 
-**Bypass mode maintenance** : rôles `superadmin`, `administrateur`, `editor` voient toutes les pages même désactivées.
+Covers albums : YouTube thumbnail `https://img.youtube.com/vi/YTID/hqdefault.jpg`
+Override cover : `DB.images['disc_'+artistId+'_'+albumIndex']`
+
+**Artistes en Promo par défaut** : `DB.promoArtists = [1, 3, 11]` (Elida + Lucibela + Neguinho Tivane) — réinitialisé si tous null
 
 ---
 
-## INTERNATIONALISATION (i18n)
+## PAGE ARTISTE — 4 ONGLETS (module SHOWCO)
 
-- 4 langues : **PT** (défaut), **FR**, **EN**, **ES**
-- `LANGS{}` objet dans `harmonia-shared.src.js` (lignes 11, 130, 249, 368)
-- `T(key)` — traduction courante avec fallback FR
-- `setLang(lang)` — change la langue, double-write `sessionStorage` + `localStorage`
-- `applyLang()` — applique toutes les traductions au DOM
-- **"Choose your language"** toujours en anglais sur index.html (hardcodé + HOME_LANGS)
-- Persistance : `localStorage('harmonia_lang')` survit aux kills d'onglet mobile (iOS)
+Structure de `openArtistPage(id)` :
+1. Hero fixe (photo + nom + bio + réseaux)
+2. Barre d'onglets sticky : **Albums | Vidéos | Showcases | Concerts**
+3. Panels cachés/affichés via `switchArtistTab(btn, panelId)`
+
+```javascript
+// IDs des panels
+'ap-tab-albums'    // buildAlbumsHtml() — accordéon par album
+'ap-tab-videos'    // grille YouTube
+'ap-tab-showcases' // buildArtistEventHtml(evShowcases)
+'ap-tab-concerts'  // buildArtistEventHtml(evConcerts)
+```
+
+CSS tabs : `.ap-tab-btn` — inactif `rgba(255,255,255,0.65)` / actif `#fff` + border-bottom accent2
+
+---
+
+## MODULE SHOWCO — Showcases & Concerts
+
+**Code nom : SHOWCO** — réimplantable dans d'autres projets.
+
+### Modèle événement
+```javascript
+DB.artistEvents[] = {
+  id:          Number,          // auto-incrémenté
+  type:        'showcase'|'concert',
+  title:       String,
+  artists:     [Number],        // IDs depuis DB.artists
+  dates:       ['YYYY-MM-DD'],  // tableau multi-dates
+  venue:       String,
+  city:        String,
+  country:     String,
+  description: String,
+  ticketUrl:   String
+}
+```
+
+### Fonctions JS (harmonia-shared.src.js)
+- `switchArtistTab(btn, panelId)` — navigation onglets
+- `buildArtistEventHtml(events)` — rendu liste (tri : à venir ASC → passés DESC, badge vert/gris)
+
+### Admin (admin.html)
+- Section `#sec-showcases` — nav "Showcases / Concerts" dans sidebar groupe Contenu
+- `_aeOpenForm(id|null)` — formulaire add/edit
+- `_aeSave(id|null)` — sauvegarde avec ID auto
+- `_aeDelete(id)` — suppression avec confirmation
+- `_aeRenderList()` — tableau trié avec filtre Tous/Showcases/Concerts
+- `_aeFilter(type, btn)` — filtrage vue liste
+- `_aeAddDateRow()` — ajout dynamique champ date
+
+### Logique affichage
+- Événements filtrés par `(ev.artists||[]).indexOf(artistId) !== -1`
+- Badge "À venir" vert si `dates[0] >= today`, "Passé" grisé sinon
+- `+N dates` affiché si l'événement a plusieurs dates
 
 ---
 
@@ -155,6 +216,7 @@ DB.modules = {
 - JS : `renderPromoArtists()` — lit `DB.promoArtists[0..2]`, cherche artiste dans `DB.artists`
 - Carte : Photo + Nom + Bouton "Découvrir" → `artistes.html?artist=ID`
 - Admin : section "Artistes en Promo" dans Modules → 3 dropdowns → `_saveAllPromoArtists()`
+- Défaut démo : `[1, 3, 11]` — réinitialisé si absent ou tous null
 
 ---
 
@@ -177,45 +239,51 @@ DB.modules = {
 - Aspect ratio carte : `3/4`
 - Photo stockée : `DB.artists[i].photo` (clé `IMG_XXX` ou base64)
 - `artistImg(artist)` — résout la clé → image base64 ou null
+- Clic carte → `openArtistPage(id)` ou `window.location.href = a.pageLink` si défini
+
+---
+
+## INTERNATIONALISATION (i18n)
+
+- 4 langues : **PT** (défaut), **FR**, **EN**, **ES**
+- `LANGS{}` objet dans `harmonia-shared.src.js`
+- `T(key)` — traduction courante avec fallback FR
+- `setLang(lang)` — change la langue, double-write `sessionStorage` + `localStorage`
+- `applyLang()` — applique toutes les traductions au DOM
+- **"Choose your language"** toujours en anglais sur index.html (hardcodé + HOME_LANGS)
+- Persistance : `localStorage('harmonia_lang')` survit aux kills d'onglet mobile (iOS)
+- Cascade lecture : `sessionStorage → localStorage → 'pt'`
 
 ---
 
 ## RÉACTIVATION BOUTIQUE
 
-Quand la boutique doit être réactivée, dans `harmonia-shared.src.js` :
-1. `defaultModules()` → `shop.enabled: false` → `true`
-2. Bloc force permanente → ajouter `'shop'` dans la liste forcée active
-3. Supprimer ou inverser : `DB.modules.shop.enabled = false`
+Dans `harmonia-shared.src.js`, bloc "Force permanente" :
+1. `defaultModules()` → `shop.enabled:false` → `true`
+2. Bloc force → ajouter `'shop'` dans liste forcée active
+3. Supprimer : `DB.modules.shop.enabled = false`
 4. Supprimer : `DB.modules.panier.enabled = false`
 5. Build + bump + push
 
----
-
-## HISTORIQUE COMPLET
-Voir `HARMONIA_CHANGELOG.md` dans ce dossier pour l'historique détaillé v1→v77.
+Ou depuis l'admin : **Modules → Boutique → toggle ON** (si le bloc force est retiré).
 
 ---
 
 ## PROCÉDURE TYPE D'UNE MODIFICATION
 
-1. Lire les fichiers concernés avec `Read`
+1. `Read` les fichiers concernés
 2. Éditer `harmonia-shared.src.js` et/ou `harmonia-shared.src.css`
-3. Éditer les HTML si besoin (ne pas éditer `harmonia-shared.js/.css`)
+3. Éditer les HTML si besoin (ne jamais éditer `harmonia-shared.js/.css`)
 4. `python3 build.py`
-5. Bump version dans tous les HTML
-6. Vérifier : `grep -c "v=NEW" *.html` et `grep -rl "v=OLD" *.html`
+5. Bump version dans tous les HTML (voir commande ci-dessus)
+6. Vérifier : `grep -l "v=OLDV" *.html` doit retourner vide
 7. Indiquer à Manu de lancer `MAJHARMO.command`
 
 ---
 
-## MODULE SHOWCO — Showcases & Concerts
-
-- `DB.artistEvents[]` — `{ id, type:'showcase'|'concert', title, artists:[ids], dates:['YYYY-MM-DD',...], venue, city, country, description, ticketUrl }`
-- `switchArtistTab(btn, panelId)` — navigation onglets page artiste
-- `buildArtistEventHtml(events)` — rendu cartes événements (tri À venir → Passé, badge)
-- `openArtistPage()` — 4 panels : Albums | Vidéos | Showcases | Concerts
-- Admin : `_aeOpenForm(id)` / `_aeSave(id)` / `_aeDelete(id)` / `_aeRenderList()` / `_aeFilter(type)`
+## HISTORIQUE COMPLET
+Voir `HARMONIA_CHANGELOG.md` dans ce dossier — historique détaillé v1→v81.
 
 ---
 
-*Mis à jour : v80 — Juin 2026*
+*Mis à jour : v82 — Juin 2026*

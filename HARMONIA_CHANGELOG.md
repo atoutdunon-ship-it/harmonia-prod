@@ -356,6 +356,36 @@
 
 ---
 
+---
+
+### v81 — Fix visibilité onglets page artiste
+**Demande :** "Les écritures du mini menu dans la page des artistes (Album, vidéos…) ne sont pas très visibles. Corrigez."
+
+**Éléments modifiés :**
+- `harmonia-shared.src.css` — `.ap-tab-btn` : opacité inactif `0.4` → `0.65`, font-size `9px` → `10px`, letter-spacing `3px` → `2px`
+- `.ap-tab-btn.active` : couleur `#fff` (pure white) au lieu de rgba partiel
+- Build v82 + bump + push
+
+---
+
+### v82 — Fix vignettes YouTube + fallback onerror
+**Demande :** "Pour l'artiste Ceuzany, les 2 vidéos n'affichent pas la vignette. Corrigez pour tous les artistes."
+
+**Corrections IDs YouTube (5 IDs confirmés erronés) :**
+- Ceuzany "Pays des Merveilles" : `lBCfSaMyaAg` → `x30kc8zgbm0`
+- Ceuzany "Pedra Run" : `NZhG5JFjuMU` → `chbNmmhoKuM`
+- Lucibela "Laço Umbilical" : `PfGHGbSXprI` → `CWjpLxduC24`
+- Neuza "Flor di Bila" : `8Xq7bxuV6w0` → `naQ1EqomsWc`
+- Sonia Sousa "Pa Bo" : `c9-LYtadmUA` → `5v_1jMCkFUE`
+
+**Éléments modifiés :**
+- `harmonia-shared.src.js` — `defaultArtists()` : correction globale des IDs (youtubeVideos, discography covers, tracks covers)
+- `harmonia-shared.src.js` — `openArtistModal()` clips : ajout `onerror="opacity:0"` sur `<img class="clip-yt-thumb">`
+- `harmonia-shared.src.js` — `openArtistPage()` onglet Vidéos : ajout `onerror="opacity:0"` sur vignettes YouTube
+- Build v82 + bump + push
+
+---
+
 ## PROCÉDURE DE MISE À JOUR
 
 ```bash
@@ -366,8 +396,8 @@ nano harmonia-shared.src.css
 # 2. Builder
 python3 build.py
 
-# 3. Bumper la version (ex: v80 → v81)
-OLDV=80; NEWV=81
+# 3. Bumper la version (ex: v82 → v83)
+OLDV=82; NEWV=83
 for f in *.html; do sed -i "s/harmonia-shared\.js?v=${OLDV}/harmonia-shared.js?v=${NEWV}/g; s/harmonia-shared\.css?v=${OLDV}/harmonia-shared.css?v=${NEWV}/g" "$f"; done
 
 # 4. Pusher
@@ -389,4 +419,4 @@ Ou depuis l'admin : **Modules → Boutique → toggle ON** (si le bloc force est
 
 ---
 
-*Dernière mise à jour : v80 — Juin 2026*
+*Dernière mise à jour : v82 — Juin 2026*

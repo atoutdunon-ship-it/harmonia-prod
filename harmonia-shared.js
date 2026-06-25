@@ -664,9 +664,9 @@ const SHOWCASE_TRACKS = [
   { artist:"Elida Almeida", title:"Ora Doci Ora Margos", album:"Ora Doci Ora Margos (2014)", ytId:"D6vBMXSFbfg", imgKey:"elida" , previewStart:15},
   { artist:"Elida Almeida", title:"Nha Cretcheu Di Alma", album:"Elida (2017)", ytId:"kAGv6QLMJ6g", imgKey:"elida" , previewStart:20},
   { artist:"Elida Almeida", title:"Nka Ta Pasa", album:"Ora Doci Ora Margos (2014)", ytId:"xHmq3kLAFzM", imgKey:"elida" , previewStart:25},
-  { artist:"Ceuzany", title:"Pays des Merveilles", album:"feat. Christophe Maé (2022)", ytId:"lBCfSaMyaAg", imgKey:"ceuzany" , previewStart:30},
-  { artist:"Ceuzany", title:"Pedra Run", album:"Single Lusafrica (2023)", ytId:"NZhG5JFjuMU", imgKey:"ceuzany" , previewStart:18},
-  { artist:"Lucibela", title:"Laço Umbilical", album:"Laço Umbilical (2018)", ytId:"PfGHGbSXprI", imgKey:"cesaria" , previewStart:22},
+  { artist:"Ceuzany", title:"Pays des Merveilles", album:"feat. Christophe Maé (2022)", ytId:"x30kc8zgbm0", imgKey:"ceuzany" , previewStart:30},
+  { artist:"Ceuzany", title:"Pedra Run", album:"Single Lusafrica (2023)", ytId:"chbNmmhoKuM", imgKey:"ceuzany" , previewStart:18},
+  { artist:"Lucibela", title:"Laço Umbilical", album:"Laço Umbilical (2018)", ytId:"CWjpLxduC24", imgKey:"cesaria" , previewStart:22},
   { artist:"Lucibela", title:"Sodade", album:"Aura (2021)", ytId:"7NUbNjBakOY", imgKey:"cesaria" , previewStart:35},
   { artist:"Jenifer Solidade", title:"Jenifer Solidade — Live", album:"Live Session", ytId:"oAoeqBWNWNQ", imgKey:"jenifer" , previewStart:28},
   { artist:"Neuza de Pina", title:"Neuza de Pina — Ao Vivo", album:"Live", ytId:"MFcxIoMKHZo", imgKey:"neuza" , previewStart:15},
@@ -750,9 +750,15 @@ if (!DB.paymentLinks)   { DB.paymentLinks   = []; saveData(DB); }
 if (!DB.artistEvents)   { DB.artistEvents   = []; saveData(DB); }
 if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
 
-if (!DB.promoArtists || DB.promoArtists.every(function(x){return !x;})){
-  DB.promoArtists = [1, 3, 11]; saveData(DB);
-}
+(function(){
+  var _defaults = [1, 3, 11];
+  if (!DB.promoArtists) { DB.promoArtists = _defaults.slice(); saveData(DB); return; }
+  var _changed = false;
+  for (var _i = 0; _i < 3; _i++) {
+    if (!DB.promoArtists[_i]) { DB.promoArtists[_i] = _defaults[_i]; _changed = true; }
+  }
+  if (_changed) saveData(DB);
+})();
 
 (function() {
   var _dm = defaultModules();
@@ -1234,11 +1240,11 @@ function defaultArtists() {
       youtube:"https://www.youtube.com/@CeuzanyVEVO",
       spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L",
       discography:[
-        {title:"Nha Vida",year:2012,cover:"https://img.youtube.com/vi/NZhG5JFjuMU/hqdefault.jpg",desc:"Le premier album solo. Le hit 'Último Chance' en vedette.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"},
-        {title:"Ilha d'Melodia",year:2016,cover:"https://img.youtube.com/vi/lBCfSaMyaAg/hqdefault.jpg",desc:"Un voyage intérieur entre mémoire et désir.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"},
-        {title:"Pays des Merveilles",year:2022,cover:"https://img.youtube.com/vi/lBCfSaMyaAg/hqdefault.jpg",desc:"Single feat. Christophe Maé — tournée européenne.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"}
+        {title:"Nha Vida",year:2012,cover:"https://img.youtube.com/vi/chbNmmhoKuM/hqdefault.jpg",desc:"Le premier album solo. Le hit 'Último Chance' en vedette.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"},
+        {title:"Ilha d'Melodia",year:2016,cover:"https://img.youtube.com/vi/x30kc8zgbm0/hqdefault.jpg",desc:"Un voyage intérieur entre mémoire et désir.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"},
+        {title:"Pays des Merveilles",year:2022,cover:"https://img.youtube.com/vi/x30kc8zgbm0/hqdefault.jpg",desc:"Single feat. Christophe Maé — tournée européenne.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"}
       ],
-      youtubeVideos:[{ytId:"lBCfSaMyaAg",title:"Pays des Merveilles"},{ytId:"NZhG5JFjuMU",title:"Pedra Run"}] },
+      youtubeVideos:[{ytId:"x30kc8zgbm0",title:"Pays des Merveilles"},{ytId:"chbNmmhoKuM",title:"Pedra Run"}] },
 
     { id:3, name:"Lucibela", category:"traditional", origin:"Cabo Verde",
       style:"Morna · Coladeira",
@@ -1250,10 +1256,10 @@ function defaultArtists() {
       youtube:"https://www.youtube.com/@LucibelaOficial",
       spotify:"https://open.spotify.com/intl-fr/artist/6Vc5SDqQcMjBQ35yJW6mZX",
       discography:[
-        {title:"Laço Umbilical",year:2018,cover:"https://img.youtube.com/vi/PfGHGbSXprI/hqdefault.jpg",desc:"Le disque événement qui a révélé Lucibela au monde.",spotify:"https://open.spotify.com/intl-fr/artist/6Vc5SDqQcMjBQ35yJW6mZX"},
+        {title:"Laço Umbilical",year:2018,cover:"https://img.youtube.com/vi/CWjpLxduC24/hqdefault.jpg",desc:"Le disque événement qui a révélé Lucibela au monde.",spotify:"https://open.spotify.com/intl-fr/artist/6Vc5SDqQcMjBQ35yJW6mZX"},
         {title:"Aura",year:2021,cover:"https://img.youtube.com/vi/7NUbNjBakOY/hqdefault.jpg",desc:"Maturité et splendeur absolue de la morna.",spotify:"https://open.spotify.com/intl-fr/artist/6Vc5SDqQcMjBQ35yJW6mZX"}
       ],
-      youtubeVideos:[{ytId:"PfGHGbSXprI",title:"Laço Umbilical"},{ytId:"7NUbNjBakOY",title:"Sodade"}] },
+      youtubeVideos:[{ytId:"CWjpLxduC24",title:"Laço Umbilical"},{ytId:"7NUbNjBakOY",title:"Sodade"}] },
 
     { id:4, name:"Fábio Ramos", category:"traditional", origin:"São Nicolau · Mindelo, São Vicente",
       style:"Morna · Coladeira",
@@ -1293,10 +1299,10 @@ function defaultArtists() {
       youtube:"https://www.youtube.com/@NeuzaVEVO",
       spotify:"https://open.spotify.com/intl-fr/artist/1xDJ96IbGuTLeuODZW4QN2",
       discography:[
-        {title:"Flor di Bila",year:2013,cover:"https://img.youtube.com/vi/8Xq7bxuV6w0/hqdefault.jpg",desc:"Révélation mondiale — les rythmes secrets de l'île do Fogo.",spotify:"https://open.spotify.com/intl-fr/artist/1xDJ96IbGuTLeuODZW4QN2"},
+        {title:"Flor di Bila",year:2013,cover:"https://img.youtube.com/vi/naQ1EqomsWc/hqdefault.jpg",desc:"Révélation mondiale — les rythmes secrets de l'île do Fogo.",spotify:"https://open.spotify.com/intl-fr/artist/1xDJ96IbGuTLeuODZW4QN2"},
         {title:"Badia di Fogo",year:2018,cover:"https://img.youtube.com/vi/6jOgf4ihD8g/hqdefault.jpg",desc:"Album intime — 'Izilda', une chanson pour sa mère.",spotify:"https://open.spotify.com/intl-fr/artist/1xDJ96IbGuTLeuODZW4QN2"}
       ],
-      youtubeVideos:[{ytId:"6jOgf4ihD8g",title:"Badia Di Fogo"},{ytId:"8Xq7bxuV6w0",title:"Flor di Bila"}] },
+      youtubeVideos:[{ytId:"6jOgf4ihD8g",title:"Badia Di Fogo"},{ytId:"naQ1EqomsWc",title:"Flor di Bila"}] },
 
 
 
@@ -1381,10 +1387,10 @@ function defaultArtists() {
       youtube:"https://www.youtube.com/channel/UCa5OHGXWMJVABJ6m8byEvsQ",
       spotify:"https://open.spotify.com/intl-fr/artist/6vYZ29NTfmd4Z4mpde2uNk",
       discography:[
-        {title:"Pa Bo",year:2022,cover:"https://img.youtube.com/vi/c9-LYtadmUA/hqdefault.jpg",desc:"Single R&B — groove cap-verdien, texte en créole.",spotify:"https://open.spotify.com/intl-fr/artist/6vYZ29NTfmd4Z4mpde2uNk"},
+        {title:"Pa Bo",year:2022,cover:"https://img.youtube.com/vi/5v_1jMCkFUE/hqdefault.jpg",desc:"Single R&B — groove cap-verdien, texte en créole.",spotify:"https://open.spotify.com/intl-fr/artist/6vYZ29NTfmd4Z4mpde2uNk"},
         {title:"Dexam Bua",year:2023,cover:"https://img.youtube.com/vi/zvmWpSRHy1k/hqdefault.jpg",desc:"Feat. Hélio Batalha — duo R&B/Funk devenu incontournable.",spotify:"https://open.spotify.com/intl-fr/artist/6vYZ29NTfmd4Z4mpde2uNk"}
       ],
-      youtubeVideos:[{ytId:"c9-LYtadmUA",title:"Pa Bo"},{ytId:"zvmWpSRHy1k",title:"Dexam Bua feat. Hélio Batalha"}] }
+      youtubeVideos:[{ytId:"5v_1jMCkFUE",title:"Pa Bo"},{ytId:"zvmWpSRHy1k",title:"Dexam Bua feat. Hélio Batalha"}] }
 
   ];
 }
@@ -1398,19 +1404,19 @@ function defaultAlbums() {
      label:"HARMONIA / Lusafrica", tracks:11, cover:"https://img.youtube.com/vi/kAGv6QLMJ6g/hqdefault.jpg",
      desc:"La confirmation d'un talent hors norme. Elida s'affirme avec une liberté créative totale et une connexion profonde avec son public."},
     {id:3, title:"Nha Vida", artist:"Ceuzany", year:2012, genre:"Morna · Coladeira",
-     label:"HARMONIA / Lusafrica", tracks:10, cover:"https://img.youtube.com/vi/NZhG5JFjuMU/hqdefault.jpg",
+     label:"HARMONIA / Lusafrica", tracks:10, cover:"https://img.youtube.com/vi/chbNmmhoKuM/hqdefault.jpg",
      desc:"Le premier album solo de Ceuzany. 'Último Chance' s'impose comme un classique instantané. La voix de São Vicente s'envole vers l'Europe."},
     {id:4, title:"Ilha d'Melodia", artist:"Ceuzany", year:2016, genre:"Morna · Funaná",
-     label:"HARMONIA / Lusafrica", tracks:11, cover:"https://img.youtube.com/vi/lBCfSaMyaAg/hqdefault.jpg",
+     label:"HARMONIA / Lusafrica", tracks:11, cover:"https://img.youtube.com/vi/x30kc8zgbm0/hqdefault.jpg",
      desc:"Mindelo transformé en musique et en mémoire. Un disque d'une intimité bouleversante où tradition et modernité fusionnent dans une même âme."},
     {id:5, title:"Laço Umbilical", artist:"Lucibela", year:2018, genre:"Morna · Coladeira",
-     label:"HARMONIA", tracks:10, cover:"https://img.youtube.com/vi/PfGHGbSXprI/hqdefault.jpg",
+     label:"HARMONIA", tracks:10, cover:"https://img.youtube.com/vi/CWjpLxduC24/hqdefault.jpg",
      desc:"Le disque événement qui a projeté Lucibela dans les plus grands festivals mondiaux. La morna dans toute sa splendeur, portée par une voix de velours rare."},
     {id:6, title:"Aura", artist:"Lucibela", year:2021, genre:"Morna · Coladeira",
      label:"HARMONIA", tracks:12, cover:"https://img.youtube.com/vi/7NUbNjBakOY/hqdefault.jpg",
      desc:"Lucibela confirme son statut de grande voix de la morna contemporaine. Un album de maturité, lumineux et profond, salué par la critique internationale."},
     {id:7, title:"Flor di Bila", artist:"Neuza de Pina", year:2013, genre:"Talaia Baxo · Rabolo · Samba",
-     label:"HARMONIA", tracks:11, cover:"https://img.youtube.com/vi/8Xq7bxuV6w0/hqdefault.jpg",
+     label:"HARMONIA", tracks:11, cover:"https://img.youtube.com/vi/naQ1EqomsWc/hqdefault.jpg",
      desc:"Les secrets musicaux de l'île do Fogo révélés au monde. Neuza de Pina porte les rythmes ancestraux du volcan avec une voix douce et une âme immense."},
     {id:8, title:"Badia di Fogo", artist:"Neuza de Pina", year:2018, genre:"Funaná · Batuque",
      label:"HARMONIA", tracks:9, cover:"https://img.youtube.com/vi/6jOgf4ihD8g/hqdefault.jpg",
@@ -1442,7 +1448,7 @@ function defaultAlbums() {
      label:"HARMONIA", tracks:3, cover:"",
      desc:"L'amour authentique chanté avec une sincérité bouleversante — Neguinho Tivane confirme un talent rare pour toucher les émotions les plus profondes."},
     {id:17, title:"Pa Bo", artist:"Sonia Sousa", year:2022, genre:"R&B · Funk · Soul",
-     label:"HARMONIA", tracks:3, cover:"https://img.youtube.com/vi/c9-LYtadmUA/hqdefault.jpg",
+     label:"HARMONIA", tracks:3, cover:"https://img.youtube.com/vi/5v_1jMCkFUE/hqdefault.jpg",
      spotify:"https://open.spotify.com/intl-fr/artist/6vYZ29NTfmd4Z4mpde2uNk",
      desc:"L'EP révélation de Sonia Sousa — groove cap-verdien, créole vibrant et une voix R&B de référence dans l'espace lusophone, entre funk et soul intemporel."}
   ];
@@ -1454,13 +1460,13 @@ function defaultTracks() {
     {id:1, artist:"Elida Almeida", title:"Ora Doci Ora Margos", album:"Ora Doci Ora Margos", duration:"3:42", cover:"https://img.youtube.com/vi/D6vBMXSFbfg/hqdefault.jpg", ytId:"D6vBMXSFbfg", style:"Tabanka", category:"traditional"},
     {id:2, artist:"Elida Almeida", title:"Nha Cretcheu Di Alma", album:"Elida", duration:"4:05", cover:"", ytId:"kAGv6QLMJ6g", style:"Funaná", category:"traditional"},
     {id:3, artist:"Elida Almeida", title:"Nka Ta Pasa", album:"Ora Doci Ora Margos", duration:"3:58", cover:"", ytId:"xHmq3kLAFzM", style:"Batuque", category:"traditional"},
-    {id:6, artist:"Lucibela", title:"Laço Umbilical", album:"Laço Umbilical", duration:"4:48", cover:"https://img.youtube.com/vi/PfGHGbSXprI/hqdefault.jpg", ytId:"PfGHGbSXprI", style:"Morna", category:"traditional"},
+    {id:6, artist:"Lucibela", title:"Laço Umbilical", album:"Laço Umbilical", duration:"4:48", cover:"https://img.youtube.com/vi/CWjpLxduC24/hqdefault.jpg", ytId:"CWjpLxduC24", style:"Morna", category:"traditional"},
     {id:7, artist:"Lucibela", title:"Sodade", album:"Aura", duration:"5:02", cover:"", ytId:"7NUbNjBakOY", style:"Morna", category:"traditional"},
     {id:11, artist:"Fábio Ramos", title:"Um Cálice d'Nha Terra", album:"Mindelo Sessions", duration:"4:33", cover:"https://img.youtube.com/vi/Jjfv6n5Og_g/hqdefault.jpg", ytId:"oQVkCBkX2Ug", style:"Morna", category:"traditional"},
     {id:10, artist:"Neuza de Pina", title:"Combersu ku Distinu", album:"feat. Mureno", duration:"4:15", cover:"", ytId:"MFcxIoMKHZo", style:"Funaná", category:"traditional"},
 
-    {id:4,  artist:"Ceuzany", title:"Pays des Merveilles", album:"Ilha d'Melodia", duration:"3:31", cover:"https://img.youtube.com/vi/lBCfSaMyaAg/hqdefault.jpg", ytId:"lBCfSaMyaAg", style:"Fusion", category:"urban"},
-    {id:5,  artist:"Ceuzany", title:"Pedra Run", album:"Ilha d'Melodia", duration:"4:12", cover:"", ytId:"NZhG5JFjuMU", style:"Urban", category:"urban"},
+    {id:4,  artist:"Ceuzany", title:"Pays des Merveilles", album:"Ilha d'Melodia", duration:"3:31", cover:"https://img.youtube.com/vi/x30kc8zgbm0/hqdefault.jpg", ytId:"x30kc8zgbm0", style:"Fusion", category:"urban"},
+    {id:5,  artist:"Ceuzany", title:"Pedra Run", album:"Ilha d'Melodia", duration:"4:12", cover:"", ytId:"chbNmmhoKuM", style:"Urban", category:"urban"},
     {id:15, artist:"Ceuzany", title:"Último Chance", album:"Nha Vida", duration:"4:28", cover:"", ytId:"", style:"Morna", category:"traditional"},
     {id:16, artist:"Ceuzany", title:"Nha Cretcheu", album:"Nha Vida", duration:"3:52", cover:"", ytId:"", style:"Coladeira", category:"traditional"},
     {id:17, artist:"Ceuzany", title:"Sodade d'Amor", album:"Nha Vida", duration:"4:44", cover:"", ytId:"", style:"Morna", category:"traditional"},
@@ -1491,7 +1497,7 @@ function defaultTracks() {
     {id:31, artist:"Neguinho Tivane", title:"Outubro Rosa", album:"Maria",       duration:"4:02", cover:"", ytId:"",           style:"Soul",   category:"urban"},
     {id:32, artist:"Neguinho Tivane", title:"Code",         album:"Maria",       duration:"3:35", cover:"", ytId:"",           style:"Afrobeat", category:"urban"},
 
-    {id:33, artist:"Sonia Sousa", title:"Pa Bo",            album:"Pa Bo",       duration:"3:45", cover:"https://img.youtube.com/vi/c9-LYtadmUA/hqdefault.jpg", ytId:"c9-LYtadmUA",  style:"R&B",  category:"urban"},
+    {id:33, artist:"Sonia Sousa", title:"Pa Bo",            album:"Pa Bo",       duration:"3:45", cover:"https://img.youtube.com/vi/5v_1jMCkFUE/hqdefault.jpg", ytId:"5v_1jMCkFUE",  style:"R&B",  category:"urban"},
     {id:34, artist:"Sonia Sousa", title:"Dexam Bua feat. Hélio Batalha", album:"Pa Bo", duration:"4:12", cover:"", ytId:"zvmWpSRHy1k", style:"Funk", category:"urban"},
     {id:35, artist:"Sonia Sousa", title:"Groove di Praia",  album:"Pa Bo",       duration:"3:28", cover:"", ytId:"",           style:"Soul",  category:"urban"}
   ];
@@ -3075,7 +3081,7 @@ function openArtistModal(id) {
           var ytUrl = 'https://www.youtube.com/watch?v=' + v.ytId;
           return '<a class="clip-card" href="' + ytUrl + '" target="_blank" rel="noopener">'
             + '<div class="clip-thumb-wrap">'
-            + '<img class="clip-yt-thumb" src="' + ytThumb + '" alt="' + esc(v.title) + '">'
+            + '<img class="clip-yt-thumb" src="' + ytThumb + '" alt="' + esc(v.title) + '" onerror="this.onerror=null;this.style.opacity=\'0\'">'
             + (albumCover ? '<img class="clip-album-cover" src="' + albumCover + '" alt="">' : '')
             + '<div class="clip-play-btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>'
             + '</div>'
@@ -6017,7 +6023,7 @@ function openArtistPage(id) {
     var thumb = 'https://img.youtube.com/vi/'+v.ytId+'/hqdefault.jpg';
     return '<div class="ap-yt-card" id="ytcard-'+i+'-'+id+'" onclick="playArtistYT(this.dataset.ytid,this.id)" data-ytid="'+v.ytId+'">'
       + '<div class="ap-yt-thumb">'
-      +   '<img src="'+thumb+'" alt="'+esc(v.title)+'" loading="lazy">'
+      +   '<img src="'+thumb+'" alt="'+esc(v.title)+'" loading="lazy" onerror="this.onerror=null;this.style.opacity=\'0\'">'
       +   '<div class="ap-yt-play"><div class="ap-yt-play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>'
       + '</div>'
       + '<div class="ap-yt-info"><div class="ap-yt-title">'+esc(v.title)+'</div></div>'
