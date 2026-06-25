@@ -4408,15 +4408,15 @@ html { height: -webkit-fill-available; }
 .ap-tab-btn {
   background:none; border:none;
   border-bottom:2px solid transparent;
-  color:rgba(255,255,255,0.4);
-  font-family:Arial,sans-serif; font-size:9px;
-  letter-spacing:3px; text-transform:uppercase;
+  color:rgba(255,255,255,0.65);
+  font-family:Arial,sans-serif; font-size:10px;
+  letter-spacing:2px; text-transform:uppercase;
   padding:18px 22px; cursor:pointer;
   margin-bottom:-1px; white-space:nowrap;
   transition:color 0.2s, border-color 0.2s;
 }
-.ap-tab-btn:hover { color:rgba(255,255,255,0.75); }
-.ap-tab-btn.active { color:var(--accent2); border-bottom-color:var(--accent2); }
+.ap-tab-btn:hover { color:rgba(255,255,255,0.92); }
+.ap-tab-btn.active { color:#fff; border-bottom-color:var(--accent2); }
 
 .ap-event-list { display:flex; flex-direction:column; gap:16px; }
 .ap-event-card {
@@ -4467,7 +4467,7 @@ html { height: -webkit-fill-available; }
   .ap-tabs { padding:0 20px; }
 }
 @media (max-width:768px) {
-  .ap-tab-btn { padding:14px 12px; font-size:8px; letter-spacing:2px; }
+  .ap-tab-btn { padding:14px 12px; font-size:9px; letter-spacing:1px; color:rgba(255,255,255,0.72); }
   .ap-event-card { grid-template-columns:80px 1fr; }
   .ap-event-meta { display:none; }
   .ap-event-day { font-size:22px; }

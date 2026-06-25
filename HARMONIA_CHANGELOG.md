@@ -294,6 +294,17 @@
 
 ---
 
+### v79 — Démo promo artistes par défaut
+**Demande :**
+- Remplir les 3 emplacements "Artistes en Promo" de qui-sommes-nous avec une sélection de démo
+
+**Éléments codés :**
+- `harmonia-shared.src.js` :
+  - Init `DB.promoArtists` : si absent ou tous null → injecter `[1, 3, 11]` (Elida Almeida + Lucibela + Neguinho Tivane)
+  - Logique : `if (!DB.promoArtists || DB.promoArtists.every(...null...))` → valeurs admin préservées
+
+---
+
 ### v80 — Module SHOWCO : Showcases & Concerts par artiste
 **Demande :**
 - 2 nouveaux onglets sur la fiche artiste : Showcases + Concerts
@@ -338,7 +349,7 @@
 | `admin.html` | Panneau d'administration complet |
 | `index.html` | Page d'accueil (sélecteur langue, médaillon Cesária) |
 | `qui-sommes-nous.html` | About + section Artistes en Promo |
-| `artistes.html` | Galerie artistes avec modal fiche |
+| `artistes.html` | Galerie artistes avec modal fiche + page artiste (4 onglets : Albums, Vidéos, Showcases, Concerts) |
 | `contact.html` | Page contact |
 | `boutique.html` | Boutique (désactivée v76-77, réactivable depuis admin) |
 | `panier.html` | Page panier (désactivée v76-77) |
@@ -355,9 +366,9 @@ nano harmonia-shared.src.css
 # 2. Builder
 python3 build.py
 
-# 3. Bumper la version (ex: v77 → v78)
-sed -i 's/harmonia-shared\.js?v=78/harmonia-shared.js?v=79/g' *.html
-sed -i 's/harmonia-shared\.css?v=78/harmonia-shared.css?v=79/g' *.html
+# 3. Bumper la version (ex: v80 → v81)
+OLDV=80; NEWV=81
+for f in *.html; do sed -i "s/harmonia-shared\.js?v=${OLDV}/harmonia-shared.js?v=${NEWV}/g; s/harmonia-shared\.css?v=${OLDV}/harmonia-shared.css?v=${NEWV}/g" "$f"; done
 
 # 4. Pusher
 ./MAJHARMO.command
@@ -378,4 +389,4 @@ Ou depuis l'admin : **Modules → Boutique → toggle ON** (si le bloc force est
 
 ---
 
-*Dernière mise à jour : v78 — Juin 2026*
+*Dernière mise à jour : v80 — Juin 2026*
