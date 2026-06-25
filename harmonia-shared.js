@@ -746,8 +746,9 @@ if (!DB.albums || DB.albums.length === 0)     { DB.albums = defaultAlbums(); sav
 if (!DB.products || !DB.products.length)      { DB.products = defaultProducts(); saveData(DB); }
 if (!DB.events   || !DB.events.length)        { DB.events   = defaultEvents();   saveData(DB); }
 if (!DB.customers)   { DB.customers   = []; saveData(DB); }
-if (!DB.paymentLinks){ DB.paymentLinks = []; saveData(DB); }
-if (!DB.modules)     { DB.modules = defaultModules(); saveData(DB); }
+if (!DB.paymentLinks)   { DB.paymentLinks   = []; saveData(DB); }
+if (!DB.artistEvents)   { DB.artistEvents   = []; saveData(DB); }
+if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
 
 if (!DB.promoArtists || DB.promoArtists.every(function(x){return !x;})){
   DB.promoArtists = [1, 3, 11]; saveData(DB);
@@ -6023,6 +6024,10 @@ function openArtistPage(id) {
       + '</div>';
   }).join('');
 
+
+  var evShowcases = (DB.artistEvents||[]).filter(function(ev){ return ev.type==='showcase' && (ev.artists||[]).indexOf(id)!==-1; });
+  var evConcerts  = (DB.artistEvents||[]).filter(function(ev){ return ev.type==='concert'  && (ev.artists||[]).indexOf(id)!==-1; });
+
   var ptx = (DB.pageTexts || {});
   page.innerHTML =
     '<button class="ap-back" onclick="closeArtistPage()">← Retour</button>'
@@ -6036,8 +6041,35 @@ function openArtistPage(id) {
     +     (socials ? '<div class="ap-social">'+socials+'</div>' : '')
     +   '</div>'
     + '</div>'
-    + buildAlbumsHtml()
-    + (ytHtml ? '<div class="ap-section"><div class="ap-section-title">Vidéos</div><div class="ap-yt-grid">'+ytHtml+'</div></div>' : '');
+
+    + '<div class="ap-tabs">'
+    +   '<button class="ap-tab-btn active" onclick="switchArtistTab(this,\'ap-tab-albums\')">Albums</button>'
+    +   '<button class="ap-tab-btn" onclick="switchArtistTab(this,\'ap-tab-videos\')">Vidéos</button>'
+    +   '<button class="ap-tab-btn" onclick="switchArtistTab(this,\'ap-tab-showcases\')">Showcases</button>'
+    +   '<button class="ap-tab-btn" onclick="switchArtistTab(this,\'ap-tab-concerts\')">Concerts</button>'
+    + '</div>'
+
+    + '<div class="ap-tab-panel" id="ap-tab-albums">'
+    +   buildAlbumsHtml()
+    + '</div>'
+
+    + '<div class="ap-tab-panel" id="ap-tab-videos" style="display:none">'
+    +   (ytHtml
+        ? '<div class="ap-section"><div class="ap-section-title">Vidéos</div><div class="ap-yt-grid">'+ytHtml+'</div></div>'
+        : '<div class="ap-section"><div class="ap-event-empty">Aucune vidéo disponible</div></div>')
+    + '</div>'
+
+    + '<div class="ap-tab-panel" id="ap-tab-showcases" style="display:none">'
+    +   '<div class="ap-section"><div class="ap-section-title">Showcases</div>'
+    +   buildArtistEventHtml(evShowcases)
+    +   '</div>'
+    + '</div>'
+
+    + '<div class="ap-tab-panel" id="ap-tab-concerts" style="display:none">'
+    +   '<div class="ap-section"><div class="ap-section-title">Concerts</div>'
+    +   buildArtistEventHtml(evConcerts)
+    +   '</div>'
+    + '</div>';
 
   page.style.display = 'block';
   page.style.animation = 'none';
@@ -6076,6 +6108,71 @@ function toggleAlbumAccordion(albumId) {
     if (chevron) chevron.style.transform = 'rotate(180deg)';
     item.classList.add('open');
   }
+}
+
+function switchArtistTab(btn, panelId) {
+  var page = document.getElementById('artist-page');
+  if (!page) return;
+  page.querySelectorAll('.ap-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  page.querySelectorAll('.ap-tab-panel').forEach(function(p){ p.style.display='none'; });
+  var panel = document.getElementById(panelId);
+  if (panel) panel.style.display='';
+}
+
+function buildArtistEventHtml(events) {
+  if (!events || !events.length) {
+    return '<div class="ap-event-empty">Aucun événement planifié</div>';
+  }
+  var today = new Date().toISOString().slice(0,10);
+  var MONTHS = ['JAN','FÉV','MAR','AVR','MAI','JUN','JUL','AOÛ','SEP','OCT','NOV','DÉC'];
+
+  var upcoming = events.filter(function(ev){ return !ev.dates || !ev.dates.length || ev.dates[0] >= today; });
+  var past     = events.filter(function(ev){  return ev.dates && ev.dates.length && ev.dates[0] < today; });
+  upcoming.sort(function(a,b){ return ((a.dates||[])[0]||'') < ((b.dates||[])[0]||'') ? -1 : 1; });
+  past.sort(function(a,b){     return ((a.dates||[])[0]||'') > ((b.dates||[])[0]||'') ? -1 : 1; });
+  var sorted = upcoming.concat(past);
+
+  function renderCard(ev) {
+    var firstDate = (ev.dates && ev.dates[0]) || '';
+    var isPast = firstDate && firstDate < today;
+    var day='', month='', year='';
+    if (firstDate) {
+      var parts = firstDate.split('-');
+      year  = parts[0] || '';
+      month = MONTHS[(parseInt(parts[1],10)||1)-1] || '';
+      day   = parts[2] || '';
+    }
+    var extraDates = (ev.dates||[]).length > 1
+      ? '+'+(ev.dates.length-1)+' date'+(ev.dates.length>2?'s':'')
+      : '';
+    var location = [ev.venue, ev.city, ev.country].filter(Boolean).join(' · ');
+    var castNames = (ev.artists||[]).map(function(aid){
+      var ar = (DB.artists||[]).find(function(x){ return x.id===aid; });
+      return ar ? ar.name : '';
+    }).filter(Boolean).join(' & ');
+
+    return '<div class="ap-event-card">'
+      + '<div class="ap-event-dates">'
+      +   (day   ? '<div class="ap-event-day">'+day+'</div>' : '')
+      +   (month ? '<div class="ap-event-month">'+month+'</div>' : '')
+      +   (year  ? '<div class="ap-event-year">'+year+'</div>' : '')
+      +   (extraDates ? '<div class="ap-event-multi">'+extraDates+'</div>' : '')
+      + '</div>'
+      + '<div class="ap-event-body">'
+      +   '<div class="ap-event-title">'+esc(ev.title||'')+'</div>'
+      +   (location  ? '<div class="ap-event-location">'+esc(location)+'</div>' : '')
+      +   (castNames ? '<div class="ap-event-cast">avec '+esc(castNames)+'</div>' : '')
+      +   (ev.description ? '<div class="ap-event-desc">'+esc(ev.description)+'</div>' : '')
+      + '</div>'
+      + '<div class="ap-event-meta">'
+      +   '<div class="ap-event-badge '+(isPast?'past':'upcoming')+'">'+(isPast?'Passé':'À venir')+'</div>'
+      +   (ev.ticketUrl ? '<a href="'+ev.ticketUrl+'" target="_blank" rel="noopener" class="ap-event-ticket">Billetterie ↗</a>' : '')
+      + '</div>'
+      + '</div>';
+  }
+
+  return '<div class="ap-event-list">'+sorted.map(renderCard).join('')+'</div>';
 }
 
 function closeArtistPage() {

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Administration — HARMONIA</title>
-<link rel="stylesheet" href="harmonia-shared.css?v=79">
+<link rel="stylesheet" href="harmonia-shared.css?v=80">
 <style>
 /* ── Variables autonomes — charte Navy / Blanc / Noir ── */
 :root {
@@ -1213,6 +1213,9 @@ td.editable:hover { background: #eaf1fb !important; }
     <div class="snav" data-sec="events"
          onclick="switchSection('events',this)">Événements</div>
 
+    <div class="snav" data-sec="showcases"
+         onclick="switchSection('showcases',this)">Showcases / Concerts</div>
+
     <div class="snav-group">Boutique</div>
     <div class="snav" data-sec="produits"
          onclick="switchSection('produits',this)">Produits</div>
@@ -1486,6 +1489,26 @@ td.editable:hover { background: #eaf1fb !important; }
     </div><!-- /users -->
 
 
+    <!-- ── SHOWCASES & CONCERTS ── -->
+    <div class="admin-section" id="sec-showcases">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="page-title" style="margin-bottom:0;">Showcases &amp; Concerts</div>
+        <button class="a-btn a-btn-primary" onclick="_aeOpenForm(null)">+ Ajouter</button>
+      </div>
+      <div class="page-sub">Agenda des événements par artiste</div>
+      <div class="a-msg" id="ae-msg"></div>
+      <!-- Formulaire add/edit (masqué par défaut) -->
+      <div id="ae-form-wrap" style="display:none;margin-bottom:24px;"></div>
+      <!-- Filtres -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="ae-filter-bar">
+        <button class="order-filter-tab active" onclick="_aeFilter('tous',this)">Tous</button>
+        <button class="order-filter-tab" onclick="_aeFilter('showcase',this)">Showcases</button>
+        <button class="order-filter-tab" onclick="_aeFilter('concert',this)">Concerts</button>
+      </div>
+      <div id="ae-list"></div>
+    </div>
+
+
     <!-- ── MODULES ── -->
     <div class="admin-section" id="sec-modules">
       <div class="page-title">Modules</div>
@@ -1646,7 +1669,7 @@ td.editable:hover { background: #eaf1fb !important; }
 })();
 </script>
 
-<script src="harmonia-shared.js?v=79"></script>
+<script src="harmonia-shared.js?v=80"></script>
 
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -4420,6 +4443,247 @@ function inlineEdit(td, type, id, field) {
     if (e.key === 'Escape') { td.textContent = old; }
   };
 }
+
+// ════════════════════════════════════════════════════════
+//  MODULE SHOWCASES & CONCERTS — code nom : SHOWCO
+// ════════════════════════════════════════════════════════
+
+var _aeCurrentFilter = 'tous';
+
+function _aeNextId() {
+  var evs = DB.artistEvents || [];
+  return evs.length ? Math.max.apply(null, evs.map(function(e){ return e.id||0; })) + 1 : 1;
+}
+
+function _aeMsg(txt, ok) {
+  var el = document.getElementById('ae-msg');
+  if (!el) return;
+  el.textContent = txt;
+  el.style.display = txt ? 'block' : 'none';
+  el.style.background = ok ? 'rgba(46,204,128,0.12)' : 'rgba(220,60,60,0.12)';
+  el.style.color       = ok ? '#2ecc80' : '#e74c3c';
+  if (txt) setTimeout(function(){ el.textContent=''; el.style.display='none'; }, 3500);
+}
+
+// ── Rendu liste dans l'admin ──
+function _aeRenderList() {
+  var container = document.getElementById('ae-list');
+  if (!container) return;
+  var evs = (DB.artistEvents || []).filter(function(ev){
+    return _aeCurrentFilter === 'tous' || ev.type === _aeCurrentFilter;
+  });
+  if (!evs.length) {
+    container.innerHTML = '<div style="font-family:Arial;font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.25);text-align:center;padding:40px 0;text-transform:uppercase;">Aucun événement</div>';
+    return;
+  }
+  // Trier par première date desc
+  evs = evs.slice().sort(function(a,b){ return ((b.dates||[])[0]||'') > ((a.dates||[])[0]||'') ? 1 : -1; });
+
+  var tStyle = 'width:100%;border-collapse:collapse;font-family:Arial;font-size:11px;';
+  var thStyle = 'text-align:left;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35);padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.07);';
+  var tdStyle = 'padding:12px 12px;border-bottom:1px solid rgba(255,255,255,0.05);color:rgba(255,255,255,0.8);vertical-align:middle;';
+
+  var html = '<table style="'+tStyle+'">'
+    + '<thead><tr>'
+    + '<th style="'+thStyle+'">Type</th>'
+    + '<th style="'+thStyle+'">Titre</th>'
+    + '<th style="'+thStyle+'">Artistes</th>'
+    + '<th style="'+thStyle+'">Dates</th>'
+    + '<th style="'+thStyle+'">Lieu</th>'
+    + '<th style="'+thStyle+'width:100px;"></th>'
+    + '</tr></thead><tbody>';
+
+  var today = new Date().toISOString().slice(0,10);
+  evs.forEach(function(ev) {
+    var isPast = ev.dates && ev.dates.length && ev.dates[0] < today;
+    var typeLabel = ev.type === 'showcase' ? 'Showcase' : 'Concert';
+    var typeColor = ev.type === 'showcase' ? '#8e44ad' : '#2ecc80';
+    var artistNames = (ev.artists||[]).map(function(aid){
+      var ar = (DB.artists||[]).find(function(x){ return x.id===aid; });
+      return ar ? ar.name : '?';
+    }).join(', ');
+    var datesStr = (ev.dates||[]).join(' / ');
+    var location = [ev.venue, ev.city, ev.country].filter(Boolean).join(', ');
+
+    html += '<tr style="'+(isPast?'opacity:0.55;':'')+'background:var(--dark);">'
+      + '<td style="'+tdStyle+'"><span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:'+typeColor+';border:1px solid '+typeColor+'33;padding:3px 8px;">'+typeLabel+'</span></td>'
+      + '<td style="'+tdStyle+'font-weight:600;">'+_esc(ev.title||'')+'</td>'
+      + '<td style="'+tdStyle+'color:rgba(255,255,255,0.55);">'+_esc(artistNames)+'</td>'
+      + '<td style="'+tdStyle+'color:rgba(255,255,255,0.55);white-space:nowrap;">'+_esc(datesStr)+'</td>'
+      + '<td style="'+tdStyle+'color:rgba(255,255,255,0.55);">'+_esc(location)+'</td>'
+      + '<td style="'+tdStyle+'">'
+      +   '<button onclick="_aeOpenForm('+ev.id+')" style="background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.6);font-size:9px;letter-spacing:1px;padding:5px 10px;cursor:pointer;margin-right:6px;">Éditer</button>'
+      +   '<button onclick="_aeDelete('+ev.id+')" style="background:none;border:1px solid rgba(220,60,60,0.3);color:rgba(220,60,60,0.7);font-size:9px;letter-spacing:1px;padding:5px 10px;cursor:pointer;">✕</button>'
+      + '</td>'
+      + '</tr>';
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+// ── Filtre ──
+window._aeFilter = function(type, btn) {
+  _aeCurrentFilter = type;
+  document.querySelectorAll('#ae-filter-bar .order-filter-tab').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  _aeRenderList();
+};
+
+// ── Suppression ──
+window._aeDelete = function(id) {
+  if (!confirm('Supprimer cet événement ?')) return;
+  DB.artistEvents = (DB.artistEvents||[]).filter(function(e){ return e.id !== id; });
+  saveData(DB);
+  _aeRenderList();
+  _aeMsg('Événement supprimé', true);
+};
+
+// ── Formulaire add / edit ──
+window._aeOpenForm = function(id) {
+  var wrap = document.getElementById('ae-form-wrap');
+  if (!wrap) return;
+  var ev = id ? (DB.artistEvents||[]).find(function(e){ return e.id===id; }) : null;
+
+  var iStyle  = 'width:100%;background:#0a1628;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.85);font-family:Arial;font-size:12px;padding:10px 12px;outline:none;box-sizing:border-box;';
+  var lblStyle = 'display:block;font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:6px;';
+  var fldStyle = 'margin-bottom:16px;';
+
+  // Multi-artist checkboxes
+  var artistsHtml = (DB.artists||[]).map(function(a){
+    var checked = ev && (ev.artists||[]).indexOf(a.id) !== -1 ? 'checked' : '';
+    return '<label style="display:flex;align-items:center;gap:8px;font-family:Arial;font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:6px;cursor:pointer;">'
+      + '<input type="checkbox" value="'+a.id+'" class="ae-artist-chk" '+checked+' style="accent-color:#2ecc80;width:14px;height:14px;">'
+      + _esc(a.name)
+      + ' <span style="font-size:9px;color:rgba(255,255,255,0.3);">('+a.category+')</span>'
+      + '</label>';
+  }).join('');
+
+  // Dates (dynamiques)
+  var existingDates = (ev && ev.dates && ev.dates.length) ? ev.dates : [''];
+  var datesHtml = existingDates.map(function(d, i){
+    return '<div style="display:flex;gap:8px;margin-bottom:8px;" class="ae-date-row">'
+      + '<input type="date" class="ae-date-inp" value="'+d+'" style="'+iStyle+'flex:1;">'
+      + (i > 0 ? '<button type="button" onclick="this.parentElement.remove()" style="background:none;border:1px solid rgba(220,60,60,0.3);color:rgba(220,60,60,0.7);padding:6px 10px;cursor:pointer;">✕</button>' : '')
+      + '</div>';
+  }).join('');
+
+  var formHtml = '<div class="a-card" style="background:#0d1f3c;border:1px solid rgba(46,204,128,0.2);">'
+    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">'
+    +   '<div style="font-family:Arial;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#2ecc80;">'+(id?'Modifier':'Nouvel')+' événement</div>'
+    +   '<button type="button" onclick="document.getElementById(\'ae-form-wrap\').style.display=\'none\'" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;">✕</button>'
+    + '</div>'
+    /* Type */
+    + '<div style="'+fldStyle+'">'
+    +   '<label style="'+lblStyle+'">Type</label>'
+    +   '<div style="display:flex;gap:16px;">'
+    +     '<label style="display:flex;align-items:center;gap:8px;font-family:Arial;font-size:12px;color:rgba(255,255,255,0.7);cursor:pointer;">'
+    +       '<input type="radio" name="ae-type" value="showcase" '+((!ev||ev.type==='showcase')?'checked':'')+' style="accent-color:#8e44ad;"> Showcase <span style="font-size:9px;color:rgba(255,255,255,0.3);">(privé / pro)</span>'
+    +     '</label>'
+    +     '<label style="display:flex;align-items:center;gap:8px;font-family:Arial;font-size:12px;color:rgba(255,255,255,0.7);cursor:pointer;">'
+    +       '<input type="radio" name="ae-type" value="concert" '+(ev&&ev.type==='concert'?'checked':'')+' style="accent-color:#2ecc80;"> Concert <span style="font-size:9px;color:rgba(255,255,255,0.3);">(public)</span>'
+    +     '</label>'
+    +   '</div>'
+    + '</div>'
+    /* Titre */
+    + '<div style="'+fldStyle+'"><label style="'+lblStyle+'">Titre de l\'événement</label>'
+    +   '<input type="text" id="ae-f-title" value="'+_esc(ev?ev.title:'',true)+'" placeholder="Ex : Festival Baia das Gatas" style="'+iStyle+'">'
+    + '</div>'
+    /* Artistes */
+    + '<div style="'+fldStyle+'">'
+    +   '<label style="'+lblStyle+'">Artistes concernés</label>'
+    +   '<div style="background:#091f13;border:1px solid rgba(255,255,255,0.08);padding:14px 16px;max-height:180px;overflow-y:auto;">'+artistsHtml+'</div>'
+    + '</div>'
+    /* Dates */
+    + '<div style="'+fldStyle+'">'
+    +   '<label style="'+lblStyle+'">Dates <span style="color:rgba(255,255,255,0.2);font-size:8px;">(plusieurs dates possibles)</span></label>'
+    +   '<div id="ae-dates-container">'+datesHtml+'</div>'
+    +   '<button type="button" onclick="_aeAddDateRow()" style="margin-top:4px;background:none;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-family:Arial;font-size:9px;letter-spacing:2px;padding:7px 14px;cursor:pointer;">+ Ajouter une date</button>'
+    + '</div>'
+    /* Venue / Ville / Pays */
+    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;'+fldStyle+'">'
+    +   '<div><label style="'+lblStyle+'">Venue / Salle</label><input type="text" id="ae-f-venue" value="'+_esc(ev?ev.venue:'',true)+'" placeholder="Ex : Baia das Gatas" style="'+iStyle+'"></div>'
+    +   '<div><label style="'+lblStyle+'">Ville</label><input type="text" id="ae-f-city" value="'+_esc(ev?ev.city:'',true)+'" placeholder="Ex : Mindelo" style="'+iStyle+'"></div>'
+    +   '<div><label style="'+lblStyle+'">Pays</label><input type="text" id="ae-f-country" value="'+_esc(ev?ev.country:'',true)+'" placeholder="Ex : Cabo Verde" style="'+iStyle+'"></div>'
+    + '</div>'
+    /* Description */
+    + '<div style="'+fldStyle+'">'
+    +   '<label style="'+lblStyle+'">Description / Programme</label>'
+    +   '<textarea id="ae-f-desc" rows="3" placeholder="Informations sur l\'événement…" style="'+iStyle+'resize:vertical;">'+_esc(ev?ev.description:'',true)+'</textarea>'
+    + '</div>'
+    /* Lien billetterie */
+    + '<div style="'+fldStyle+'">'
+    +   '<label style="'+lblStyle+'">Lien billetterie / infos</label>'
+    +   '<input type="url" id="ae-f-ticket" value="'+_esc(ev?ev.ticketUrl:'',true)+'" placeholder="https://…" style="'+iStyle+'">'
+    + '</div>'
+    /* Bouton save */
+    + '<div style="display:flex;gap:12px;margin-top:8px;">'
+    +   '<button onclick="_aeSave('+(id||'null')+')" style="background:rgba(46,204,128,0.15);border:1px solid rgba(46,204,128,0.4);color:#2ecc80;font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:11px 28px;cursor:pointer;">✓ '+(id?'Mettre à jour':'Enregistrer')+'</button>'
+    +   '<button type="button" onclick="document.getElementById(\'ae-form-wrap\').style.display=\'none\'" style="background:none;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);font-family:Arial;font-size:9px;letter-spacing:2px;padding:11px 20px;cursor:pointer;">Annuler</button>'
+    + '</div>'
+    + '</div>';
+
+  wrap.innerHTML = formHtml;
+  wrap.style.display = 'block';
+  wrap.scrollIntoView({ behavior:'smooth', block:'start' });
+};
+
+window._aeAddDateRow = function() {
+  var cont = document.getElementById('ae-dates-container');
+  if (!cont) return;
+  var iStyle = 'width:100%;background:#0a1628;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.85);font-family:Arial;font-size:12px;padding:10px 12px;outline:none;box-sizing:border-box;';
+  var row = document.createElement('div');
+  row.className = 'ae-date-row';
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;';
+  row.innerHTML = '<input type="date" class="ae-date-inp" style="'+iStyle+'flex:1;">'
+    + '<button type="button" onclick="this.parentElement.remove()" style="background:none;border:1px solid rgba(220,60,60,0.3);color:rgba(220,60,60,0.7);padding:6px 10px;cursor:pointer;">✕</button>';
+  cont.appendChild(row);
+};
+
+window._aeSave = function(id) {
+  var titleEl = document.getElementById('ae-f-title');
+  if (!titleEl || !titleEl.value.trim()) { _aeMsg('Le titre est obligatoire', false); return; }
+
+  var type = document.querySelector('input[name="ae-type"]:checked');
+  if (!type) { _aeMsg('Choisissez un type', false); return; }
+
+  var artists = Array.from(document.querySelectorAll('.ae-artist-chk:checked')).map(function(c){ return parseInt(c.value,10); });
+  var dates   = Array.from(document.querySelectorAll('.ae-date-inp')).map(function(i){ return i.value; }).filter(Boolean);
+
+  var ev = {
+    id:          id || _aeNextId(),
+    type:        type.value,
+    title:       titleEl.value.trim(),
+    artists:     artists,
+    dates:       dates,
+    venue:       (document.getElementById('ae-f-venue')||{}).value||'',
+    city:        (document.getElementById('ae-f-city')||{}).value||'',
+    country:     (document.getElementById('ae-f-country')||{}).value||'',
+    description: (document.getElementById('ae-f-desc')||{}).value||'',
+    ticketUrl:   (document.getElementById('ae-f-ticket')||{}).value||''
+  };
+
+  if (!DB.artistEvents) DB.artistEvents = [];
+  if (id) {
+    var idx = DB.artistEvents.findIndex(function(e){ return e.id===id; });
+    if (idx !== -1) DB.artistEvents[idx] = ev; else DB.artistEvents.push(ev);
+  } else {
+    DB.artistEvents.push(ev);
+  }
+  saveData(DB);
+  document.getElementById('ae-form-wrap').style.display = 'none';
+  _aeRenderList();
+  _aeMsg((id ? 'Événement mis à jour' : 'Événement ajouté') + ' ✓', true);
+};
+
+// ── switchSection hook ──
+var _aeOrigSwitch = window.switchSection;
+window.switchSection = function(sec, btn) {
+  if (_aeOrigSwitch) _aeOrigSwitch(sec, btn);
+  if (sec === 'showcases') {
+    _aeRenderList();
+  }
+};
 
 // ── Fermer la modale avec Escape ────────────────────────
 document.addEventListener('keydown', function(e) {

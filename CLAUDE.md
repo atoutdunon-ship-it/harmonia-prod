@@ -52,7 +52,7 @@ sed -i 's/harmonia-shared\.css?v=77/harmonia-shared.css?v=78/g' *.html
 ```
 
 ### Version actuelle
-**v78** — vérifier avec `grep "v=" artistes.html | head -1`
+**v80** — vérifier avec `grep "v=" artistes.html | head -1`
 
 ---
 
@@ -208,4 +208,14 @@ Voir `HARMONIA_CHANGELOG.md` dans ce dossier pour l'historique détaillé v1→v
 
 ---
 
-*Mis à jour : v78 — Juin 2026*
+## MODULE SHOWCO — Showcases & Concerts
+
+- `DB.artistEvents[]` — `{ id, type:'showcase'|'concert', title, artists:[ids], dates:['YYYY-MM-DD',...], venue, city, country, description, ticketUrl }`
+- `switchArtistTab(btn, panelId)` — navigation onglets page artiste
+- `buildArtistEventHtml(events)` — rendu cartes événements (tri À venir → Passé, badge)
+- `openArtistPage()` — 4 panels : Albums | Vidéos | Showcases | Concerts
+- Admin : `_aeOpenForm(id)` / `_aeSave(id)` / `_aeDelete(id)` / `_aeRenderList()` / `_aeFilter(type)`
+
+---
+
+*Mis à jour : v80 — Juin 2026*

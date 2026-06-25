@@ -294,6 +294,37 @@
 
 ---
 
+### v80 — Module SHOWCO : Showcases & Concerts par artiste
+**Demande :**
+- 2 nouveaux onglets sur la fiche artiste : Showcases + Concerts
+- Module admin pour gérer les événements avec sélection multi-artistes et multi-dates
+- Événements passés marqués d'un badge "Passé", à venir en vert
+
+**Éléments codés :**
+- `harmonia-shared.src.css` :
+  - `.ap-tabs`, `.ap-tab-btn` — barre d'onglets sticky sous le hero
+  - `.ap-event-card`, `.ap-event-dates`, `.ap-event-body`, `.ap-event-meta` — cartes événements
+  - `.ap-event-badge.past` / `.ap-event-badge.upcoming` — statut visuel
+  - `.ap-event-ticket`, `.ap-event-empty` — lien billetterie + état vide
+  - Responsive : 2 colonnes mobile, masquage .ap-event-meta
+- `harmonia-shared.src.js` :
+  - `DB.artistEvents = []` — nouveau tableau dans le modèle de données
+  - `switchArtistTab(btn, panelId)` — navigation entre onglets
+  - `buildArtistEventHtml(events)` — rendu liste événements avec tri À venir/Passé
+  - `openArtistPage()` — refactorisé : 4 panels (Albums, Vidéos, Showcases, Concerts)
+- `admin.html` :
+  - Sidebar : nav item "Showcases / Concerts" dans groupe Contenu
+  - Section `#sec-showcases` avec filtre Tous/Showcases/Concerts
+  - `_aeOpenForm(id)` — formulaire add/edit (type, titre, artistes checkboxes, dates multi, venue, ville, pays, description, billetterie)
+  - `_aeSave(id)` — création / mise à jour avec ID auto-incrémenté
+  - `_aeDelete(id)` — suppression avec confirmation
+  - `_aeFilter(type)` — filtrage liste
+  - `_aeRenderList()` — rendu tableau avec tri par date
+
+**Code nom module : SHOWCO**
+
+---
+
 ## FICHIERS CLÉS DU PROJET
 
 | Fichier | Rôle |

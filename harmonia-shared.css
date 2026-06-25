@@ -4394,3 +4394,83 @@ html { height: -webkit-fill-available; }
   .promo-artists-grid { grid-template-columns: 1fr; gap: 20px; max-width: 360px; }
   .promo-artists-section { padding: 48px 20px 60px; }
 }
+
+.ap-tabs {
+  display:flex; gap:0;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  padding:0 48px;
+  background:var(--navy);
+  position:sticky; top:0; z-index:10;
+  overflow-x:auto; -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.ap-tabs::-webkit-scrollbar { display:none; }
+.ap-tab-btn {
+  background:none; border:none;
+  border-bottom:2px solid transparent;
+  color:rgba(255,255,255,0.4);
+  font-family:Arial,sans-serif; font-size:9px;
+  letter-spacing:3px; text-transform:uppercase;
+  padding:18px 22px; cursor:pointer;
+  margin-bottom:-1px; white-space:nowrap;
+  transition:color 0.2s, border-color 0.2s;
+}
+.ap-tab-btn:hover { color:rgba(255,255,255,0.75); }
+.ap-tab-btn.active { color:var(--accent2); border-bottom-color:var(--accent2); }
+
+.ap-event-list { display:flex; flex-direction:column; gap:16px; }
+.ap-event-card {
+  display:grid; grid-template-columns:110px 1fr 150px;
+  border:1px solid rgba(255,255,255,0.07);
+  background:var(--navy2);
+  transition:border-color 0.3s;
+}
+.ap-event-card:hover { border-color:rgba(46,204,128,0.25); }
+.ap-event-dates {
+  padding:24px 14px;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  border-right:1px solid rgba(255,255,255,0.06);
+  gap:2px;
+}
+.ap-event-day   { font-family:Georgia,serif; font-size:30px; color:var(--white); line-height:1; }
+.ap-event-month { font-family:Arial,sans-serif; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--accent2); margin-top:2px; }
+.ap-event-year  { font-family:Arial,sans-serif; font-size:10px; color:rgba(255,255,255,0.3); }
+.ap-event-multi { font-family:Arial,sans-serif; font-size:9px; letter-spacing:1px; color:rgba(255,255,255,0.35); text-align:center; margin-top:6px; border-top:1px solid rgba(255,255,255,0.08); padding-top:6px; width:100%; }
+.ap-event-body  { padding:24px 28px; display:flex; flex-direction:column; gap:6px; }
+.ap-event-title    { font-family:Georgia,serif; font-size:18px; color:var(--white); }
+.ap-event-location { font-family:Arial,sans-serif; font-size:10px; letter-spacing:2px; color:rgba(255,255,255,0.45); text-transform:uppercase; margin-top:2px; }
+.ap-event-cast     { font-family:Arial,sans-serif; font-size:11px; color:var(--accent2); margin-top:2px; }
+.ap-event-desc     { font-family:Arial,sans-serif; font-size:13px; color:rgba(255,255,255,0.6); line-height:1.65; margin-top:8px; }
+.ap-event-meta {
+  padding:24px 18px;
+  display:flex; flex-direction:column;
+  align-items:flex-end; justify-content:space-between; gap:12px;
+  border-left:1px solid rgba(255,255,255,0.06);
+}
+.ap-event-badge { font-family:Arial,sans-serif; font-size:9px; letter-spacing:2px; text-transform:uppercase; padding:5px 10px; border:1px solid; }
+.ap-event-badge.past     { color:rgba(255,255,255,0.28); border-color:rgba(255,255,255,0.1); }
+.ap-event-badge.upcoming { color:var(--accent2); border-color:rgba(46,204,128,0.3); }
+.ap-event-ticket {
+  font-family:Arial,sans-serif; font-size:9px; letter-spacing:2px;
+  text-transform:uppercase; color:var(--accent2);
+  border:1px solid rgba(46,204,128,0.3); padding:8px 12px;
+  text-decoration:none; transition:all 0.3s; text-align:center; white-space:nowrap;
+}
+.ap-event-ticket:hover { background:var(--accent2); color:var(--dark); }
+.ap-event-empty {
+  font-family:Arial,sans-serif; font-size:11px; letter-spacing:3px;
+  color:rgba(255,255,255,0.18); text-align:center;
+  padding:72px 0; text-transform:uppercase;
+}
+@media (max-width:900px) {
+  .ap-tabs { padding:0 20px; }
+}
+@media (max-width:768px) {
+  .ap-tab-btn { padding:14px 12px; font-size:8px; letter-spacing:2px; }
+  .ap-event-card { grid-template-columns:80px 1fr; }
+  .ap-event-meta { display:none; }
+  .ap-event-day { font-size:22px; }
+  .ap-event-body { padding:16px; }
+  .ap-event-title { font-size:15px; }
+}
