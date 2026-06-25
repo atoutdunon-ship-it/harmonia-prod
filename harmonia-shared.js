@@ -777,20 +777,19 @@ if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
 })();
 
 (function migrateSocialEnabled() {
-  var _chg = false;
+  if (DB._socialEnabledV >= 2) return;
   (DB.artists||[]).forEach(function(a) {
-    if (!a.socialEnabled) {
-      a.socialEnabled = {
-        spotify:   !!a.spotify,
-        instagram: false,
-        facebook:  false,
-        youtube:   false,
-        tiktok:    false
-      };
-      _chg = true;
-    }
+    var prev = a.socialEnabled || {};
+    a.socialEnabled = {
+      spotify:   prev.hasOwnProperty('spotify') ? !!prev.spotify : !!a.spotify,
+      instagram: prev.instagram === true,
+      facebook:  prev.facebook  === true,
+      youtube:   prev.youtube   === true,
+      tiktok:    prev.tiktok    === true
+    };
   });
-  if (_chg) saveData(DB);
+  DB._socialEnabledV = 2;
+  saveData(DB);
 })();
 
 (function migrateSocialLinks() {
@@ -3201,13 +3200,13 @@ function openArtistModal(id) {
   }
 
   var _se = a.socialEnabled || {};
-  var _spOn = _se.hasOwnProperty ? (_se.hasOwnProperty('spotify') ? _se.spotify : !!a.spotify) : !!a.spotify;
+  var _spOn = (_se.spotify !== false) && !!a.spotify;
   const socials = [
-    (a.instagram && _se.instagram)  && {url: a.instagram, label: 'Instagram'},
-    (a.facebook  && _se.facebook)   && {url: a.facebook,  label: 'Facebook'},
-    (a.youtube   && _se.youtube)    && {url: a.youtube,   label: 'YouTube'},
-    (a.spotify   && _spOn)          && {url: a.spotify,   label: 'Spotify'},
-    (a.tiktok    && _se.tiktok)     && {url: a.tiktok,    label: 'TikTok'},
+    (a.instagram && _se.instagram === true)  && {url: a.instagram, label: 'Instagram'},
+    (a.facebook  && _se.facebook  === true)  && {url: a.facebook,  label: 'Facebook'},
+    (a.youtube   && _se.youtube   === true)  && {url: a.youtube,   label: 'YouTube'},
+    (a.spotify   && _spOn)                   && {url: a.spotify,   label: 'Spotify'},
+    (a.tiktok    && _se.tiktok    === true)  && {url: a.tiktok,    label: 'TikTok'},
   ].filter(Boolean);
 
   if (el('modal-social')) {
@@ -6159,13 +6158,13 @@ function openArtistPage(id) {
 
 
   var _se2 = a.socialEnabled || {};
-  var _sp2 = _se2.hasOwnProperty ? (_se2.hasOwnProperty('spotify') ? _se2.spotify : !!a.spotify) : !!a.spotify;
+  var _sp2 = (_se2.spotify !== false) && !!a.spotify;
   var socials = [
-    (a.instagram && _se2.instagram) && '<a href="'+a.instagram+'" target="_blank" rel="noopener">Instagram</a>',
-    (a.facebook  && _se2.facebook)  && '<a href="'+a.facebook+'"  target="_blank" rel="noopener">Facebook</a>',
-    (a.youtube   && _se2.youtube)   && '<a href="'+a.youtube+'"   target="_blank" rel="noopener">YouTube</a>',
-    (a.spotify   && _sp2)           && '<a href="'+a.spotify+'"   target="_blank" rel="noopener">Spotify</a>',
-    (a.tiktok    && _se2.tiktok)    && '<a href="'+a.tiktok+'"    target="_blank" rel="noopener">TikTok</a>'
+    (a.instagram && _se2.instagram === true) && '<a href="'+a.instagram+'" target="_blank" rel="noopener">Instagram</a>',
+    (a.facebook  && _se2.facebook  === true) && '<a href="'+a.facebook+'"  target="_blank" rel="noopener">Facebook</a>',
+    (a.youtube   && _se2.youtube   === true) && '<a href="'+a.youtube+'"   target="_blank" rel="noopener">YouTube</a>',
+    (a.spotify   && _sp2)                   && '<a href="'+a.spotify+'"   target="_blank" rel="noopener">Spotify</a>',
+    (a.tiktok    && _se2.tiktok    === true) && '<a href="'+a.tiktok+'"    target="_blank" rel="noopener">TikTok</a>'
   ].filter(Boolean).join('');
 
 
