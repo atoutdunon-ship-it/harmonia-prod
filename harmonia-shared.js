@@ -750,10 +750,25 @@ if (!DB.paymentLinks)   { DB.paymentLinks   = []; saveData(DB); }
 if (!DB.artistEvents)   { DB.artistEvents   = []; saveData(DB); }
 if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
 
+(function migrateUrbanPhotos() {
+  var _pm = {
+    'IMG_ELLY':    'https://img.youtube.com/vi/HRnSlprhbIQ/hqdefault.jpg',
+    'IMG_INDIRA':  'https://img.youtube.com/vi/1ztMmdEZ1bw/hqdefault.jpg',
+    'IMG_LEY_LAZZ':'https://img.youtube.com/vi/NDqCs1c7eYU/hqdefault.jpg',
+    'IMG_MURENO':  'https://img.youtube.com/vi/7HorxxeTgNs/hqdefault.jpg',
+    'IMG_SONIA':   'https://img.youtube.com/vi/5v_1jMCkFUE/hqdefault.jpg'
+  };
+  var _chg = false;
+  (DB.artists || []).forEach(function(a) { if (_pm[a.photo]) { a.photo = _pm[a.photo]; _chg = true; } });
+  if (_chg) saveData(DB);
+})();
+
 (function(){
-  var _defaults = [1, 3, 11];
+  var _defaults = [1, 3, 12];
   if (!DB.promoArtists) { DB.promoArtists = _defaults.slice(); saveData(DB); return; }
   var _changed = false;
+
+  if (DB.promoArtists[2] === 11) { DB.promoArtists[2] = 12; _changed = true; }
   for (var _i = 0; _i < 3; _i++) {
     if (!DB.promoArtists[_i]) { DB.promoArtists[_i] = _defaults[_i]; _changed = true; }
   }
@@ -1310,7 +1325,7 @@ function defaultArtists() {
       style:"Urban · Pop · R&B",
       bioShort:"Elly Paris est la voix urbaine d'une nouvelle génération cap-verdienne — pop lumineux, énergie scénique naturelle, et une personnalité artistique déjà distincte.",
       bioLong:"Elly Paris est née pour être sur scène. Sa voix chaude et son charisme instinctif ont immédiatement retenu l'attention de la maison HARMONIA, qui a reconnu en elle un tempérament artistique rare — celui des artistes qui n'ont pas besoin de se construire une image parce qu'ils sont déjà eux-mêmes dès la première note.\n\nSon univers musical mêle pop urbaine contemporaine, influences R&B et culture cap-verdienne dans une alchimie spontanée et communicative. Son single « Sabi » (2023) — « délicieux, savoureux » en créole — est une déclaration d'identité : une musique qui se savoure, qui s'écoute et se danse dans le même souffle. « Xpia B'oia » (2022) confirme une artiste qui sait raconter des histoires avec une économie de mots et une générosité de groove.\n\nLa collaboration avec l'artiste Kiddye Bonz sur « Adax » (2023) révèle également une capacité à s'insérer dans des univers différents sans jamais perdre sa voix propre — qualité rare et précieuse dans un paysage musical en mutation permanente.\n\nElly Paris est l'une des représentantes de cette nouvelle scène cap-verdienne urbaine qui s'impose sans complexe dans le concert de la musique afro-contemporaine mondiale. HARMONIA mise sur son avenir avec la conviction que les meilleures pages de son histoire restent à écrire.",
-      photo:"IMG_ELLY",
+      photo:"https://img.youtube.com/vi/HRnSlprhbIQ/hqdefault.jpg",
       instagram:"https://www.instagram.com/ellyparis_/",
       facebook:"",
       youtube:"https://www.youtube.com/@EllyParis",
@@ -1325,7 +1340,7 @@ function defaultArtists() {
       style:"Urban · R&B · Soul",
       bioShort:"Indira est l'une des voix R&B les plus prometteuses de la scène cap-verdienne — une présence sur scène à la fois sensuelle et puissante, déjà appréciée des festivals.",
       bioLong:"Indira s'est imposée sur la scène musicale cap-verdienne par la force de sa voix et l'authenticité de sa présence. Dans un paysage où les artistes urbains commencent à occuper une place de premier plan aux côtés de la tradition, elle représente cette génération qui assume pleinement ses influences R&B et soul tout en restant profondément ancrée dans la culture des îles.\n\nSa participation aux grandes scènes du pays — dont le festival Gamboa — l'a placée aux côtés des noms les plus en vue de la musique cap-verdienne contemporaine : Hélio Batalha, Mito Kaskas, Paulinha. Une reconnaissance par les pairs qui ne trompe pas.\n\nSon univers musical, à la croisée du R&B américain et des cadences afro-lusitaniennes, lui permet d'aborder des sujets universels — l'amour, l'identité, la résilience — avec une profondeur qui dépasse son jeune âge. Chaque performance est une invitation à entrer dans un monde intime et chaleureux, où la voix fait le travail d'une confidence.\n\nHARMONIA a identifié en Indira une artiste en pleine construction dont la trajectoire s'annonce remarquable. Elle fait partie de cette vague de talents cap-verdiens qui prouve que Cabo Verde n'est pas seulement la patrie de la morna — c'est aussi un vivier d'artistes urbains de calibre international.",
-      photo:"IMG_INDIRA",
+      photo:"https://img.youtube.com/vi/1ztMmdEZ1bw/hqdefault.jpg",
       instagram:"",
       facebook:"",
       youtube:"",
@@ -1337,7 +1352,7 @@ function defaultArtists() {
       style:"Urban · Afrobeat · R&B",
       bioShort:"Ley Lazz incarne la fusion des sonorités afro-caribéennes et des beats contemporains — un artiste cap-verdien qui s'impose avec une énergie et un charisme naturels.",
       bioLong:"Ley Lazz appartient à cette génération d'artistes cap-verdiens qui ont grandi entre deux mondes : les rythmes de l'archipel et les productions afro-contemporaines qui circulent des Caraïbes à l'Afrique de l'Ouest, de Lisbonne à Paris. C'est de cette double exposition qu'est née sa musique — un mélange instinctif d'Afrobeat, de R&B et de pop qui semble couler de source.\n\nSon approche artistique est résolument moderne : productions léchées, mélodies immédiates, textes en créole et en portugais qui touchent juste. « We Vibe » illustre parfaitement cet univers — une ode à la connexion humaine, à l'attraction, au groove partagé. Directe, efficace, dansante.\n\nLey Lazz travaille avec une économie d'effets qui révèle une vraie maîtrise : pas besoin de surcharge sonore quand l'ossature mélodique est solide. C'est la marque des artistes qui construisent pour durer.\n\nAvec HARMONIA, Ley Lazz entre dans une phase décisive de son développement artistique. Le label apporte la structure et la vision internationale ; l'artiste apporte l'originalité et l'énergie. Une combinaison qui a déjà fait ses preuves.",
-      photo:"IMG_LEY_LAZZ",
+      photo:"https://img.youtube.com/vi/NDqCs1c7eYU/hqdefault.jpg",
       instagram:"",
       facebook:"",
       youtube:"",
@@ -1351,7 +1366,7 @@ function defaultArtists() {
       style:"Urban · R&B · Kizomba",
       bioShort:"Mureno est une valeur sûre de la scène urbaine cap-verdienne — sa voix grave et ses mélodies sensuelles en ont fait l'un des artistes les plus appréciés des publics jeunes.",
       bioLong:"Il y a dans la voix de Mureno quelque chose qui s'impose sans effort — une gravité naturelle, une chaleur qui enveloppe l'auditeur dès les premières mesures. C'est peut-être pour cela que ses collaborations comptent parmi les moments les plus marquants de la scène cap-verdienne contemporaine. Son duo avec Neuza de Pina sur « Conberso cu Distino » est devenu une référence — deux univers qui se rencontrent, le traditionnel et l'urbain, et qui découvrent qu'ils parlent la même langue au fond.\n\nSon propre single « Diskulpam » — « Pardonne-moi » — est un exemple de ce que la musique urbaine cap-verdienne fait de mieux : une sincérité désarmante emballée dans une production contemporaine qui n'oublie pas ses racines. Le titre circule sur les radios et les réseaux, porté par une mélodie qui résiste à l'usure.\n\nMureno travaille à la frontière entre le R&B, la kizomba et les influences afro-lusitaniennes. Il fait partie de ces artistes dont le positionnement stylistique est suffisamment ouvert pour toucher des publics différents sans jamais perdre en authenticité. Ce grand écart, peu d'artistes savent le tenir. Mureno en a naturellement les moyens.",
-      photo:"IMG_MURENO",
+      photo:"https://img.youtube.com/vi/7HorxxeTgNs/hqdefault.jpg",
       instagram:"",
       facebook:"",
       youtube:"",
@@ -1381,7 +1396,7 @@ function defaultArtists() {
       style:"R&B · Funk · Soul",
       bioShort:"Sonia Sousa est la reine du R&B cap-verdien — groove, sensualité et créole dans une voix qui sait marier la rue de Praia et les meilleures productions contemporaines.",
       bioLong:"Sonia Sousa a trouvé sa voie à l'intersection de deux mondes : la tradition musicale de Cabo Verde et le R&B/funk contemporain qui irrigue les playlists mondiales. Ce n'est pas une fusion de façade — c'est une synthèse organique, construite par une artiste qui a absorbé autant James Brown que la musique des rues de Santiago.\n\nSon style est immédiatement identifiable : un groove profond, une ligne mélodique qui s'accroche, et cette façon qu'elle a de chanter en créole caboverdien comme si aucune autre langue ne pouvait contenir ce qu'elle ressent. « Pa Bo » — « Pour toi » — est l'archétype de sa démarche : une ballade R&B qui sonne universel tout en étant profondément locale. La collaboration avec Hélio Batalha sur « Dexam Bua » — « Laisse-moi t'embrasser » — confirme sa capacité à s'insérer dans des productions plus ambitieuses sans jamais perdre son identité propre.\n\nSes textes explorent l'amour dans toutes ses nuances — la désir, l'abandon, la nostalgie, la joie du corps — avec une franchise et une élégance qui sont sa marque de fabrique. Sonia Sousa ne joue pas la carte de l'exotisme : elle joue la carte de l'honnêteté artistique, et le public l'en récompense.\n\nAvec une présence croissante sur les plateformes de streaming internationales, Sonia Sousa est en train de s'imposer comme l'une des voix R&B de référence de l'espace lusophone. HARMONIA est fière de compter parmi ses artistes cette force tranquille du groove cap-verdien.",
-      photo:"IMG_SONIA",
+      photo:"https://img.youtube.com/vi/5v_1jMCkFUE/hqdefault.jpg",
       instagram:"",
       facebook:"",
       youtube:"https://www.youtube.com/channel/UCa5OHGXWMJVABJ6m8byEvsQ",

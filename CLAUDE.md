@@ -55,7 +55,7 @@ grep -l "v=${OLDV}" *.html   # doit retourner vide
 ```
 
 ### Version actuelle
-**v86** — vérifier avec `grep "v=" artistes.html | head -1`
+**v88** — vérifier avec `grep "v=" artistes.html | head -1`
 
 ---
 
@@ -147,7 +147,7 @@ DB.modules = {
 Covers albums : YouTube thumbnail `https://img.youtube.com/vi/YTID/hqdefault.jpg`
 Override cover : `DB.images['disc_'+artistId+'_'+albumIndex']`
 
-**Artistes en Promo par défaut** : `DB.promoArtists = [1, 3, 11]` (Elida + Lucibela + Neguinho Tivane) — réinitialisé si tous null
+**Artistes en Promo par défaut** : `DB.promoArtists = [1, 3, 12]` (Elida + Lucibela + Sonia Sousa) — réinitialisé si absent ou tous null
 
 ---
 
@@ -216,7 +216,7 @@ DB.artistEvents[] = {
 - JS : `renderPromoArtists()` — lit `DB.promoArtists[0..2]`, cherche artiste dans `DB.artists`
 - Carte : Photo + Nom + Bouton "Découvrir" → `artistes.html?artist=ID`
 - Admin : section "Artistes en Promo" dans Modules → 3 dropdowns → `_saveAllPromoArtists()`
-- Défaut démo : `[1, 3, 11]` — réinitialisé si absent ou tous null
+- Défaut démo : `[1, 3, 12]` — réinitialisé si absent ou tous null; migration auto si `11` encore stocké
 
 ---
 
@@ -286,4 +286,4 @@ Voir `HARMONIA_CHANGELOG.md` dans ce dossier — historique détaillé v1→v81.
 
 ---
 
-*Mis à jour : v82 — Juin 2026*
+*Mis à jour : v88 — Juin 2026*
