@@ -3122,9 +3122,10 @@ function renderPromoArtists() {
       return '<div class="promo-artist-slot-empty"><span>Artiste introuvable</span></div>';
     }
     var img = (typeof artistImg === 'function') ? artistImg(a) : null;
+    var initial = a.name ? a.name.charAt(0).toUpperCase() : '?';
     var photoEl = img
       ? '<img src="' + img + '" alt="' + esc(a.name) + '" loading="lazy">'
-      : '<div class="promo-artist-no-photo">&#9834;</div>';
+      : '<div class="promo-artist-no-photo"><span class="promo-artist-no-photo-initial">' + initial + '</span></div>';
     return '<div class="promo-artist-card">'
       + '<div class="promo-artist-photo">' + photoEl + '</div>'
       + '<div class="promo-artist-info">'
