@@ -3705,8 +3705,18 @@ function _renderAlbums() {
       + '<div class="a-field"><label>Label</label><input type="text" id="add-alb-label" placeholder="HARMONIA"></div>'
       + '<div class="a-field"><label>Nb titres</label><input type="number" id="add-alb-tracks" placeholder="10"></div>'
       + '</div>'
-      + '<div class="a-field"><label>URL Pochette (optionnel)</label><input type="text" id="add-alb-cover" placeholder="https://img.youtube.com/vi/YTID/hqdefault.jpg"></div>'
-      + '<button class="a-btn a-btn-primary" onclick="_addAlbum()" style="margin-top:4px;">Ajouter</button>'
+      + '<div class="a-field" style="margin-top:4px;">'
+      +   '<label>Pochette</label>'
+      +   '<div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">'
+      +     '<div>'
+      +       '<input type="file" id="add-alb-img-input" accept="image/*" style="font-size:12px;" onchange="_onAddAlbImgChange(this)">'
+      +       '<div style="margin:6px 0 3px;font-size:9px;letter-spacing:1px;color:#666;text-transform:uppercase;">— ou URL —</div>'
+      +       '<input type="text" id="add-alb-cover" placeholder="https://img.youtube.com/vi/YTID/hqdefault.jpg" style="width:320px;max-width:100%;font-size:12px;padding:6px 8px;border:1px solid #ccc;" oninput="_onAddAlbUrlChange(this)">'
+      +     '</div>'
+      +     '<img id="add-alb-preview" style="width:72px;height:72px;object-fit:cover;border:1px solid #ccc;display:none;" alt="">'
+      +   '</div>'
+      + '</div>'
+      + '<button class="a-btn a-btn-primary" onclick="_addAlbum()" style="margin-top:12px;">Ajouter</button>'
       + '</div>';
   }
 
@@ -3755,19 +3765,52 @@ function _renderAlbums() {
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
+// Handlers upload/URL pour le formulaire "Ajouter un album"
+var _addAlbImgData = null; // base64 en attente
+function _onAddAlbImgChange(input) {
+  if (!input.files || !input.files[0]) return;
+  resizeImage(input.files[0], 1200, 0.85, function(dataUrl) {
+    _addAlbImgData = dataUrl;
+    var prev = document.getElementById('add-alb-preview');
+    if (prev) { prev.src = dataUrl; prev.style.display = 'block'; }
+    var urlEl = document.getElementById('add-alb-cover');
+    if (urlEl) urlEl.value = ''; // effacer URL si fichier sélectionné
+  });
+}
+function _onAddAlbUrlChange(input) {
+  var url = input.value.trim();
+  var prev = document.getElementById('add-alb-preview');
+  if (prev && url) { prev.src = url; prev.style.display = 'block'; }
+  if (url) _addAlbImgData = null; // URL prime sur upload
+}
+
 function _addAlbum() {
   if (!canDo('add')) return;
   var title = (document.getElementById('add-alb-title') || {}).value || '';
   if (!title.trim()) { alert('Le titre est requis.'); return; }
-  createItem('album', {
+  var coverUrl = ((document.getElementById('add-alb-cover') || {}).value || '').trim();
+  var newItem = {
     title:  title.trim(),
     artist: ((document.getElementById('add-alb-artist') || {}).value || '').trim(),
     year:   ((document.getElementById('add-alb-year') || {}).value || '').trim(),
     genre:  ((document.getElementById('add-alb-genre') || {}).value || '').trim(),
     label:  ((document.getElementById('add-alb-label') || {}).value || 'HARMONIA').trim(),
     tracks: parseInt((document.getElementById('add-alb-tracks') || {}).value) || 0,
-    cover:  ((document.getElementById('add-alb-cover') || {}).value || '').trim()
-  });
+    cover:  _addAlbImgData ? '' : coverUrl
+  };
+  createItem('album', newItem);
+  // Sauvegarder l'image base64 si uploadée
+  if (_addAlbImgData) {
+    var created = (DB.albums || []).find(function(a){ return a.title === newItem.title && !a.imgKey; });
+    if (created) {
+      var key = 'alb_' + created.id;
+      if (!DB.images) DB.images = {};
+      DB.images[key] = _addAlbImgData;
+      created.imgKey = key;
+      saveData(DB);
+    }
+    _addAlbImgData = null;
+  }
   _renderAlbums();
 }
 
