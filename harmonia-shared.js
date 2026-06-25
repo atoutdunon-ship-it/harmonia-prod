@@ -748,7 +748,10 @@ if (!DB.events   || !DB.events.length)        { DB.events   = defaultEvents();  
 if (!DB.customers)   { DB.customers   = []; saveData(DB); }
 if (!DB.paymentLinks){ DB.paymentLinks = []; saveData(DB); }
 if (!DB.modules)     { DB.modules = defaultModules(); saveData(DB); }
-if (!DB.promoArtists){ DB.promoArtists = [null, null, null]; saveData(DB); }
+
+if (!DB.promoArtists || DB.promoArtists.every(function(x){return !x;})){
+  DB.promoArtists = [1, 3, 11]; saveData(DB);
+}
 
 (function() {
   var _dm = defaultModules();
@@ -3024,7 +3027,9 @@ function openArtistModal(id) {
         + '<div class="modal-disco-grid">'
         + disco.map(function(al, i) {
           var coverKey = 'disc_' + a.id + '_' + i;
-          var coverSrc = (DB.images && DB.images[coverKey]) || al.cover || '';
+
+          var artistFallback = (typeof artistImg === 'function') ? artistImg(a) : null;
+          var coverSrc = (DB.images && DB.images[coverKey]) || al.cover || artistFallback || '';
           var coverHtml = coverSrc
             ? '<img src="' + coverSrc + '" alt="' + esc(al.title) + '" class="disco-cover-img">'
             : '<div class="disco-cover-placeholder">♪</div>';
@@ -5947,8 +5952,11 @@ function openArtistPage(id) {
     var html = '<div class="ap-section"><div class="ap-section-title">Albums</div><div class="ap-albums-accordion">';
     artistAlbums.forEach(function(al, idx) {
       var albumTracks = artistTracks.filter(function(t){ return t.album === al.title; });
-      var coverHtml = al.cover
-        ? '<img src="'+al.cover+'" alt="'+esc(al.title)+'" style="width:100%;height:100%;object-fit:cover;">'
+
+      var artistFallbackSrc = (typeof artistImg === 'function') ? artistImg(a) : null;
+      var coverSrcAp = al.cover || artistFallbackSrc || '';
+      var coverHtml = coverSrcAp
+        ? '<img src="'+coverSrcAp+'" alt="'+esc(al.title)+'" style="width:100%;height:100%;object-fit:cover;">'
         : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--accent2);">♪</div>';
       var albumId = 'album-acc-'+id+'-'+idx;
 

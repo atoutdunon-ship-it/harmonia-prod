@@ -281,6 +281,19 @@
 
 ---
 
+### v78 — Fallback cover → photo artiste pour toute la discographie
+**Demande :**
+- Afficher les covers des albums pour tous les artistes
+- Quand aucune cover n'est disponible, utiliser la photo de l'artiste à la place du ♪
+
+**Éléments codés :**
+- `harmonia-shared.src.js` — 2 emplacements :
+  - `openArtistModal()` (modal discographie) : cascade `DB.images[coverKey] → al.cover → artistImg(a) → ♪`
+  - `openArtistPage()` → `buildAlbumsHtml()` (vue plein écran) : cascade `al.cover → artistImg(a) → ♪`
+- Bénéficie à tous les artistes dont les singles n'ont pas encore de cover dédiée (ex: Neguinho Tivane)
+
+---
+
 ## FICHIERS CLÉS DU PROJET
 
 | Fichier | Rôle |
@@ -312,8 +325,8 @@ nano harmonia-shared.src.css
 python3 build.py
 
 # 3. Bumper la version (ex: v77 → v78)
-sed -i 's/harmonia-shared\.js?v=77/harmonia-shared.js?v=78/g' *.html
-sed -i 's/harmonia-shared\.css?v=77/harmonia-shared.css?v=78/g' *.html
+sed -i 's/harmonia-shared\.js?v=78/harmonia-shared.js?v=79/g' *.html
+sed -i 's/harmonia-shared\.css?v=78/harmonia-shared.css?v=79/g' *.html
 
 # 4. Pusher
 ./MAJHARMO.command
@@ -334,4 +347,4 @@ Ou depuis l'admin : **Modules → Boutique → toggle ON** (si le bloc force est
 
 ---
 
-*Dernière mise à jour : v77 — Juin 2026*
+*Dernière mise à jour : v78 — Juin 2026*

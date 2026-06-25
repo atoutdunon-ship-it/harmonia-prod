@@ -52,7 +52,7 @@ sed -i 's/harmonia-shared\.css?v=77/harmonia-shared.css?v=78/g' *.html
 ```
 
 ### Version actuelle
-**v77** — vérifier avec `grep "v=" artistes.html | head -1`
+**v78** — vérifier avec `grep "v=" artistes.html | head -1`
 
 ---
 
@@ -208,4 +208,4 @@ Voir `HARMONIA_CHANGELOG.md` dans ce dossier pour l'historique détaillé v1→v
 
 ---
 
-*Mis à jour : v77 — Juin 2026*
+*Mis à jour : v78 — Juin 2026*
