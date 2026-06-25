@@ -776,6 +776,36 @@ if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
   if (_chg) saveData(DB);
 })();
 
+(function migrateSocialEnabled() {
+  var _chg = false;
+  (DB.artists||[]).forEach(function(a) {
+    if (!a.socialEnabled) {
+      a.socialEnabled = {
+        spotify:   !!a.spotify,
+        instagram: false,
+        facebook:  false,
+        youtube:   false,
+        tiktok:    false
+      };
+      _chg = true;
+    }
+  });
+  if (_chg) saveData(DB);
+})();
+
+(function migrateSocialLinks() {
+  var _fields = ['instagram','facebook','youtube','spotify','tiktok'];
+  var _chg = false;
+  defaultArtists().forEach(function(def) {
+    var stored = (DB.artists||[]).find(function(a){ return a.id === def.id; });
+    if (!stored) return;
+    _fields.forEach(function(f) {
+      if (!stored[f] && def[f]) { stored[f] = def[f]; _chg = true; }
+    });
+  });
+  if (_chg) saveData(DB);
+})();
+
 (function(){
   var _defaults = [1, 3, 12];
   if (!DB.promoArtists) { DB.promoArtists = _defaults.slice(); saveData(DB); return; }
@@ -1340,7 +1370,7 @@ function defaultArtists() {
       bioLong:"Elly Paris est née pour être sur scène. Sa voix chaude et son charisme instinctif ont immédiatement retenu l'attention de la maison HARMONIA, qui a reconnu en elle un tempérament artistique rare — celui des artistes qui n'ont pas besoin de se construire une image parce qu'ils sont déjà eux-mêmes dès la première note.\n\nSon univers musical mêle pop urbaine contemporaine, influences R&B et culture cap-verdienne dans une alchimie spontanée et communicative. Son single « Sabi » (2023) — « délicieux, savoureux » en créole — est une déclaration d'identité : une musique qui se savoure, qui s'écoute et se danse dans le même souffle. « Xpia B'oia » (2022) confirme une artiste qui sait raconter des histoires avec une économie de mots et une générosité de groove.\n\nLa collaboration avec l'artiste Kiddye Bonz sur « Adax » (2023) révèle également une capacité à s'insérer dans des univers différents sans jamais perdre sa voix propre — qualité rare et précieuse dans un paysage musical en mutation permanente.\n\nElly Paris est l'une des représentantes de cette nouvelle scène cap-verdienne urbaine qui s'impose sans complexe dans le concert de la musique afro-contemporaine mondiale. HARMONIA mise sur son avenir avec la conviction que les meilleures pages de son histoire restent à écrire.",
       photo:"https://img.youtube.com/vi/HRnSlprhbIQ/hqdefault.jpg",
       instagram:"https://www.instagram.com/ellyparis_/",
-      facebook:"",
+      facebook:"https://www.facebook.com/ellyparismusic/",
       youtube:"https://www.youtube.com/@EllyParis",
       spotify:"",
       discography:[
@@ -1410,8 +1440,8 @@ function defaultArtists() {
       bioShort:"Sonia Sousa est la reine du R&B cap-verdien — groove, sensualité et créole dans une voix qui sait marier la rue de Praia et les meilleures productions contemporaines.",
       bioLong:"Sonia Sousa a trouvé sa voie à l'intersection de deux mondes : la tradition musicale de Cabo Verde et le R&B/funk contemporain qui irrigue les playlists mondiales. Ce n'est pas une fusion de façade — c'est une synthèse organique, construite par une artiste qui a absorbé autant James Brown que la musique des rues de Santiago.\n\nSon style est immédiatement identifiable : un groove profond, une ligne mélodique qui s'accroche, et cette façon qu'elle a de chanter en créole caboverdien comme si aucune autre langue ne pouvait contenir ce qu'elle ressent. « Pa Bo » — « Pour toi » — est l'archétype de sa démarche : une ballade R&B qui sonne universel tout en étant profondément locale. La collaboration avec Hélio Batalha sur « Dexam Bua » — « Laisse-moi t'embrasser » — confirme sa capacité à s'insérer dans des productions plus ambitieuses sans jamais perdre son identité propre.\n\nSes textes explorent l'amour dans toutes ses nuances — la désir, l'abandon, la nostalgie, la joie du corps — avec une franchise et une élégance qui sont sa marque de fabrique. Sonia Sousa ne joue pas la carte de l'exotisme : elle joue la carte de l'honnêteté artistique, et le public l'en récompense.\n\nAvec une présence croissante sur les plateformes de streaming internationales, Sonia Sousa est en train de s'imposer comme l'une des voix R&B de référence de l'espace lusophone. HARMONIA est fière de compter parmi ses artistes cette force tranquille du groove cap-verdien.",
       photo:"https://img.youtube.com/vi/5v_1jMCkFUE/hqdefault.jpg",
-      instagram:"",
-      facebook:"",
+      instagram:"https://www.instagram.com/soniasousa_oficial/",
+      facebook:"https://www.facebook.com/soniasousaofficial/",
       youtube:"https://www.youtube.com/channel/UCa5OHGXWMJVABJ6m8byEvsQ",
       spotify:"https://open.spotify.com/intl-fr/artist/6vYZ29NTfmd4Z4mpde2uNk",
       discography:[
@@ -3170,11 +3200,14 @@ function openArtistModal(id) {
     _bioEl.textContent = a.bioLong || a.bioShort || '';
   }
 
+  var _se = a.socialEnabled || {};
+  var _spOn = _se.hasOwnProperty ? (_se.hasOwnProperty('spotify') ? _se.spotify : !!a.spotify) : !!a.spotify;
   const socials = [
-    a.instagram && {url: a.instagram, label: 'Instagram'},
-    a.facebook  && {url: a.facebook,  label: 'Facebook'},
-    a.youtube   && {url: a.youtube,   label: 'YouTube'},
-    a.spotify   && {url: a.spotify,   label: 'Spotify'},
+    (a.instagram && _se.instagram)  && {url: a.instagram, label: 'Instagram'},
+    (a.facebook  && _se.facebook)   && {url: a.facebook,  label: 'Facebook'},
+    (a.youtube   && _se.youtube)    && {url: a.youtube,   label: 'YouTube'},
+    (a.spotify   && _spOn)          && {url: a.spotify,   label: 'Spotify'},
+    (a.tiktok    && _se.tiktok)     && {url: a.tiktok,    label: 'TikTok'},
   ].filter(Boolean);
 
   if (el('modal-social')) {
@@ -3875,6 +3908,22 @@ function handleArtistPhoto(inp) {
   const r = new FileReader(); r.onload = e => { artistPhotoData = e.target.result; }; r.readAsDataURL(f);
 }
 
+function _readSocialEnabled() {
+  var g = function(id) { var el=document.getElementById(id); return !!(el && el.checked); };
+  return { spotify:g('a-en-spotify'), instagram:g('a-en-insta'), facebook:g('a-en-facebook'), youtube:g('a-en-youtube'), tiktok:g('a-en-tiktok') };
+}
+function _writeSocialEnabled(se, hasSpotify) {
+  var s = se || {};
+
+  var spOn = s.hasOwnProperty && s.hasOwnProperty('spotify') ? s.spotify : hasSpotify;
+  var set = function(id, val) { var el=document.getElementById(id); if(el) el.checked = !!val; };
+  set('a-en-spotify',  spOn);
+  set('a-en-insta',    s.instagram);
+  set('a-en-facebook', s.facebook);
+  set('a-en-youtube',  s.youtube);
+  set('a-en-tiktok',   s.tiktok);
+}
+
 function saveArtist() {
   if (!can('artists','add') && !can('artists','edit')) return;
   const name = document.getElementById('a-name').value.trim(); if (!name) return;
@@ -3886,9 +3935,13 @@ function saveArtist() {
       DB.artists[idx].bioShort = document.getElementById('a-bio-short').value.trim();
       DB.artists[idx].bioLong = document.getElementById('a-bio-long').value.trim();
       DB.artists[idx].instagram = document.getElementById('a-insta').value.trim();
-      DB.artists[idx].spotify = document.getElementById('a-spotify').value.trim();
+      DB.artists[idx].facebook  = (document.getElementById('a-facebook')||{value:''}).value.trim();
+      DB.artists[idx].youtube   = (document.getElementById('a-youtube')||{value:''}).value.trim();
+      DB.artists[idx].spotify   = document.getElementById('a-spotify').value.trim();
+      DB.artists[idx].tiktok    = (document.getElementById('a-tiktok')||{value:''}).value.trim();
       DB.artists[idx].appleMusic = (document.getElementById('a-apple-music')||{value:''}).value.trim();
       DB.artists[idx].deezer = (document.getElementById('a-deezer')||{value:''}).value.trim();
+      DB.artists[idx].socialEnabled = _readSocialEnabled();
       if (artistPhotoData) DB.artists[idx].photo = artistPhotoData;
     }
     currentEditArtistId = null;
@@ -3899,9 +3952,13 @@ function saveArtist() {
       bioShort: document.getElementById('a-bio-short').value.trim(),
       bioLong: document.getElementById('a-bio-long').value.trim(),
       instagram: document.getElementById('a-insta').value.trim(),
-      spotify: document.getElementById('a-spotify').value.trim(),
+      facebook:  (document.getElementById('a-facebook')||{value:''}).value.trim(),
+      youtube:   (document.getElementById('a-youtube')||{value:''}).value.trim(),
+      spotify:   document.getElementById('a-spotify').value.trim(),
+      tiktok:    (document.getElementById('a-tiktok')||{value:''}).value.trim(),
       appleMusic: (document.getElementById('a-apple-music')||{value:''}).value.trim(),
       deezer: (document.getElementById('a-deezer')||{value:''}).value.trim(),
+      socialEnabled: _readSocialEnabled(),
       photo: artistPhotoData || null,
       discography: [],
       youtubeVideos: [],
@@ -3914,7 +3971,8 @@ function saveArtist() {
 }
 
 function resetArtistForm() {
-  ['a-name','a-origin','a-bio-short','a-bio-long','a-insta','a-spotify'].forEach(id => { var el=document.getElementById(id); if(el) el.value=''; });
+  ['a-name','a-origin','a-bio-short','a-bio-long','a-insta','a-facebook','a-youtube','a-spotify','a-tiktok'].forEach(id => { var el=document.getElementById(id); if(el) el.value=''; });
+  ['a-en-insta','a-en-facebook','a-en-youtube','a-en-spotify','a-en-tiktok'].forEach(id => { var el=document.getElementById(id); if(el) el.checked = false; });
   var am = document.getElementById('a-apple-music'); if(am) am.value='';
   var dz = document.getElementById('a-deezer'); if(dz) dz.value='';
   artistPhotoData = null;
@@ -4172,9 +4230,13 @@ function editArtist(id) {
   document.getElementById('a-bio-short').value = a.bioShort || '';
   document.getElementById('a-bio-long').value = a.bioLong || '';
   document.getElementById('a-insta').value = a.instagram || '';
+  var fb = document.getElementById('a-facebook'); if(fb) fb.value = a.facebook || '';
+  var yt = document.getElementById('a-youtube');  if(yt) yt.value = a.youtube  || '';
   document.getElementById('a-spotify').value = a.spotify || '';
+  var tt = document.getElementById('a-tiktok');   if(tt) tt.value = a.tiktok   || '';
   var am = document.getElementById('a-apple-music'); if(am) am.value = a.appleMusic || '';
   var dz = document.getElementById('a-deezer'); if(dz) dz.value = a.deezer || '';
+  _writeSocialEnabled(a.socialEnabled, !!a.spotify);
   currentEditArtistId = id;
   var ft = document.getElementById('artist-form-title'); if(ft) ft.textContent = 'Modifier : ' + a.name;
   showAdminPage('artists-admin');
@@ -6096,11 +6158,14 @@ function openArtistPage(id) {
   var img = artistImg(a);
 
 
+  var _se2 = a.socialEnabled || {};
+  var _sp2 = _se2.hasOwnProperty ? (_se2.hasOwnProperty('spotify') ? _se2.spotify : !!a.spotify) : !!a.spotify;
   var socials = [
-    a.instagram && '<a href="'+a.instagram+'" target="_blank" rel="noopener">Instagram</a>',
-    a.facebook  && '<a href="'+a.facebook+'"  target="_blank" rel="noopener">Facebook</a>',
-    a.youtube   && '<a href="'+a.youtube+'"   target="_blank" rel="noopener">YouTube</a>',
-    a.spotify   && '<a href="'+a.spotify+'"   target="_blank" rel="noopener">Spotify</a>'
+    (a.instagram && _se2.instagram) && '<a href="'+a.instagram+'" target="_blank" rel="noopener">Instagram</a>',
+    (a.facebook  && _se2.facebook)  && '<a href="'+a.facebook+'"  target="_blank" rel="noopener">Facebook</a>',
+    (a.youtube   && _se2.youtube)   && '<a href="'+a.youtube+'"   target="_blank" rel="noopener">YouTube</a>',
+    (a.spotify   && _sp2)           && '<a href="'+a.spotify+'"   target="_blank" rel="noopener">Spotify</a>',
+    (a.tiktok    && _se2.tiktok)    && '<a href="'+a.tiktok+'"    target="_blank" rel="noopener">TikTok</a>'
   ].filter(Boolean).join('');
 
 
@@ -6375,9 +6440,13 @@ function openArtistTabAdmin(artistId, tab) {
   document.getElementById('a-bio-short').value = a.bioShort || '';
   document.getElementById('a-bio-long').value = a.bioLong || '';
   document.getElementById('a-insta').value = a.instagram || '';
+  var fb = document.getElementById('a-facebook'); if(fb) fb.value = a.facebook || '';
+  var yt = document.getElementById('a-youtube');  if(yt) yt.value = a.youtube  || '';
   document.getElementById('a-spotify').value = a.spotify || '';
+  var tt = document.getElementById('a-tiktok');   if(tt) tt.value = a.tiktok   || '';
   var am = document.getElementById('a-apple-music'); if(am) am.value = a.appleMusic || '';
   var dz = document.getElementById('a-deezer'); if(dz) dz.value = a.deezer || '';
+  _writeSocialEnabled(a.socialEnabled, !!a.spotify);
   var ft = document.getElementById('artist-form-title'); if(ft) ft.textContent = 'Modifier : ' + a.name;
   showAdminPage('artists-admin');
   showArtistTab(tab || 'disco');

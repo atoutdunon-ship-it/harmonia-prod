@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nos Artistes — HARMONIA</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj48c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDYxYTEwIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMGQyNjE4Ii8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0idXJsKCNnKSIvPjxyZWN0IHg9IjciIHk9IjgiIHdpZHRoPSIyLjUiIGhlaWdodD0iMTYiIHJ4PSIxLjIiIGZpbGw9IiMyZWNjODAiLz48cmVjdCB4PSIyMi41IiB5PSI4IiB3aWR0aD0iMi41IiBoZWlnaHQ9IjE2IiByeD0iMS4yIiBmaWxsPSIjMWY5ZTVjIi8+PHJlY3QgeD0iNyIgeT0iMTQuNSIgd2lkdGg9IjE4IiBoZWlnaHQ9IjMiIHJ4PSIxLjIiIGZpbGw9IiMyZWNjODAiLz48L3N2Zz4=">
-<link rel="stylesheet" href="harmonia-shared.css?v=90">
+<link rel="stylesheet" href="harmonia-shared.css?v=92">
 <style>
 .artists-cat-btn {
   font-family: Arial, sans-serif;
@@ -422,14 +422,52 @@
             <label>Biographie longue</label>
             <textarea id="a-bio-long" rows="5" placeholder="Biographie complète (modale)"></textarea>
           </div>
+          <div class="admin-field">
+            <div class="social-section-title">Réseaux sociaux — activer le bouton + renseigner l'URL</div>
+          </div>
           <div class="admin-grid-2">
-            <div class="admin-field">
-              <label>Instagram</label>
-              <input type="text" id="a-insta" placeholder="@handle">
+            <div class="admin-field social-field">
+              <div class="social-field-header">
+                <label class="social-toggle"><input type="checkbox" id="a-en-spotify"><span class="stoggle"></span></label>
+                <span class="social-field-name">Spotify</span>
+              </div>
+              <input type="text" id="a-spotify" placeholder="https://open.spotify.com/artist/...">
+            </div>
+            <div class="admin-field social-field">
+              <div class="social-field-header">
+                <label class="social-toggle"><input type="checkbox" id="a-en-insta"><span class="stoggle"></span></label>
+                <span class="social-field-name">Instagram</span>
+              </div>
+              <input type="text" id="a-insta" placeholder="https://www.instagram.com/...">
+            </div>
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field social-field">
+              <div class="social-field-header">
+                <label class="social-toggle"><input type="checkbox" id="a-en-facebook"><span class="stoggle"></span></label>
+                <span class="social-field-name">Facebook</span>
+              </div>
+              <input type="text" id="a-facebook" placeholder="https://www.facebook.com/...">
+            </div>
+            <div class="admin-field social-field">
+              <div class="social-field-header">
+                <label class="social-toggle"><input type="checkbox" id="a-en-youtube"><span class="stoggle"></span></label>
+                <span class="social-field-name">YouTube</span>
+              </div>
+              <input type="text" id="a-youtube" placeholder="https://www.youtube.com/@...">
+            </div>
+          </div>
+          <div class="admin-grid-2">
+            <div class="admin-field social-field">
+              <div class="social-field-header">
+                <label class="social-toggle"><input type="checkbox" id="a-en-tiktok"><span class="stoggle"></span></label>
+                <span class="social-field-name">TikTok</span>
+              </div>
+              <input type="text" id="a-tiktok" placeholder="https://www.tiktok.com/@...">
             </div>
             <div class="admin-field">
-              <label>Spotify / Streaming</label>
-              <input type="text" id="a-spotify" placeholder="URL Spotify">
+              <label>Apple Music</label>
+              <input type="text" id="a-apple-music" placeholder="https://music.apple.com/...">
             </div>
           </div>
           <div class="admin-field">
@@ -1457,7 +1495,7 @@
   </div>
 </div>
 
-<script src="harmonia-shared.js?v=90"></script>
+<script src="harmonia-shared.js?v=92"></script>
 <script>
 // ===== RENDU DES ARTISTES PAR CATÉGORIE =====
 function renderArtistCard(a) {

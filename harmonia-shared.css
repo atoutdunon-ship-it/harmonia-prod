@@ -1531,6 +1531,36 @@
     margin-bottom: 20px;
   }
 
+
+  .social-section-title {
+    font-family: Arial, sans-serif; font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: rgba(255,255,255,0.35);
+    padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 4px;
+  }
+  .social-field { margin-bottom: 14px; }
+  .social-field-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  }
+  .social-field-name {
+    font-family: Arial, sans-serif; font-size: 11px; letter-spacing: 1px;
+    text-transform: uppercase; color: rgba(255,255,255,0.55);
+  }
+  .social-toggle { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+  .social-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .stoggle {
+    width: 32px; height: 17px; background: rgba(255,255,255,0.1);
+    border-radius: 17px; transition: background 0.25s;
+    border: 1px solid rgba(255,255,255,0.12); flex-shrink: 0;
+  }
+  .stoggle::after {
+    content: ''; position: absolute; left: 2px; top: 50%; transform: translateY(-50%);
+    width: 12px; height: 12px; background: rgba(255,255,255,0.4);
+    border-radius: 50%; transition: left 0.2s, background 0.2s;
+  }
+  .social-toggle input:checked + .stoggle { background: rgba(46,204,128,0.35); border-color: rgba(46,204,128,0.5); }
+  .social-toggle input:checked + .stoggle::after { left: 17px; background: #2ecc80; }
+
   .admin-field label {
     display: block;
     font-family: 'Arial', sans-serif;
