@@ -2949,13 +2949,20 @@ function applyPermissions() {
 function getImg(key) { return IMG[key] || null; }
 
 function artistImg(artist) {
-  if (!artist || !artist.photo) return null;
+  if (!artist) return null;
   var photo = artist.photo;
-  if (photo.startsWith('data:')) return photo;
-  if (photo.startsWith('http')) return photo;
-  if (DB.images && DB.images[photo]) return DB.images[photo];
-  var map = {"IMG_ELIDA":"elida","IMG_CEUZANY":"ceuzany","IMG_JENIFER":"jenifer","IMG_NEUZA":"neuza","IMG_FABIO":"fabio","IMG_LUCIBELA":"cesaria","IMG_CESARIA":"cesaria"};
-  if (map[photo]) return getImg(map[photo]);
+  if (photo) {
+    if (photo.startsWith('data:')) return photo;
+    if (photo.startsWith('http')) return photo;
+    if (DB.images && DB.images[photo]) return DB.images[photo];
+    var map = {"IMG_ELIDA":"elida","IMG_CEUZANY":"ceuzany","IMG_JENIFER":"jenifer","IMG_NEUZA":"neuza","IMG_FABIO":"fabio","IMG_LUCIBELA":"cesaria","IMG_CESARIA":"cesaria"};
+    if (map[photo]) return getImg(map[photo]);
+  }
+
+  var vids = artist.youtubeVideos;
+  if (vids && vids.length > 0 && vids[0].ytId) {
+    return 'https://img.youtube.com/vi/' + vids[0].ytId + '/hqdefault.jpg';
+  }
   return null;
 }
 
