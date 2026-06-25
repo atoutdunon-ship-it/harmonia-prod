@@ -747,11 +747,18 @@ if (!DB.products || !DB.products.length)      { DB.products = defaultProducts();
 if (!DB.events   || !DB.events.length)        { DB.events   = defaultEvents();   saveData(DB); }
 if (!DB.customers)   { DB.customers   = []; saveData(DB); }
 if (!DB.paymentLinks)   { DB.paymentLinks   = []; saveData(DB); }
-if (!DB.artistEvents)   { DB.artistEvents   = defaultArtistEvents(); saveData(DB); }
+if (!DB.artistEvents)   { DB.artistEvents   = []; saveData(DB); }
 
 (function seedDemoEvents() {
-  if (!DB.artistEvents || DB.artistEvents.length > 0) return;
-  DB.artistEvents = defaultArtistEvents();
+  var _demoIds = [1001,1002,1003,1004,1005,1006];
+  var _existing = (DB.artistEvents || []).map(function(e){ return e.id; });
+  var _missing = _demoIds.filter(function(id){ return _existing.indexOf(id) === -1; });
+  if (!_missing.length) return;
+  var _defaults = defaultArtistEvents();
+  _missing.forEach(function(id) {
+    var ev = _defaults.find(function(e){ return e.id === id; });
+    if (ev) DB.artistEvents.push(ev);
+  });
   saveData(DB);
 })();
 if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
