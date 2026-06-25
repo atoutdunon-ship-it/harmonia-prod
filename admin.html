@@ -1971,68 +1971,7 @@ function _renderArtistes() {
     + '</tbody></table></div>';
 }
 
-// ─────────────────────────────────────────────────────────
-// ALBUMS
-// ─────────────────────────────────────────────────────────
-function _renderAlbums() {
-  var el = document.getElementById('albums-list');
-  if (!el || typeof DB === 'undefined') return;
-  var list = DB.albums || [];
-  if (!list.length) {
-    el.innerHTML = '<p style="color:#000000">Aucun album.</p>'; return;
-  }
-  el.innerHTML = '<div class="a-table-wrap"><table class="a-table">'
-    + '<thead><tr>'
-    + '<th>Titre</th><th>Artiste</th><th>Année</th>'
-    + '<th>Genre</th><th>Label</th><th>Titres</th><th>Actions</th>'
-    + '</tr></thead><tbody>'
-    + list.map(function(a) {
-        var active = _isActive('album', a.id);
-        return '<tr>'
-          + '<td style="font-family:Georgia,serif;">' + _esc(a.title || '') + '</td>'
-          + '<td style="color:#000000;">' + _esc(a.artist || '') + '</td>'
-          + '<td style="color:#000000;font-size:11px;">' + (a.year || '—') + '</td>'
-          + '<td style="color:#000000;font-size:11px;">' + _esc(a.genre || '') + '</td>'
-          + '<td style="color:#000000;font-size:10px;">' + _esc(a.label || '') + '</td>'
-          + '<td style="color:#000000;text-align:center;">' + (a.tracks || '—') + '</td>'
-          + '<td>'
-          + '<button class="a-btn-sm ' + (active ? 'a-btn-danger' : 'a-btn-edit') + '"'
-          + ' onclick="_toggleActive(\'album\',' + a.id + ')">'
-          + (active ? 'Désactiver' : 'Activer') + '</button>'
-          + '</td>'
-          + '</tr>';
-      }).join('')
-    + '</tbody></table></div>';
-}
-
-// ─────────────────────────────────────────────────────────
-// TRACKS
-// ─────────────────────────────────────────────────────────
-function _renderTracks() {
-  var el = document.getElementById('tracks-list');
-  if (!el || typeof DB === 'undefined') return;
-  var list = DB.tracks || [];
-  if (!list.length) {
-    el.innerHTML = '<p style="color:#000000">Aucun titre.</p>'; return;
-  }
-  el.innerHTML = '<div class="a-table-wrap"><table class="a-table">'
-    + '<thead><tr>'
-    + '<th>Titre</th><th>Artiste</th><th>Album</th>'
-    + '<th>Durée</th><th>Style</th><th>Catégorie</th>'
-    + '</tr></thead><tbody>'
-    + list.map(function(t) {
-        return '<tr>'
-          + '<td>' + _esc(t.title || '') + '</td>'
-          + '<td style="color:#000000;">' + _esc(t.artist || '') + '</td>'
-          + '<td style="color:#000000;font-size:11px;">' + _esc(t.album || '') + '</td>'
-          + '<td style="color:#000000;">' + _esc(t.duration || '') + '</td>'
-          + '<td style="color:#000000;font-size:11px;">' + _esc(t.style || '') + '</td>'
-          + '<td><span class="badge ' + (t.category === 'urban' ? 'badge-orange' : 'badge-green') + '">'
-          + _esc(t.category || 'traditional') + '</span></td>'
-          + '</tr>';
-      }).join('')
-    + '</tbody></table></div>';
-}
+// _renderAlbums et _renderTracks → définitions complètes plus bas (section ALBUMS/TRACKS)
 
 // ─────────────────────────────────────────────────────────
 // NEWS — titre multilingue (objet {fr, en, pt, es} ou string)
@@ -3823,6 +3762,14 @@ function openTrackModal(id) {
   _modalId   = id || null;
 
   var item = id ? (DB.tracks || []).find(function(x){ return x.id === id; }) : null;
+  _modalImageKey = (item && item.imgKey) ? item.imgKey : 'trk_' + (id || Date.now());
+
+  var imgSrc = '';
+  if (item) {
+    if (DB.images && item.imgKey && DB.images[item.imgKey]) imgSrc = DB.images[item.imgKey];
+    else if (item.cover && !item.cover.startsWith('IMG_')) imgSrc = item.cover;
+  }
+
   var artistNames = (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; });
   var albumNames  = (DB.albums  || []).map(function(a){ return {value: a.title, label: a.title}; });
   var catOptions  = [{value:'traditional',label:'Traditionnel'},{value:'urban',label:'Urban'}];
@@ -3841,7 +3788,8 @@ function openTrackModal(id) {
       _mField('Style', 'mt-style', 'text', item ? (item.style || '') : '') +
       _mField('Catégorie', 'mt-category', 'select', item ? item.category : 'traditional', {options: catOptions})
     ) +
-    _mField('URL / YouTube ID', 'mt-url', 'text', item ? (item.url || item.ytId || '') : '');
+    _mField('URL / YouTube ID', 'mt-url', 'text', item ? (item.url || item.ytId || '') : '') +
+    _mImageField(imgSrc, item ? (item.cover || '') : '');
 
   document.getElementById('edit-modal').classList.add('open');
 }
@@ -3868,6 +3816,8 @@ function _saveTrackModal() {
   item.style    = _mVal('mt-style');
   item.category = _mVal('mt-category');
   item.url      = _mVal('mt-url');
+
+  _persistModalImage(item);
 
   saveData(DB);
   closeEditModal();
@@ -3903,7 +3853,18 @@ function _renderTracks() {
       + '<div class="a-field"><label>Catégorie</label>'
       + '<select id="add-trk-cat"><option value="traditional">Traditionnel</option><option value="urban">Urban</option></select></div>'
       + '</div>'
-      + '<button class="a-btn a-btn-primary" onclick="_addTrack()" style="margin-top:4px;">Ajouter</button>'
+      + '<div class="a-field" style="margin-top:4px;">'
+      +   '<label>Pochette</label>'
+      +   '<div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">'
+      +     '<div>'
+      +       '<input type="file" id="add-trk-img-input" accept="image/*" style="font-size:12px;" onchange="_onAddTrkImgChange(this)">'
+      +       '<div style="margin:6px 0 3px;font-size:9px;letter-spacing:1px;color:#666;text-transform:uppercase;">— ou URL —</div>'
+      +       '<input type="text" id="add-trk-cover" placeholder="https://img.youtube.com/vi/YTID/hqdefault.jpg" style="width:320px;max-width:100%;font-size:12px;padding:6px 8px;border:1px solid #ccc;" oninput="_onAddTrkUrlChange(this)">'
+      +     '</div>'
+      +     '<img id="add-trk-preview" style="width:72px;height:72px;object-fit:cover;border:1px solid #ccc;display:none;" alt="">'
+      +   '</div>'
+      + '</div>'
+      + '<button class="a-btn a-btn-primary" onclick="_addTrack()" style="margin-top:12px;">Ajouter</button>'
       + '</div>';
   }
 
@@ -3913,11 +3874,14 @@ function _renderTracks() {
   }
 
   var rows = list.map(function(t) {
-    // Pochette héritée de l'album associé
-    var alb = (DB.albums || []).find(function(a){ return a.title === t.album; });
-    var albCover = alb ? ((DB.images && alb.imgKey && DB.images[alb.imgKey]) || alb.cover || '') : '';
-    var thumbHtml = albCover
-      ? '<img src="' + albCover + '" style="width:36px;height:36px;object-fit:cover;border:1px solid #ccc;">'
+    // Pochette : propre au titre > héritée de l'album associé
+    var trkCover = (DB.images && t.imgKey && DB.images[t.imgKey]) || t.cover || '';
+    if (!trkCover) {
+      var alb = (DB.albums || []).find(function(a){ return a.title === t.album; });
+      trkCover = alb ? ((DB.images && alb.imgKey && DB.images[alb.imgKey]) || alb.cover || '') : '';
+    }
+    var thumbHtml = trkCover
+      ? '<img src="' + trkCover + '" style="width:36px;height:36px;object-fit:cover;border:1px solid #ccc;">'
       : '<div style="width:36px;height:36px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:14px;color:#aaa;">♪</div>';
 
     var actBtns = '';
@@ -3953,18 +3917,51 @@ function _renderTracks() {
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
+// Handlers pochette — formulaire rapide Musiques
+var _addTrkImgData = null;
+function _onAddTrkImgChange(input) {
+  if (!input.files || !input.files[0]) return;
+  resizeImage(input.files[0], 1200, 0.85, function(dataUrl) {
+    _addTrkImgData = dataUrl;
+    var prev = document.getElementById('add-trk-preview');
+    if (prev) { prev.src = dataUrl; prev.style.display = 'block'; }
+    var urlEl = document.getElementById('add-trk-cover');
+    if (urlEl) urlEl.value = '';
+  });
+}
+function _onAddTrkUrlChange(input) {
+  var url = input.value.trim();
+  var prev = document.getElementById('add-trk-preview');
+  if (prev && url) { prev.src = url; prev.style.display = 'block'; }
+  if (url) _addTrkImgData = null;
+}
+
 function _addTrack() {
   if (!canDo('add')) return;
   var title = (document.getElementById('add-trk-title') || {}).value || '';
   if (!title.trim()) { alert('Le titre est requis.'); return; }
-  createItem('track', {
+  var coverUrl = ((document.getElementById('add-trk-cover') || {}).value || '').trim();
+  var newItem = {
     title:    title.trim(),
     artist:   ((document.getElementById('add-trk-artist') || {}).value || '').trim(),
     album:    ((document.getElementById('add-trk-album') || {}).value || '').trim(),
     duration: ((document.getElementById('add-trk-dur') || {}).value || '').trim(),
     style:    ((document.getElementById('add-trk-style') || {}).value || '').trim(),
-    category: ((document.getElementById('add-trk-cat') || {}).value || 'traditional')
-  });
+    category: ((document.getElementById('add-trk-cat') || {}).value || 'traditional'),
+    cover:    _addTrkImgData ? '' : coverUrl
+  };
+  createItem('track', newItem);
+  if (_addTrkImgData) {
+    var created = (DB.tracks || []).find(function(t){ return t.title === newItem.title && !t.imgKey; });
+    if (created) {
+      var key = 'trk_' + created.id;
+      if (!DB.images) DB.images = {};
+      DB.images[key] = _addTrkImgData;
+      created.imgKey = key;
+      saveData(DB);
+    }
+    _addTrkImgData = null;
+  }
   _renderTracks();
 }
 
