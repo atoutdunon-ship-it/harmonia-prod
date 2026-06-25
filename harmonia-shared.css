@@ -722,6 +722,10 @@
     background: var(--accent); color: var(--white);
     border-color: var(--accent);
   }
+  .modal-social-btn.ap-social-pending {
+    opacity: 0.4; cursor: default; pointer-events: none;
+    border-style: dashed;
+  }
 
   .modal-close-btn {
     position: absolute; top: 16px; right: 20px;
@@ -3338,6 +3342,7 @@
 .ap-social { display:flex; gap:12px; margin-top:28px; flex-wrap:wrap; }
 .ap-social a { font-family:Arial,sans-serif; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--accent2); border:1px solid rgba(46,204,128,0.3); padding:7px 16px; text-decoration:none; transition:all 0.3s; }
 .ap-social a:hover { background:var(--accent2); color:var(--dark); }
+.ap-social a.ap-social-pending { opacity:0.4; cursor:default; pointer-events:none; border-style:dashed; }
 .ap-section { padding:60px 48px; max-width:1200px; margin:0 auto; }
 .ap-section-title { font-family:Arial,sans-serif; font-size:10px; letter-spacing:5px; text-transform:uppercase; color:var(--accent2); margin-bottom:32px; padding-bottom:12px; border-bottom:1px solid rgba(31,158,92,0.2); }
 

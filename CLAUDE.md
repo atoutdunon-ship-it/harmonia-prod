@@ -55,7 +55,7 @@ grep -l "v=${OLDV}" *.html   # doit retourner vide
 ```
 
 ### Version actuelle
-**v93** — vérifier avec `grep "v=" artistes.html | head -1`
+**v94** — vérifier avec `grep "v=" artistes.html | head -1`
 
 ---
 

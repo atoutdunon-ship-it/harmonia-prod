@@ -776,22 +776,6 @@ if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
   if (_chg) saveData(DB);
 })();
 
-(function migrateSocialEnabled() {
-  if (DB._socialEnabledV >= 2) return;
-  (DB.artists||[]).forEach(function(a) {
-    var prev = a.socialEnabled || {};
-    a.socialEnabled = {
-      spotify:   prev.hasOwnProperty('spotify') ? !!prev.spotify : !!a.spotify,
-      instagram: prev.instagram === true,
-      facebook:  prev.facebook  === true,
-      youtube:   prev.youtube   === true,
-      tiktok:    prev.tiktok    === true
-    };
-  });
-  DB._socialEnabledV = 2;
-  saveData(DB);
-})();
-
 (function migrateSocialLinks() {
   var _fields = ['instagram','facebook','youtube','spotify','tiktok'];
   var _chg = false;
@@ -803,6 +787,22 @@ if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
     });
   });
   if (_chg) saveData(DB);
+})();
+
+(function migrateSocialEnabled() {
+  if (DB._socialEnabledV >= 3) return;
+  (DB.artists||[]).forEach(function(a) {
+    var prev = a.socialEnabled || {};
+    a.socialEnabled = {
+      spotify:   true,
+      instagram: prev.instagram === true,
+      facebook:  prev.facebook  === true,
+      youtube:   prev.youtube   === true,
+      tiktok:    prev.tiktok    === true
+    };
+  });
+  DB._socialEnabledV = 3;
+  saveData(DB);
 })();
 
 (function(){
@@ -3200,18 +3200,18 @@ function openArtistModal(id) {
   }
 
   var _se = a.socialEnabled || {};
-  var _spOn = (_se.spotify !== false) && !!a.spotify;
+  var _spOn = (_se.spotify !== false);
   const socials = [
     (a.instagram && _se.instagram === true)  && {url: a.instagram, label: 'Instagram'},
     (a.facebook  && _se.facebook  === true)  && {url: a.facebook,  label: 'Facebook'},
     (a.youtube   && _se.youtube   === true)  && {url: a.youtube,   label: 'YouTube'},
-    (a.spotify   && _spOn)                   && {url: a.spotify,   label: 'Spotify'},
+    (_spOn)                                  && {url: a.spotify||'#', label: 'Spotify', noUrl: !a.spotify},
     (a.tiktok    && _se.tiktok    === true)  && {url: a.tiktok,    label: 'TikTok'},
   ].filter(Boolean);
 
   if (el('modal-social')) {
     el('modal-social').innerHTML = socials.map(s =>
-      `<a class="modal-social-btn" href="${s.url}" target="_blank" rel="noopener">${s.label}</a>`
+      `<a class="modal-social-btn${s.noUrl?' ap-social-pending':''}" href="${s.url}" ${s.noUrl?'':'target="_blank" rel="noopener"'}>${s.label}</a>`
     ).join('');
   }
 
@@ -6158,12 +6158,12 @@ function openArtistPage(id) {
 
 
   var _se2 = a.socialEnabled || {};
-  var _sp2 = (_se2.spotify !== false) && !!a.spotify;
+  var _sp2 = (_se2.spotify !== false);
   var socials = [
     (a.instagram && _se2.instagram === true) && '<a href="'+a.instagram+'" target="_blank" rel="noopener">Instagram</a>',
     (a.facebook  && _se2.facebook  === true) && '<a href="'+a.facebook+'"  target="_blank" rel="noopener">Facebook</a>',
     (a.youtube   && _se2.youtube   === true) && '<a href="'+a.youtube+'"   target="_blank" rel="noopener">YouTube</a>',
-    (a.spotify   && _sp2)                   && '<a href="'+a.spotify+'"   target="_blank" rel="noopener">Spotify</a>',
+    (_sp2)                                   && '<a href="'+(a.spotify||'#')+'" '+(a.spotify?'target="_blank" rel="noopener"':'')+' class="ap-social-sp'+(a.spotify?'':' ap-social-pending')+'">Spotify</a>',
     (a.tiktok    && _se2.tiktok    === true) && '<a href="'+a.tiktok+'"    target="_blank" rel="noopener">TikTok</a>'
   ].filter(Boolean).join('');
 
