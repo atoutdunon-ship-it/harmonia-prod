@@ -2949,10 +2949,13 @@ function applyPermissions() {
 function getImg(key) { return IMG[key] || null; }
 
 function artistImg(artist) {
-  if (artist.photo && artist.photo.startsWith('data:')) return artist.photo;
-  const map = {"IMG_ELIDA":"elida","IMG_CEUZANY":"ceuzany","IMG_JENIFER":"jenifer","IMG_NEUZA":"neuza","IMG_FABIO":"fabio","IMG_LUCIBELA":"cesaria","IMG_CESARIA":"cesaria"};
-  if (artist.photo && map[artist.photo]) return getImg(map[artist.photo]);
-
+  if (!artist || !artist.photo) return null;
+  var photo = artist.photo;
+  if (photo.startsWith('data:')) return photo;
+  if (photo.startsWith('http')) return photo;
+  if (DB.images && DB.images[photo]) return DB.images[photo];
+  var map = {"IMG_ELIDA":"elida","IMG_CEUZANY":"ceuzany","IMG_JENIFER":"jenifer","IMG_NEUZA":"neuza","IMG_FABIO":"fabio","IMG_LUCIBELA":"cesaria","IMG_CESARIA":"cesaria"};
+  if (map[photo]) return getImg(map[photo]);
   return null;
 }
 
