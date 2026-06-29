@@ -15,6 +15,7 @@ const LANGS = {
     hero_sub:'Maison de Production Musicale',
     hero_desc:'Cabo Verde · Monde · Authenticité', hero_scroll:'Découvrir',
     about_label:'Qui sommes-nous', about_title:'Une vision,<br>une âme',
+    promo_label:'En ce moment', promo_title:'Artistes en Promo',
     about_p1:"HARMONIA est née d'une conviction : la musique de Cabo Verde mérite une scène mondiale. Fondée par José da Silva — l'homme qui a révélé Cesária Évora au monde entier en 1987 —, notre maison de production accompagne depuis plus de trente ans les voix les plus singulières de l'archipel jusqu'aux plus grandes salles de la planète.",
     about_p2:"Notre mission est de produire, distribuer et promouvoir des artistes d'exception dont la musique porte une identité forte et une authenticité irréductible. De la morna traditionnelle au funaná contemporain, du batuque ancestral aux fusions urbaines, HARMONIA défend une vision élargie de la world music cap-verdienne — vivante, innovante, universelle.",
     artists_label:'Nos artistes', artists_title:'Le Roster',
@@ -134,6 +135,7 @@ const LANGS = {
     hero_sub:'Music Production House',
     hero_desc:'Cabo Verde · World · Authenticity', hero_scroll:'Discover',
     about_label:'Who we are', about_title:'One vision,<br>one soul',
+    promo_label:'Right now', promo_title:'Artists on Promo',
     about_p1:'HARMONIA was born from a conviction: the music of Cabo Verde deserves a world stage. Founded by José da Silva — the man who brought Cesária Évora to the world in 1987 — our production house has spent over thirty years accompanying the most singular voices of the archipelago to the greatest venues on earth.',
     about_p2:'Our mission is to produce, distribute and promote exceptional artists whose music carries a strong identity and irreducible authenticity. From traditional morna to contemporary funaná, from ancestral batuque to urban fusions, HARMONIA champions a broad vision of Cape Verdean world music — alive, innovative, universal.',
     artists_label:'Our artists', artists_title:'The Roster',
@@ -253,6 +255,7 @@ const LANGS = {
     hero_sub:'Editora de Produção Musical',
     hero_desc:'Cabo Verde · Mundo · Autenticidade', hero_scroll:'Descobrir',
     about_label:'Quem somos', about_title:'Uma visão,<br>uma alma',
+    promo_label:'Agora', promo_title:'Artistas em Promoção',
     about_p1:'A HARMONIA nasceu de uma convicção: a música de Cabo Verde merece uma palco mundial. Fundada por José da Silva — o homem que revelou Cesária Évora ao mundo em 1987 —, a nossa editora de produção acompanha há mais de trinta anos as vozes mais singulares do arquipélago até às maiores salas do planeta.',
     about_p2:'A nossa missão é produzir, distribuir e promover artistas de excepção cuja música transporta uma identidade forte e uma autenticidade irredutível. Da morna tradicional ao funaná contemporâneo, do batuque ancestral às fusões urbanas, a HARMONIA defende uma visão alargada da world music cabo-verdiana — viva, inovadora, universal.',
     artists_label:'Os nossos artistas', artists_title:'O Roster',
@@ -372,6 +375,7 @@ const LANGS = {
     hero_sub:'Sello de Producción Musical',
     hero_desc:'Cabo Verde · Mundo · Autenticidad', hero_scroll:'Descubrir',
     about_label:'Quiénes somos', about_title:'Una visión,<br>un alma',
+    promo_label:'Ahora mismo', promo_title:'Artistas en Promoción',
     about_p1:'HARMONIA nació de una convicción: la música de Cabo Verde merece un escenario mundial. Fundada por José da Silva — el hombre que reveló a Cesária Évora al mundo en 1987 —, nuestra productora lleva más de treinta años acompañando a las voces más singulares del archipiélago hasta las salas más importantes del planeta.',
     about_p2:'Nuestra misión es producir, distribuir y promover artistas excepcionales cuya música transmite una identidad sólida y una autenticidad irreductible. De la morna tradicional al funaná contemporáneo, del batuque ancestral a las fusiones urbanas, HARMONIA defiende una visión amplia de la world music caboverdiana — viva, innovadora, universal.',
     artists_label:'Nuestros artistas', artists_title:'El Roster',
@@ -2306,9 +2310,10 @@ function _showEditBar() {
 
 function _hookEditablesIn(container) {
   container.querySelectorAll('[data-editable-key]').forEach(function(el) {
-    if (el.classList.contains('edit-hoverable')) return;
     el.setAttribute('data-original', el.innerHTML);
     el.classList.add('edit-hoverable');
+
+    el.removeEventListener('click', _onEditableClick);
     el.addEventListener('click', _onEditableClick);
   });
 }
