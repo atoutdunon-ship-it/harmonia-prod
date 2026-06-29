@@ -15,16 +15,19 @@ git config credential.helper osxkeychain
 git config user.email "atout.dunon@gmail.com"
 git config user.name "Harmonia"
 
-# ── PULL : récupérer les dernières modifications ─────────────
-echo "🔄  Récupération des modifications en cours..."
+# ── PULL : récupérer les nouveautés de GitHub ───────────────
+echo "🔄  Vérification des modifications en cours..."
 git fetch origin
 
-LOCAL=$(git rev-parse HEAD)
-REMOTE=$(git rev-parse origin/main)
+BEHIND=$(git rev-list HEAD..origin/main --count 2>/dev/null || echo 0)
+AHEAD=$(git rev-list origin/main..HEAD --count 2>/dev/null || echo 0)
 
-if [ "$LOCAL" != "$REMOTE" ]; then
-  git reset --hard origin/main
+if [ "$BEHIND" -gt 0 ]; then
+  echo "🔽  GitHub a $BEHIND commit(s) à récupérer..."
+  git pull --rebase origin main
   echo "✅  Fichiers mis à jour depuis GitHub"
+elif [ "$AHEAD" -gt 0 ]; then
+  echo "🔼  $AHEAD commit(s) local/locaux prêts à envoyer"
 else
   echo "ℹ️   Déjà à jour"
 fi
