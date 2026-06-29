@@ -2006,7 +2006,7 @@ function _activateEditModeNow() {
   _activateEditHovers();
   _rerenderItemSections();
 
-  setTimeout(function() { _injectItemToggles(); _activateImageImport(); _hookEditablesIn(document); }, 150);
+  setTimeout(function() { _injectLegalModals(); _injectItemToggles(); _activateImageImport(); _hookEditablesIn(document); }, 150);
   var fab = document.getElementById('inline-edit-fab');
   if (fab) { fab.innerHTML = '&#9998; Mode &Eacute;diteur ON'; fab.style.background='rgba(46,204,128,0.12)'; }
 }
