@@ -4627,7 +4627,6 @@ function openLegal(id, e) {
     if (docDef) titleEl.textContent = _legalLabel(docDef);
   }
   if (bodyEl) {
-
     if (bodyEl.getAttribute('contenteditable') !== 'true') {
       bodyEl.innerHTML = content
         ? content
@@ -4636,10 +4635,13 @@ function openLegal(id, e) {
     }
     bodyEl.setAttribute('data-legal-lang', lang);
 
-    if (typeof _editModeActive !== 'undefined' && _editModeActive
-        && !bodyEl.classList.contains('edit-hoverable')
-        && typeof _hookEditablesIn === 'function') {
-      _hookEditablesIn(overlay);
+
+
+    if (typeof _editModeActive !== 'undefined' && _editModeActive) {
+      if (!bodyEl.classList.contains('edit-hoverable')) {
+        bodyEl.classList.add('edit-hoverable');
+        bodyEl.addEventListener('click', _onEditableClick);
+      }
     }
   }
   overlay.classList.add('open');
