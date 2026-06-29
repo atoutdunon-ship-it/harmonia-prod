@@ -4595,15 +4595,13 @@ function _injectLegalModals() {
     div.className = 'legal-overlay';
     div.innerHTML = '<div class="legal-box">'
       + '<button class="legal-close" onclick="closeLegal(\'' + doc.id + '\')">✕</button>'
-      + '<div class="legal-box-label" id="legal-label-' + doc.id + '">Harmonia LDA</div>'
+      + '<div class="legal-box-label">Harmonia LDA</div>'
       + '<h1 id="legal-title-' + doc.id + '">' + doc.labelFr + '</h1>'
-      + '<div id="legal-editbar-' + doc.id + '" style="display:none;align-items:center;gap:10px;margin-bottom:12px;padding:8px 12px;background:rgba(46,204,128,0.08);border:1px solid rgba(46,204,128,0.25);">'
-      +   '<span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#2ecc80;">✎ Mode Édition</span>'
-      +   '<button onclick="_legalInlineSave(\'' + doc.id + '\')" style="margin-left:auto;background:#1f9e5c;border:none;color:#fff;font-family:Arial,sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;cursor:pointer;">Sauvegarder</button>'
-      +   '<span id="legal-inline-saved-' + doc.id + '" style="font-family:Arial,sans-serif;font-size:11px;color:#2ecc80;opacity:0;transition:opacity 0.4s;">✓</span>'
-      + '</div>'
-      + '<div class="legal-box-body" id="legal-body-' + doc.id + '">'
-      +   '<div class="legal-empty">— Document à compléter depuis le panneau d\'administration —</div>'
+      + '<div class="legal-box-body" id="legal-body-' + doc.id + '"'
+      +   ' data-editable-key="legal_' + doc.id + '"'
+      +   ' data-legal-id="' + doc.id + '"'
+      +   ' style="min-height:60px;">'
+      +   '<p style="color:rgba(255,255,255,0.25);font-style:italic;text-align:center;padding:32px 0;">— Document à compléter depuis le panneau d\'administration —</p>'
       + '</div>'
       + '</div>';
     div.addEventListener('click', function(e) {
@@ -4624,51 +4622,28 @@ function openLegal(id, e) {
   var content = (docs[id] && (docs[id][lang] || docs[id]['fr'])) || '';
   var bodyEl  = document.getElementById('legal-body-' + id);
   var titleEl = document.getElementById('legal-title-' + id);
-  var editBar = document.getElementById('legal-editbar-' + id);
   if (titleEl) {
     var docDef = _LEGAL_DOCS.find(function(d){ return d.id === id; });
     if (docDef) titleEl.textContent = _legalLabel(docDef);
   }
   if (bodyEl) {
-    bodyEl.innerHTML = content
-      ? content
-      : '<p style="color:rgba(255,255,255,0.3);font-style:italic;text-align:center;padding:32px 0;">— Document à compléter depuis le panneau d\'administration —</p>';
 
-    var inEditMode = typeof _editModeActive !== 'undefined' && _editModeActive;
-    if (inEditMode) {
-      bodyEl.setAttribute('contenteditable', 'true');
-      bodyEl.style.outline = '2px dashed rgba(46,204,128,0.45)';
-      bodyEl.style.outlineOffset = '4px';
-      bodyEl.style.minHeight = '120px';
-      bodyEl.style.cursor = 'text';
-      if (editBar) editBar.style.display = 'flex';
+    if (bodyEl.getAttribute('contenteditable') !== 'true') {
+      bodyEl.innerHTML = content
+        ? content
+        : '<p style="color:rgba(255,255,255,0.25);font-style:italic;text-align:center;padding:32px 0;">— Document à compléter depuis le panneau d\'administration —</p>';
+      bodyEl.setAttribute('data-original', bodyEl.innerHTML);
+    }
+    bodyEl.setAttribute('data-legal-lang', lang);
 
-      bodyEl.setAttribute('data-legal-id', id);
-      bodyEl.setAttribute('data-legal-lang', lang);
-    } else {
-      bodyEl.removeAttribute('contenteditable');
-      bodyEl.style.outline = '';
-      bodyEl.style.cursor = '';
-      if (editBar) editBar.style.display = 'none';
+    if (typeof _editModeActive !== 'undefined' && _editModeActive
+        && !bodyEl.classList.contains('edit-hoverable')
+        && typeof _hookEditablesIn === 'function') {
+      _hookEditablesIn(overlay);
     }
   }
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-  if (bodyEl && typeof _editModeActive !== 'undefined' && _editModeActive) {
-    setTimeout(function() { bodyEl.focus(); }, 80);
-  }
-}
-
-function _legalInlineSave(id) {
-  var bodyEl = document.getElementById('legal-body-' + id);
-  if (!bodyEl || typeof DB === 'undefined') return;
-  var lang = bodyEl.getAttribute('data-legal-lang') || 'fr';
-  if (!DB.legalDocs) DB.legalDocs = {};
-  if (!DB.legalDocs[id]) DB.legalDocs[id] = {};
-  DB.legalDocs[id][lang] = bodyEl.innerHTML;
-  saveData(DB);
-  var saved = document.getElementById('legal-inline-saved-' + id);
-  if (saved) { saved.style.opacity = '1'; setTimeout(function(){ saved.style.opacity = '0'; }, 2000); }
 }
 
 function closeLegal(id) {
