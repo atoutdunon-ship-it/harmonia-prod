@@ -4562,21 +4562,74 @@ var _yt=document.getElementById('yt-modal'); if(_yt) _yt.addEventListener('click
   if (e.target === document.getElementById('yt-modal')) closeYT();
 });
 
-function openLegal(id, e) {
-  if (e) e.preventDefault();
-  document.getElementById('legal-' + id).classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeLegal(id) {
-  document.getElementById('legal-' + id).classList.remove('open');
-  document.body.style.overflow = '';
+var _LEGAL_DOCS = [
+  { id: 'mentions', labelFr: 'Mentions légales',           labelPt: 'Menções legais',         labelEn: 'Legal Notice',        labelEs: 'Aviso legal' },
+  { id: 'cgv',      labelFr: 'Conditions Générales de Vente', labelPt: 'Condições Gerais de Venda', labelEn: 'Terms of Sale',  labelEs: 'Condiciones de Venta' },
+  { id: 'privacy',  labelFr: 'Politique de confidentialité', labelPt: 'Política de privacidade', labelEn: 'Privacy Policy',   labelEs: 'Política de privacidad' },
+  { id: 'cgu',      labelFr: "Conditions Générales d'Utilisation", labelPt: 'Condições Gerais de Utilização', labelEn: 'Terms of Use', labelEs: 'Condiciones de Uso' },
+  { id: 'cookies',  labelFr: 'Politique Cookies',          labelPt: 'Política de Cookies',    labelEn: 'Cookie Policy',       labelEs: 'Política de Cookies' }
+];
+
+function _legalLabel(doc) {
+  var lang = (typeof currentLang !== 'undefined' ? currentLang : 'fr') || 'fr';
+  if (lang === 'pt') return doc.labelPt;
+  if (lang === 'en') return doc.labelEn;
+  if (lang === 'es') return doc.labelEs;
+  return doc.labelFr;
 }
 
-document.querySelectorAll('.legal-overlay').forEach(function(el) {
-  el.addEventListener('click', function(e) {
-    if (e.target === el) closeLegal(el.id.replace('legal-',''));
+function _injectLegalModals() {
+  if (document.getElementById('legal-mentions')) return;
+  var container = document.createElement('div');
+  _LEGAL_DOCS.forEach(function(doc) {
+    var div = document.createElement('div');
+    div.id = 'legal-' + doc.id;
+    div.className = 'legal-overlay';
+    div.innerHTML = '<div class="legal-box">'
+      + '<button class="legal-close" onclick="closeLegal(\'' + doc.id + '\')">✕</button>'
+      + '<div class="legal-box-label">Harmonia LDA</div>'
+      + '<h1 id="legal-title-' + doc.id + '">' + doc.labelFr + '</h1>'
+      + '<div class="legal-box-body" id="legal-body-' + doc.id + '">'
+      +   '<div class="legal-empty">— Document à compléter depuis le panneau d\'administration —</div>'
+      + '</div>'
+      + '</div>';
+    div.addEventListener('click', function(e) {
+      if (e.target === div) closeLegal(doc.id);
+    });
+    container.appendChild(div);
   });
-});
+  document.body.appendChild(container);
+}
+
+function openLegal(id, e) {
+  if (e) e.preventDefault();
+  _injectLegalModals();
+  var overlay = document.getElementById('legal-' + id);
+  if (!overlay) return;
+
+  var lang = (typeof currentLang !== 'undefined' ? currentLang : 'fr') || 'fr';
+  var docs = (typeof DB !== 'undefined' && DB.legalDocs) ? DB.legalDocs : {};
+  var content = (docs[id] && (docs[id][lang] || docs[id]['fr'])) || '';
+  var bodyEl  = document.getElementById('legal-body-' + id);
+  var titleEl = document.getElementById('legal-title-' + id);
+  if (titleEl) {
+    var doc = _LEGAL_DOCS.find(function(d){ return d.id === id; });
+    if (doc) titleEl.textContent = _legalLabel(doc);
+  }
+  if (bodyEl) {
+    bodyEl.innerHTML = content
+      ? content
+      : '<div class="legal-empty">— Document à compléter depuis le panneau d\'administration —</div>';
+  }
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLegal(id) {
+  var el = document.getElementById('legal-' + id);
+  if (el) el.classList.remove('open');
+  document.body.style.overflow = '';
+}
 
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') {
@@ -4584,6 +4637,10 @@ document.addEventListener('keydown', function(e) {
       closeLegal(el.id.replace('legal-',''));
     });
   }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (document.querySelector('footer')) _injectLegalModals();
 });
 
 (function initCookieBanner() {

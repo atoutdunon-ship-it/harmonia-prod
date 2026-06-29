@@ -1123,6 +1123,61 @@ td.editable:hover { background: #eaf1fb !important; }
   border: 1px solid rgba(10,22,40,0.2);
   margin-top: 8px; display: none;
 }
+
+/* ── Pages Légales admin ── */
+.legal-atab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: rgba(255,255,255,0.4);
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px 18px 8px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+.legal-atab:hover { color: rgba(255,255,255,0.7); }
+.legal-atab.active { color: #ffffff; border-bottom-color: #2ecc80; }
+
+.legal-alang {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.4);
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.legal-alang:hover { color: #fff; background: rgba(255,255,255,0.1); }
+.legal-alang.active { color: #fff; background: rgba(46,204,128,0.18); border-color: rgba(46,204,128,0.4); }
+
+.legal-fmt-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: rgba(255,255,255,0.6);
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-width: 32px;
+}
+.legal-fmt-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+#legal-editor:focus { border-color: rgba(255,255,255,0.28); }
+#legal-editor h2 {
+  font-family: Arial, sans-serif; font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.85); margin: 20px 0 10px;
+}
+#legal-editor p   { margin-bottom: 12px; }
+#legal-editor ul, #legal-editor ol { margin: 0 0 12px 22px; }
+#legal-editor a   { color: #2ecc80; }
 </style>
 </head>
 <body>
@@ -1227,6 +1282,8 @@ td.editable:hover { background: #eaf1fb !important; }
          onclick="switchSection('users',this)">Utilisateurs</div>
     <div class="snav" data-sec="modules"
          onclick="switchSection('modules',this)">Modules</div>
+    <div class="snav" data-sec="legaldocs"
+         onclick="switchSection('legaldocs',this)">Pages Légales</div>
 
     <div class="snav-group" id="snav-support-group">Support</div>
     <div class="snav" id="snav-assistance" data-sec="assistance"
@@ -1519,6 +1576,59 @@ td.editable:hover { background: #eaf1fb !important; }
       </div>
     </div>
 
+
+    <!-- ── PAGES LÉGALES ── -->
+    <div class="admin-section" id="sec-legaldocs">
+      <div class="page-title">Pages Légales</div>
+      <div class="page-sub">Éditez le contenu de chaque document légal affiché dans le footer</div>
+
+      <!-- Tabs sélecteur de document -->
+      <div id="legal-admin-tabs" style="display:flex;gap:0;margin-bottom:24px;border-bottom:1.5px solid rgba(255,255,255,0.10);">
+        <button class="legal-atab active" data-doc="mentions"  onclick="_legalSelectDoc('mentions',this)">Mentions légales</button>
+        <button class="legal-atab"        data-doc="cgv"       onclick="_legalSelectDoc('cgv',this)">CGV</button>
+        <button class="legal-atab"        data-doc="privacy"   onclick="_legalSelectDoc('privacy',this)">Confidentialité</button>
+        <button class="legal-atab"        data-doc="cgu"       onclick="_legalSelectDoc('cgu',this)">CGU</button>
+        <button class="legal-atab"        data-doc="cookies"   onclick="_legalSelectDoc('cookies',this)">Cookies</button>
+      </div>
+
+      <!-- Sélecteur de langue -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <span style="color:rgba(255,255,255,0.5);font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;">Langue</span>
+        <div style="display:flex;gap:4px;">
+          <button class="legal-alang active" data-lang="fr" onclick="_legalSelectLang('fr',this)">FR</button>
+          <button class="legal-alang"        data-lang="pt" onclick="_legalSelectLang('pt',this)">PT</button>
+          <button class="legal-alang"        data-lang="en" onclick="_legalSelectLang('en',this)">EN</button>
+          <button class="legal-alang"        data-lang="es" onclick="_legalSelectLang('es',this)">ES</button>
+        </div>
+      </div>
+
+      <!-- Toolbar éditeur riche -->
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;">
+        <button class="legal-fmt-btn" onclick="_legalFmt('bold')"              title="Gras"><b>G</b></button>
+        <button class="legal-fmt-btn" onclick="_legalFmt('italic')"            title="Italique"><i>I</i></button>
+        <button class="legal-fmt-btn" onclick="_legalFmt('underline')"         title="Souligné"><u>S</u></button>
+        <button class="legal-fmt-btn" onclick="_legalFmt('insertUnorderedList')" title="Liste">• —</button>
+        <button class="legal-fmt-btn" onclick="_legalFmt('insertOrderedList')"   title="Liste num.">1.</button>
+        <button class="legal-fmt-btn" onclick="_legalFmtBlock('h2')"           title="Sous-titre">H2</button>
+        <button class="legal-fmt-btn" onclick="_legalFmtBlock('p')"            title="Paragraphe">¶</button>
+        <button class="legal-fmt-btn" onclick="_legalInsertLink()"             title="Lien">🔗</button>
+      </div>
+
+      <!-- Zone contenteditable -->
+      <div id="legal-editor"
+           contenteditable="true"
+           style="min-height:340px;max-height:60vh;overflow-y:auto;
+                  background:#081220;border:1.5px solid rgba(255,255,255,0.12);
+                  padding:20px 24px;font-family:Arial,sans-serif;font-size:13px;
+                  line-height:1.9;color:rgba(255,255,255,0.78);outline:none;"></div>
+
+      <!-- Boutons action -->
+      <div style="display:flex;gap:12px;margin-top:16px;align-items:center;">
+        <button class="a-btn a-btn-primary" onclick="_legalSave()">Enregistrer</button>
+        <button class="a-btn a-btn-secondary" onclick="_legalPreview()">Aperçu</button>
+        <span id="legal-save-msg" style="font-family:Arial,sans-serif;font-size:11px;color:#2ecc80;opacity:0;transition:opacity 0.4s;">✓ Enregistré</span>
+      </div>
+    </div>
 
     <!-- ── ASSISTANCE (non-superadmin) ── -->
     <div class="admin-section" id="sec-assistance">
@@ -4778,6 +4888,96 @@ document.getElementById('edit-modal').addEventListener('click', function(e) {
 // (les fonctions internes appelées par switchSection sont désormais les nouvelles)
 // Rien à faire : les noms _renderArtistes, _renderAlbums, etc. sont les mêmes fonctions
 // que les anciens stubs, qui sont maintenant remplacés par ces définitions complètes.
+</script>
+
+<!-- ══════════════════════════════════════════
+     PAGES LÉGALES — Éditeur admin
+══════════════════════════════════════════ -->
+<script>
+(function() {
+  var _lDoc  = 'mentions';
+  var _lLang = 'fr';
+
+  function _lGetEditor() { return document.getElementById('legal-editor'); }
+
+  function _lLoad() {
+    var ed = _lGetEditor();
+    if (!ed) return;
+    var docs = (typeof DB !== 'undefined' && DB.legalDocs) ? DB.legalDocs : {};
+    var content = (docs[_lDoc] && docs[_lDoc][_lLang]) || '';
+    ed.innerHTML = content;
+  }
+
+  window._legalSelectDoc = function(id, btn) {
+    _lDoc = id;
+    document.querySelectorAll('.legal-atab').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    _lLoad();
+  };
+
+  window._legalSelectLang = function(lang, btn) {
+    _lLang = lang;
+    document.querySelectorAll('.legal-alang').forEach(function(b){ b.classList.remove('active'); });
+    if (btn) btn.classList.add('active');
+    _lLoad();
+  };
+
+  window._legalFmt = function(cmd) {
+    var ed = _lGetEditor();
+    if (ed) { ed.focus(); document.execCommand(cmd, false, null); }
+  };
+
+  window._legalFmtBlock = function(tag) {
+    var ed = _lGetEditor();
+    if (ed) { ed.focus(); document.execCommand('formatBlock', false, tag); }
+  };
+
+  window._legalInsertLink = function() {
+    var url = prompt('URL du lien :', 'https://');
+    if (!url || url === 'https://') return;
+    var ed = _lGetEditor();
+    if (ed) { ed.focus(); document.execCommand('createLink', false, url); }
+  };
+
+  window._legalSave = function() {
+    var ed = _lGetEditor();
+    if (!ed) return;
+    if (typeof DB === 'undefined') return;
+    if (!DB.legalDocs) DB.legalDocs = {};
+    if (!DB.legalDocs[_lDoc]) DB.legalDocs[_lDoc] = {};
+    DB.legalDocs[_lDoc][_lLang] = ed.innerHTML;
+    saveData(DB);
+    var msg = document.getElementById('legal-save-msg');
+    if (msg) {
+      msg.style.opacity = '1';
+      setTimeout(function(){ msg.style.opacity = '0'; }, 2000);
+    }
+  };
+
+  window._legalPreview = function() {
+    var ed = _lGetEditor();
+    if (!ed) return;
+    var win = window.open('', '_blank', 'width=880,height=700');
+    if (!win) return;
+    win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">'
+      + '<title>Aperçu — ' + _lDoc + '</title>'
+      + '<style>body{margin:0;background:#0a1628;color:rgba(255,255,255,0.72);font-family:Arial,sans-serif;font-size:13px;line-height:1.9;padding:48px 60px;max-width:820px;margin:0 auto;}'
+      + 'h2{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.85);margin:24px 0 10px;}'
+      + 'p{margin-bottom:12px;}ul,ol{margin:0 0 12px 22px;}a{color:#2ecc80;}'
+      + '</style></head><body>' + ed.innerHTML + '</body></html>');
+    win.document.close();
+  };
+
+  // Charger le premier doc quand la section devient visible
+  document.addEventListener('DOMContentLoaded', function() {
+    var snav = document.querySelector('.snav[data-sec="legaldocs"]');
+    if (snav) {
+      snav.addEventListener('click', function() {
+        setTimeout(_lLoad, 80);
+      });
+    }
+  });
+})();
 </script>
 </body>
 </html>
