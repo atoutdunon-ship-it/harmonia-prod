@@ -2638,8 +2638,11 @@ function _renderModulesCustom() {
   if (!DB.modules) { if (typeof defaultModules === 'function') DB.modules = defaultModules(); else return; }
 
   var mods = DB.modules;
-  var navKeys  = ['about','cesaria','jose','artists','music','shop','events','news','contact'];
-  var utilKeys = ['moncompte','panier'];
+  var _sa = (typeof isSuperAdmin === 'function') && isSuperAdmin();
+  // Modules e-commerce réservés au SUPERADMIN — invisibles pour éditeurs et admins
+  var navKeys  = ['about','cesaria','jose','artists','music','events','news','contact'];
+  if (_sa) navKeys.splice(5, 0, 'shop'); // insère 'shop' à sa position originale
+  var utilKeys = _sa ? ['moncompte','panier'] : ['moncompte'];
 
   function row(key) {
     var m  = mods[key]; if (!m) return '';
@@ -2768,7 +2771,9 @@ window._saveAllPromoArtists = function() {
 };
 
 function _toggleModuleCustom(key) {
-  // Auto-contenu : pas de dépendance à isSuperAdmin() de shared.js
+  // Modules e-commerce réservés SUPERADMIN uniquement
+  var _ecomKeys = ['shop','panier'];
+  if (_ecomKeys.indexOf(key) !== -1 && !(typeof isSuperAdmin === 'function' && isSuperAdmin())) return;
   if (typeof DB === 'undefined' || !DB.modules || !DB.modules[key]) return;
   var m = DB.modules[key];
   if (!m.enabled) {
