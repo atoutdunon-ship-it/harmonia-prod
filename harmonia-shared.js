@@ -4595,8 +4595,13 @@ function _injectLegalModals() {
     div.className = 'legal-overlay';
     div.innerHTML = '<div class="legal-box">'
       + '<button class="legal-close" onclick="closeLegal(\'' + doc.id + '\')">✕</button>'
-      + '<div class="legal-box-label">Harmonia LDA</div>'
+      + '<div class="legal-box-label" id="legal-label-' + doc.id + '">Harmonia LDA</div>'
       + '<h1 id="legal-title-' + doc.id + '">' + doc.labelFr + '</h1>'
+      + '<div id="legal-editbar-' + doc.id + '" style="display:none;align-items:center;gap:10px;margin-bottom:12px;padding:8px 12px;background:rgba(46,204,128,0.08);border:1px solid rgba(46,204,128,0.25);">'
+      +   '<span style="font-family:Arial,sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#2ecc80;">✎ Mode Édition</span>'
+      +   '<button onclick="_legalInlineSave(\'' + doc.id + '\')" style="margin-left:auto;background:#1f9e5c;border:none;color:#fff;font-family:Arial,sans-serif;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;cursor:pointer;">Sauvegarder</button>'
+      +   '<span id="legal-inline-saved-' + doc.id + '" style="font-family:Arial,sans-serif;font-size:11px;color:#2ecc80;opacity:0;transition:opacity 0.4s;">✓</span>'
+      + '</div>'
       + '<div class="legal-box-body" id="legal-body-' + doc.id + '">'
       +   '<div class="legal-empty">— Document à compléter depuis le panneau d\'administration —</div>'
       + '</div>'
@@ -4614,30 +4619,56 @@ function openLegal(id, e) {
   _injectLegalModals();
   var overlay = document.getElementById('legal-' + id);
   if (!overlay) return;
-
   var lang = (typeof currentLang !== 'undefined' ? currentLang : 'fr') || 'fr';
   var docs = (typeof DB !== 'undefined' && DB.legalDocs) ? DB.legalDocs : {};
   var content = (docs[id] && (docs[id][lang] || docs[id]['fr'])) || '';
   var bodyEl  = document.getElementById('legal-body-' + id);
   var titleEl = document.getElementById('legal-title-' + id);
+  var editBar = document.getElementById('legal-editbar-' + id);
   if (titleEl) {
-    var doc = _LEGAL_DOCS.find(function(d){ return d.id === id; });
-    if (doc) titleEl.textContent = _legalLabel(doc);
+    var docDef = _LEGAL_DOCS.find(function(d){ return d.id === id; });
+    if (docDef) titleEl.textContent = _legalLabel(docDef);
   }
   if (bodyEl) {
     bodyEl.innerHTML = content
       ? content
-      : '<div class="legal-empty">— Document à compléter depuis le panneau d\'administration —</div>';
+      : '<p style="color:rgba(255,255,255,0.3);font-style:italic;text-align:center;padding:32px 0;">— Document à compléter depuis le panneau d\'administration —</p>';
 
-    bodyEl.setAttribute('data-editable-key', 'legal_' + id);
-    bodyEl.setAttribute('data-original', bodyEl.innerHTML);
+    var inEditMode = typeof _editModeActive !== 'undefined' && _editModeActive;
+    if (inEditMode) {
+      bodyEl.setAttribute('contenteditable', 'true');
+      bodyEl.style.outline = '2px dashed rgba(46,204,128,0.45)';
+      bodyEl.style.outlineOffset = '4px';
+      bodyEl.style.minHeight = '120px';
+      bodyEl.style.cursor = 'text';
+      if (editBar) editBar.style.display = 'flex';
+
+      bodyEl.setAttribute('data-legal-id', id);
+      bodyEl.setAttribute('data-legal-lang', lang);
+    } else {
+      bodyEl.removeAttribute('contenteditable');
+      bodyEl.style.outline = '';
+      bodyEl.style.cursor = '';
+      if (editBar) editBar.style.display = 'none';
+    }
   }
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-
-  if (typeof _editModeActive !== 'undefined' && _editModeActive && typeof _hookEditablesIn === 'function') {
-    setTimeout(function() { _hookEditablesIn(overlay); }, 50);
+  if (bodyEl && typeof _editModeActive !== 'undefined' && _editModeActive) {
+    setTimeout(function() { bodyEl.focus(); }, 80);
   }
+}
+
+function _legalInlineSave(id) {
+  var bodyEl = document.getElementById('legal-body-' + id);
+  if (!bodyEl || typeof DB === 'undefined') return;
+  var lang = bodyEl.getAttribute('data-legal-lang') || 'fr';
+  if (!DB.legalDocs) DB.legalDocs = {};
+  if (!DB.legalDocs[id]) DB.legalDocs[id] = {};
+  DB.legalDocs[id][lang] = bodyEl.innerHTML;
+  saveData(DB);
+  var saved = document.getElementById('legal-inline-saved-' + id);
+  if (saved) { saved.style.opacity = '1'; setTimeout(function(){ saved.style.opacity = '0'; }, 2000); }
 }
 
 function closeLegal(id) {
