@@ -4627,25 +4627,31 @@ function openLegal(id, e) {
     if (docDef) titleEl.textContent = _legalLabel(docDef);
   }
   if (bodyEl) {
-    if (bodyEl.getAttribute('contenteditable') !== 'true') {
-      bodyEl.innerHTML = content
-        ? content
-        : '<p style="color:rgba(255,255,255,0.25);font-style:italic;text-align:center;padding:32px 0;">— Document à compléter depuis le panneau d\'administration —</p>';
-      bodyEl.setAttribute('data-original', bodyEl.innerHTML);
-    }
+    bodyEl.innerHTML = content
+      ? content
+      : '<p style="color:rgba(255,255,255,0.25);font-style:italic;text-align:center;padding:32px 0;">— Document à compléter depuis le panneau d\'administration —</p>';
+    bodyEl.setAttribute('data-original', bodyEl.innerHTML);
     bodyEl.setAttribute('data-legal-lang', lang);
-
-
-
-    if (typeof _editModeActive !== 'undefined' && _editModeActive) {
-      if (!bodyEl.classList.contains('edit-hoverable')) {
-        bodyEl.classList.add('edit-hoverable');
-        bodyEl.addEventListener('click', _onEditableClick);
-      }
-    }
   }
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+
+
+
+  if (bodyEl && typeof _editModeActive !== 'undefined' && _editModeActive) {
+    setTimeout(function() {
+      _closeActiveEditable();
+      _activeEditEl = bodyEl;
+      bodyEl.classList.add('edit-active');
+      bodyEl.setAttribute('contenteditable', 'true');
+      bodyEl.removeEventListener('input', _onEditInput);
+      bodyEl.addEventListener('input', _onEditInput);
+      bodyEl.removeEventListener('paste', _onEditPaste);
+      bodyEl.addEventListener('paste', _onEditPaste);
+      bodyEl.focus();
+      _showFloatingToolbar(bodyEl);
+    }, 120);
+  }
 }
 
 function closeLegal(id) {
