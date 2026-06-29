@@ -105,14 +105,32 @@ else
   echo "╚═══════════════════════════════════════════╝"
   echo ""
   GIT_TRACE_PACKET=0 git push --progress --verbose origin main 2>&1
+  PUSH_CODE=$?
   echo ""
   echo "─────────────────────────────────────────────"
-  echo "  ✅ Push terminé → commit $HASH en ligne"
+  if [ $PUSH_CODE -eq 0 ]; then
+    echo "  ✅ Push réussi → commit $HASH en ligne"
+    PUSH_OK=1
+  else
+    echo "  ❌ PUSH ÉCHOUÉ (code $PUSH_CODE)"
+    echo "  → Vérifiez votre connexion et vos accès GitHub"
+    PUSH_OK=0
+  fi
   echo "─────────────────────────────────────────────"
 fi
 
 echo ""
-echo "✅  OPÉRATION TERMINÉE"
-echo "   → https://atoutdunon-ship-it.github.io/harmonia-prod/"
+if [ "${PUSH_OK:-}" = "1" ]; then
+  echo "✅  DÉPLOIEMENT TERMINÉ"
+  echo "   → Site mis à jour : https://atoutdunon-ship-it.github.io/harmonia-prod/"
+  echo "   → GitHub Pages prend ~1 min pour reconstruire"
+  echo "   → Videz le cache navigateur si besoin (Cmd+Shift+R)"
+elif [ "${PUSH_OK:-}" = "0" ]; then
+  echo "⚠️   OPÉRATION INCOMPLÈTE — commit local OK mais push GitHub échoué"
+  echo "   → Relancez MAJHARMO.command ou vérifiez l'accès GitHub"
+else
+  echo "ℹ️   Aucune modification — site déjà à jour"
+  echo "   → https://atoutdunon-ship-it.github.io/harmonia-prod/"
+fi
 echo ""
 read -p "Appuie sur Entrée pour fermer..."
