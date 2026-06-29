@@ -2386,6 +2386,14 @@ function saveAllEdits() {
     }
     savedKeys.push(key);
 
+    var lm = key.match(/^legal_(.+)$/);
+    if (lm) {
+      if (!DB.legalDocs) DB.legalDocs = {};
+      var legalId = lm[1];
+      if (!DB.legalDocs[legalId]) DB.legalDocs[legalId] = {};
+      DB.legalDocs[legalId][lang] = val;
+    }
+
     var m = key.match(/^artist_(\d+)_(name|style|bio|label)$/);
     if (m) {
       var aid = +m[1], field = m[2];
@@ -4620,9 +4628,16 @@ function openLegal(id, e) {
     bodyEl.innerHTML = content
       ? content
       : '<div class="legal-empty">— Document à compléter depuis le panneau d\'administration —</div>';
+
+    bodyEl.setAttribute('data-editable-key', 'legal_' + id);
+    bodyEl.setAttribute('data-original', bodyEl.innerHTML);
   }
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  if (typeof _editModeActive !== 'undefined' && _editModeActive && typeof _hookEditablesIn === 'function') {
+    setTimeout(function() { _hookEditablesIn(overlay); }, 50);
+  }
 }
 
 function closeLegal(id) {
