@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Administration — HARMONIA</title>
-<link rel="stylesheet" href="harmonia-shared.css?v=97">
+<link rel="stylesheet" href="harmonia-shared.css?v=109">
 <style>
 /* ── Variables autonomes — charte Navy / Blanc / Noir ── */
 :root {
@@ -3305,6 +3305,54 @@ selectUrgencyAdmin('normal');
 var _modalType      = '';    // 'artiste' | 'album' | 'track' | 'news' | 'event' | 'produit'
 var _modalId        = null;  // null = création, number = modification
 var _modalImageKey  = null;  // imgKey en cours
+var _addEvtImgData  = null;  // photo ajout rapide événement
+var _addNewsImgData = null;  // photo ajout rapide actualité
+var _artGallery     = [];    // [{key,src,isNew}] galerie photos artiste en cours d'édition
+
+function _handleAddEvtImg(inp) {
+  var f = inp.files[0]; if (!f) return;
+  resizeImage(f, 1200, 0.85, function(d) {
+    _addEvtImgData = d;
+    var p = document.getElementById('add-evt-img-prev'); if (p) { p.src = d; p.style.display = 'block'; }
+    var l = document.getElementById('add-evt-img-lbl'); if (l) l.textContent = f.name;
+  });
+}
+function _handleAddNewsImg(inp) {
+  var f = inp.files[0]; if (!f) return;
+  resizeImage(f, 1200, 0.85, function(d) {
+    _addNewsImgData = d;
+    var p = document.getElementById('add-nws-img-prev'); if (p) { p.src = d; p.style.display = 'block'; }
+    var l = document.getElementById('add-nws-img-lbl'); if (l) l.textContent = f.name;
+  });
+}
+
+// ── Galerie photos artiste (modal) ───────────────────────
+function _artGalleryAddImg(inp) {
+  var f = inp.files[0]; if (!f) return;
+  resizeImage(f, 1200, 0.85, function(d) {
+    _artGallery.push({ key: 'art_gal_' + Date.now() + '_' + _artGallery.length, src: d, isNew: true });
+    _renderArtGallery();
+    inp.value = '';
+  });
+}
+function _artGalleryRemoveImg(idx) {
+  _artGallery.splice(idx, 1);
+  _renderArtGallery();
+}
+function _renderArtGallery() {
+  var cont = document.getElementById('art-gallery-cont');
+  if (!cont) return;
+  if (!_artGallery.length) {
+    cont.innerHTML = '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0;">Aucune photo — ajoutez en cliquant sur le bouton ci-dessous.</div>';
+    return;
+  }
+  cont.innerHTML = _artGallery.map(function(g, i) {
+    return '<div style="position:relative;display:inline-block;margin:4px 4px 0 0;vertical-align:top;">'
+      + '<img src="' + g.src + '" style="width:76px;height:76px;object-fit:cover;border:1px solid #ccc;display:block;">'
+      + '<button onclick="_artGalleryRemoveImg(' + i + ')" style="position:absolute;top:2px;right:2px;background:rgba(180,0,0,0.85);border:none;color:#fff;width:18px;height:18px;font-size:9px;cursor:pointer;padding:0;line-height:18px;">✕</button>'
+      + '</div>';
+  }).join('');
+}
 
 // ── Droits par rôle ──────────────────────────────────────
 function canDo(action) {
@@ -3503,6 +3551,21 @@ function openArtisteModal(id) {
     {value:'autre',       label:'Autre'}
   ];
 
+  // Init galerie depuis DB
+  _artGallery = [];
+  if (item && item.gallery && DB.images) {
+    item.gallery.forEach(function(k) {
+      if (DB.images[k]) _artGallery.push({ key: k, src: DB.images[k], isNew: false });
+    });
+  }
+
+  var gallerySection = '<div class="a-field" style="margin-top:10px;border-top:1px solid rgba(0,0,0,0.1);padding-top:14px;">'
+    + '<label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#000;display:block;margin-bottom:10px;">Galerie photos</label>'
+    + '<div id="art-gallery-cont" style="margin-bottom:10px;"></div>'
+    + '<input type="file" id="art-gallery-inp" accept="image/*" multiple style="display:none;" onchange="_artGalleryAddImg(this)">'
+    + '<button type="button" onclick="document.getElementById(\'art-gallery-inp\').click()" style="background:#fff;border:1px solid rgba(10,22,40,0.35);color:#0a1628;font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:8px 18px;cursor:pointer;">+ Ajouter des photos</button>'
+    + '</div>';
+
   document.getElementById('edit-modal-title').textContent = title;
   document.getElementById('edit-modal-body').innerHTML =
     _mGrid(
@@ -3519,9 +3582,12 @@ function openArtisteModal(id) {
       'style="width:100%;border:1px solid rgba(10,22,40,0.3);padding:10px 14px;font-size:13px;color:#000;background:#fff;outline:none;">' +
     '</div>' +
     _mField('Bio courte', 'ma-bio', 'textarea', item ? (item.bioShort || item.bio || '') : '', {rows:3}) +
-    _mImageField(imgSrc);
+    _mImageField(imgSrc) +
+    gallerySection;
 
   document.getElementById('edit-modal').classList.add('open');
+  // Render galerie après injection HTML
+  setTimeout(_renderArtGallery, 0);
 
   // Afficher/masquer le champ custom selon la sélection
   var catSel = document.getElementById('ma-category');
@@ -3565,6 +3631,15 @@ function _saveArtisteModal() {
   item.bioShort = _mVal('ma-bio');
 
   _persistModalImage(item);
+
+  // Galerie photos
+  if (!DB.images) DB.images = {};
+  item.gallery = _artGallery.map(function(g) {
+    DB.images[g.key] = g.src;
+    return g.key;
+  });
+  _artGallery = [];
+
   saveData(DB);
   closeEditModal();
   _renderArtistes();
@@ -4176,6 +4251,15 @@ function _renderNews() {
       + '<div class="a-field"><label>Artiste</label><select id="add-nws-artist">' + artistOpts + '</select></div>'
       + '<div class="a-field" style="grid-column:span 2;"><label>Extrait</label><input type="text" id="add-nws-content" placeholder="Résumé court..."></div>'
       + '</div>'
+      + '<div class="a-field" style="margin-top:4px;">'
+      + '<label>Image de couverture</label>'
+      + '<input type="file" id="add-nws-img" accept="image/*" style="display:none;" onchange="_handleAddNewsImg(this)">'
+      + '<div style="display:flex;align-items:center;gap:12px;border:1px solid #ccc;padding:10px 14px;cursor:pointer;background:#fff;" onclick="document.getElementById(\'add-nws-img\').click()">'
+      + '<img id="add-nws-img-prev" src="" alt="" style="width:44px;height:44px;object-fit:cover;border:1px solid #ccc;display:none;flex-shrink:0;">'
+      + '<div><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#666;">Cliquer pour choisir une image</div>'
+      + '<div id="add-nws-img-lbl" style="font-size:10px;color:#0a1628;margin-top:3px;"></div></div>'
+      + '</div>'
+      + '</div>'
       + '<button class="a-btn a-btn-primary" onclick="_addNews()" style="margin-top:4px;">Ajouter</button>'
       + '</div>';
   }
@@ -4224,12 +4308,19 @@ function _addNews() {
   if (!canDo('add')) return;
   var title = (document.getElementById('add-nws-title') || {}).value || '';
   if (!title.trim()) { alert('Le titre est requis.'); return; }
+  var imgKey = _addNewsImgData ? ('news_' + Date.now()) : null;
+  if (imgKey && _addNewsImgData) {
+    if (!DB.images) DB.images = {};
+    DB.images[imgKey] = _addNewsImgData;
+  }
   createItem('news', {
     title:   title.trim(),
     artist:  ((document.getElementById('add-nws-artist') || {}).value || '').trim(),
     date:    ((document.getElementById('add-nws-date') || {}).value || '').trim(),
-    content: ((document.getElementById('add-nws-content') || {}).value || '').trim()
+    content: ((document.getElementById('add-nws-content') || {}).value || '').trim(),
+    imgKey:  imgKey || ''
   });
+  _addNewsImgData = null;
   _renderNews();
 }
 
@@ -4242,6 +4333,15 @@ function openEventModal(id) {
   _modalId   = id || null;
 
   var item = id ? (DB.events || []).find(function(x){ return x.id === id; }) : null;
+  _modalImageKey = (item && item.imgKey) ? item.imgKey : 'evt_' + (id || Date.now());
+
+  var imgSrc = '';
+  if (item) {
+    if (DB.images && item.imgKey && DB.images[item.imgKey]) imgSrc = DB.images[item.imgKey];
+    else if (item.img && !item.img.startsWith('IMG_')) imgSrc = item.img;
+    else if (item.cover) imgSrc = item.cover;
+  }
+
   var artistNames = [{value:'',label:'— Aucun —'}].concat(
     (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; })
   );
@@ -4270,7 +4370,8 @@ function openEventModal(id) {
       _mField('Prix standard (€)', 'me-price', 'number', item ? (item.price || '') : '') +
       _mField('Prix VIP (€)', 'me-vip', 'number', item ? (item.vip || '') : '')
     ) +
-    _mField('Statut', 'me-status', 'select', item ? (item.status || 'active') : 'active', {options: statusOpts});
+    _mField('Statut', 'me-status', 'select', item ? (item.status || 'active') : 'active', {options: statusOpts}) +
+    _mImageField(imgSrc);
 
   document.getElementById('edit-modal').classList.add('open');
 }
@@ -4301,9 +4402,11 @@ function _saveEventModal() {
   item.vip    = parseFloat(_mVal('me-vip')) || 0;
   item.status = _mVal('me-status');
 
+  _persistModalImage(item);
   saveData(DB);
   closeEditModal();
   _renderEvents();
+  _refreshDashboard();
 }
 
 function renderEventsAdmin() { _renderEvents(); }
@@ -4334,6 +4437,15 @@ function _renderEvents() {
       + '<div class="a-field"><label>Prix (€)</label><input type="number" id="add-evt-price" placeholder="30"></div>'
       + '<div class="a-field"><label>Prix VIP (€)</label><input type="number" id="add-evt-vip" placeholder="80"></div>'
       + '</div>'
+      + '<div class="a-field" style="margin-top:4px;">'
+      + '<label>Photo de l\'événement</label>'
+      + '<input type="file" id="add-evt-img" accept="image/*" style="display:none;" onchange="_handleAddEvtImg(this)">'
+      + '<div style="display:flex;align-items:center;gap:12px;border:1px solid #ccc;padding:10px 14px;cursor:pointer;background:#fff;" onclick="document.getElementById(\'add-evt-img\').click()">'
+      + '<img id="add-evt-img-prev" src="" alt="" style="width:44px;height:44px;object-fit:cover;border:1px solid #ccc;display:none;flex-shrink:0;">'
+      + '<div><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#666;">Cliquer pour choisir un visuel</div>'
+      + '<div id="add-evt-img-lbl" style="font-size:10px;color:#0a1628;margin-top:3px;"></div></div>'
+      + '</div>'
+      + '</div>'
       + '<button class="a-btn a-btn-primary" onclick="_addEvent()" style="margin-top:4px;">Ajouter</button>'
       + '</div>';
   }
@@ -4345,6 +4457,10 @@ function _renderEvents() {
 
   var rows = list.map(function(e) {
     var st = e.status || 'active';
+    var imgSrc = (DB.images && e.imgKey && DB.images[e.imgKey]) ? DB.images[e.imgKey] : (e.img || e.cover || '');
+    var imgCell = imgSrc
+      ? '<img src="' + imgSrc + '" style="width:36px;height:36px;object-fit:cover;border:1px solid #ccc;">'
+      : '<span style="color:#ccc;font-size:18px;">&#128248;</span>';
     var actBtns = '';
     if (canDo('edit')) {
       actBtns += '<button class="a-btn-crud-edit" onclick="openEventModal(' + e.id + ')">Modifier</button>';
@@ -4353,6 +4469,7 @@ function _renderEvents() {
       actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'event\',' + e.id + ')">Supprimer</button>';
     }
     return '<tr>'
+      + '<td style="width:44px;">' + imgCell + '</td>'
       + '<td class="editable" style="font-family:Georgia,serif;" ondblclick="inlineEdit(this,\'event\',' + e.id + ',\'artist\')">'
       + _esc(e.artist || '') + '</td>'
       + '<td class="editable" style="font-size:12px;" ondblclick="inlineEdit(this,\'event\',' + e.id + ',\'venue\')">'
@@ -4372,7 +4489,7 @@ function _renderEvents() {
   el.innerHTML = addForm
     + '<div class="a-table-wrap"><table class="a-table">'
     + '<thead><tr>'
-    + '<th>Artiste</th><th>Venue</th><th>Ville</th>'
+    + '<th></th><th>Artiste</th><th>Venue</th><th>Ville</th>'
     + '<th>Date</th><th>Standard</th><th>VIP</th><th>Statut</th><th>Actions</th>'
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
@@ -4388,8 +4505,10 @@ function _addEvent() {
     date:   ((document.getElementById('add-evt-date') || {}).value || '').trim(),
     price:  parseFloat((document.getElementById('add-evt-price') || {}).value) || 0,
     vip:    parseFloat((document.getElementById('add-evt-vip') || {}).value) || 0,
-    status: 'active'
+    status: 'active',
+    img:    _addEvtImgData || null
   });
+  _addEvtImgData = null;
   _renderEvents();
 }
 
@@ -4639,6 +4758,18 @@ function inlineEdit(td, type, id, field) {
 // ════════════════════════════════════════════════════════
 
 var _aeCurrentFilter = 'tous';
+var _aeImgData = null;
+
+function _aeHandleImg(inp) {
+  var f = inp.files[0]; if (!f) return;
+  resizeImage(f, 1200, 0.85, function(dataUrl) {
+    _aeImgData = dataUrl;
+    var prev = document.getElementById('ae-img-preview');
+    if (prev) { prev.src = dataUrl; prev.style.display = 'block'; }
+    var lbl = document.getElementById('ae-img-label');
+    if (lbl) lbl.textContent = f.name;
+  });
+}
 
 function _aeNextId() {
   var evs = DB.artistEvents || [];
@@ -4735,6 +4866,7 @@ window._aeOpenForm = function(id) {
   var wrap = document.getElementById('ae-form-wrap');
   if (!wrap) return;
   var ev = id ? (DB.artistEvents||[]).find(function(e){ return e.id===id; }) : null;
+  _aeImgData = (ev && ev.img) ? ev.img : null;
 
   var iStyle  = 'width:100%;background:#0a1628;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.85);font-family:Arial;font-size:12px;padding:10px 12px;outline:none;box-sizing:border-box;';
   var lblStyle = 'display:block;font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:6px;';
@@ -4807,6 +4939,18 @@ window._aeOpenForm = function(id) {
     +   '<label style="'+lblStyle+'">Lien billetterie / infos</label>'
     +   '<input type="url" id="ae-f-ticket" value="'+_esc(ev?ev.ticketUrl:'',true)+'" placeholder="https://…" style="'+iStyle+'">'
     + '</div>'
+    /* Photo */
+    + '<div style="'+fldStyle+'">'
+    +   '<label style="'+lblStyle+'">Visuel / Photo</label>'
+    +   '<input type="file" id="ae-img-input" accept="image/*" style="display:none;" onchange="_aeHandleImg(this)">'
+    +   '<div style="display:flex;align-items:center;gap:14px;border:1px dashed rgba(46,204,128,0.3);padding:12px 16px;cursor:pointer;" onclick="document.getElementById(\'ae-img-input\').click()">'
+    +     '<img id="ae-img-preview" src="' + (_aeImgData||'') + '" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:2px;border:1px solid rgba(255,255,255,0.1);flex-shrink:0;' + (_aeImgData?'display:block;':'display:none;') + '">'
+    +     '<div>'
+    +       '<div style="font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);">Cliquer pour choisir un visuel</div>'
+    +       '<div id="ae-img-label" style="font-family:Arial;font-size:10px;color:rgba(46,204,128,0.8);margin-top:4px;">'+ (_aeImgData ? '(photo en place — cliquer pour remplacer)' : '') +'</div>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>'
     /* Bouton save */
     + '<div style="display:flex;gap:12px;margin-top:8px;">'
     +   '<button onclick="_aeSave('+(id||'null')+')" style="background:rgba(46,204,128,0.15);border:1px solid rgba(46,204,128,0.4);color:#2ecc80;font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:11px 28px;cursor:pointer;">✓ '+(id?'Mettre à jour':'Enregistrer')+'</button>'
@@ -4851,7 +4995,8 @@ window._aeSave = function(id) {
     city:        (document.getElementById('ae-f-city')||{}).value||'',
     country:     (document.getElementById('ae-f-country')||{}).value||'',
     description: (document.getElementById('ae-f-desc')||{}).value||'',
-    ticketUrl:   (document.getElementById('ae-f-ticket')||{}).value||''
+    ticketUrl:   (document.getElementById('ae-f-ticket')||{}).value||'',
+    img:         _aeImgData || (id ? ((DB.artistEvents||[]).find(function(e){return e.id===id;})||{}).img||null : null)
   };
 
   if (!DB.artistEvents) DB.artistEvents = [];
