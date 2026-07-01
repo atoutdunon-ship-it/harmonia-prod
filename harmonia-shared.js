@@ -533,6 +533,12 @@ function applyLang() {
   try { if (typeof renderNews === 'function') renderNews(); } catch(e) {}
 
   try { if (typeof renderArtistsByCategory === 'function') renderArtistsByCategory(); } catch(e) {}
+
+  try {
+    if (typeof _currentArtistPage !== 'undefined' && _currentArtistPage !== null && typeof openArtistPage === 'function') {
+      openArtistPage(_currentArtistPage);
+    }
+  } catch(e) {}
   document.documentElement.lang = currentLang;
   if (typeof updateNavConnectBtn === 'function') updateNavConnectBtn();
 
@@ -6812,7 +6818,7 @@ function openArtistPage(id) {
     +     '<div class="ap-label" data-editable-key="artist_'+id+'_label">'+(ptx['artist_'+id+'_label']||('HARMONIA Records · '+esc(a.origin||'Cabo Verde')))+'</div>'
     +     '<div class="ap-name"  data-editable-key="artist_'+id+'_name">' +(ptx['artist_'+id+'_name'] ||esc(a.name))+'</div>'
     +     '<div class="ap-style" data-editable-key="artist_'+id+'_style">'+(ptx['artist_'+id+'_style']||esc(a.style||''))+'</div>'
-    +     '<div class="ap-bio"   data-editable-key="artist_'+id+'_bio">'  +(ptx['artist_'+id+'_bio']  ||esc(a.bioLong||a.bioShort||''))+'</div>'
+    +     '<div class="ap-bio"   data-editable-key="artist_'+id+'_bio">'  +(ptx[currentLang+':artist_'+id+'_bio'] || ptx['artist_'+id+'_bio'] || esc(_artistBio(a,'bioLong')||_artistBio(a,'bioShort')||''))+'</div>'
     +     (socials ? '<div class="ap-social">'+socials+'</div>' : '')
     +   '</div>'
     + '</div>'
