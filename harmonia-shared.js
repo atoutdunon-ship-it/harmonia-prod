@@ -1099,6 +1099,23 @@ if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
   if (_chg) saveData(DB);
 })();
 
+(function migrateGallery() {
+  if (DB._galleryV >= 1) return;
+  var _defs = defaultArtists();
+  var _chg = false;
+  _defs.forEach(function(def) {
+    if (!def.gallery || !def.gallery.length) return;
+    var stored = (DB.artists||[]).find(function(a){ return a.id === def.id; });
+    if (!stored) return;
+    if (!stored.gallery || !stored.gallery.length) {
+      stored.gallery = def.gallery.slice();
+      _chg = true;
+    }
+  });
+  DB._galleryV = 1;
+  if (_chg) saveData(DB);
+})();
+
 (function(){
   var _defaults = [1, 3, 12];
   if (!DB.promoArtists) { DB.promoArtists = _defaults.slice(); saveData(DB); return; }
