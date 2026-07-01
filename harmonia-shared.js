@@ -528,7 +528,11 @@ function applyLang() {
 
   if (typeof renderCatalogueByCategory === 'function') renderCatalogueByCategory();
 
+  try { if (typeof renderMusicTabs === 'function') renderMusicTabs(); } catch(e) {}
+
   try { if (typeof renderNews === 'function') renderNews(); } catch(e) {}
+
+  try { if (typeof renderArtistsByCategory === 'function') renderArtistsByCategory(); } catch(e) {}
   document.documentElement.lang = currentLang;
   if (typeof updateNavConnectBtn === 'function') updateNavConnectBtn();
 
@@ -1291,7 +1295,7 @@ function updateNavConnectBtn() {
       btn.onclick = openAdmin;
     }
     if (mobileLi) {
-      mobileLi.innerHTML = '<button onclick="openAdmin(event)" style="display:block!important;width:100%!important;padding:12px 0!important;background:rgba(31,158,92,0.12)!important;border:1px solid rgba(31,158,92,0.4)!important;border-bottom:1px solid rgba(31,158,92,0.4)!important;color:var(--white)!important;font-family:Arial,sans-serif!important;font-size:11px!important;letter-spacing:3px!important;text-transform:uppercase!important;text-align:center!important;cursor:pointer!important;border-radius:2px!important;" data-i18n="nav_login">Se connecter</button>';
+      mobileLi.innerHTML = '<button onclick="openAdmin(event)" style="display:block!important;width:100%!important;padding:12px 0!important;background:rgba(31,158,92,0.12)!important;border:1px solid rgba(31,158,92,0.4)!important;border-bottom:1px solid rgba(31,158,92,0.4)!important;color:var(--white)!important;font-family:Arial,sans-serif!important;font-size:11px!important;letter-spacing:3px!important;text-transform:uppercase!important;text-align:center!important;cursor:pointer!important;border-radius:2px!important;" data-i18n="nav_login">' + T('nav_login') + '</button>';
     }
   }
 }
@@ -2175,13 +2179,14 @@ function applyPageTexts() {
   });
 
 
+
   Object.keys(DB.pageTexts).forEach(function(key) {
     if (key.indexOf(':') >= 0 || key.indexOf('__style') >= 0) return;
     if (applied[key]) return;
     var val = DB.pageTexts[key];
     if (!val || typeof val !== 'string') return;
     var s = DB.pageTexts[key + '__style'] || '';
-    document.querySelectorAll('[data-editable-key="' + key + '"]:not([contenteditable="true"])').forEach(function(el) {
+    document.querySelectorAll('[data-editable-key="' + key + '"]:not([contenteditable="true"]):not([data-i18n])').forEach(function(el) {
       el.innerHTML = val;
       if (s) el.setAttribute('style', s);
     });
