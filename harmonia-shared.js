@@ -1083,6 +1083,22 @@ if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
   if (_changed) saveData(DB);
 })();
 
+(function migrateBioTranslations() {
+  if (DB._bioTransV >= 1) return;
+  var _defs = defaultArtists();
+  var _bioFields = ['bioShort_pt','bioLong_pt','bioShort_en','bioLong_en','bioShort_es','bioLong_es'];
+  var _chg = false;
+  _defs.forEach(function(def) {
+    var stored = (DB.artists||[]).find(function(a){ return a.id === def.id; });
+    if (!stored) return;
+    _bioFields.forEach(function(f) {
+      if (!stored[f] && def[f]) { stored[f] = def[f]; _chg = true; }
+    });
+  });
+  DB._bioTransV = 1;
+  if (_chg) saveData(DB);
+})();
+
 (function(){
   var _defaults = [1, 3, 12];
   if (!DB.promoArtists) { DB.promoArtists = _defaults.slice(); saveData(DB); return; }
