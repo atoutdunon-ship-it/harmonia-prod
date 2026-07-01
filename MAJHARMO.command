@@ -38,7 +38,24 @@ echo ""
 git add -A
 
 if git diff --cached --quiet; then
-  echo "ℹ️   Aucune modification locale à envoyer."
+  # Pas de fichiers stagés — vérifier si des commits locaux attendent
+  AHEAD_NOW=$(git rev-list origin/main..HEAD --count 2>/dev/null || echo 0)
+  if [ "$AHEAD_NOW" -gt 0 ]; then
+    echo "🔼  $AHEAD_NOW commit(s) local/locaux non poussés — push en cours..."
+    echo ""
+    git push --progress --verbose origin main 2>&1
+    PUSH_CODE=$?
+    HASH=$(git rev-parse --short HEAD)
+    if [ $PUSH_CODE -eq 0 ]; then
+      PUSH_OK=1
+      echo "  ✅ Push réussi → commit $HASH en ligne"
+    else
+      PUSH_OK=0
+      echo "  ❌ PUSH ÉCHOUÉ (code $PUSH_CODE)"
+    fi
+  else
+    echo "ℹ️   Aucune modification locale à envoyer."
+  fi
 else
   # ── 1. Résumé détaillé des fichiers modifiés ─────────────
   echo "╔═══════════════════════════════════════════╗"
