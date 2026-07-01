@@ -1625,7 +1625,7 @@ function defaultArtists() {
         {title:"Aura",year:2021,cover:"https://img.youtube.com/vi/7NUbNjBakOY/hqdefault.jpg",desc:"Maturité et splendeur absolue de la morna.",spotify:"https://open.spotify.com/intl-fr/artist/6Vc5SDqQcMjBQ35yJW6mZX"}
       ],
       youtubeVideos:[{ytId:"CWjpLxduC24",title:"Laço Umbilical"},{ytId:"7NUbNjBakOY",title:"Sodade"}],
-      gallery:[] },
+      gallery:["https://img.youtube.com/vi/CWjpLxduC24/hqdefault.jpg","https://img.youtube.com/vi/7NUbNjBakOY/hqdefault.jpg","https://img.youtube.com/vi/xq4mkiINIHg/hqdefault.jpg"] },
 
     { id:4, name:"Fábio Ramos", category:"traditional", origin:"São Nicolau · Mindelo, São Vicente",
       style:"Morna · Coladeira",
@@ -1704,7 +1704,8 @@ function defaultArtists() {
         {title:"Xpia B'oia",year:2022,cover:"https://img.youtube.com/vi/m75CxcGXGn8/hqdefault.jpg",desc:"Premier single — identité urbaine affirmée.",spotify:""},
         {title:"Sabi / Adax",year:2023,cover:"https://img.youtube.com/vi/HRnSlprhbIQ/hqdefault.jpg",desc:"Double single confirmant une voix distincte de la nouvelle scène CV.",spotify:""}
       ],
-      youtubeVideos:[{ytId:"HRnSlprhbIQ",title:"Sabi"},{ytId:"m75CxcGXGn8",title:"Xpia B'oia"}] },
+      youtubeVideos:[{ytId:"HRnSlprhbIQ",title:"Sabi"},{ytId:"m75CxcGXGn8",title:"Xpia B'oia"}],
+      gallery:["https://img.youtube.com/vi/HRnSlprhbIQ/hqdefault.jpg","https://img.youtube.com/vi/m75CxcGXGn8/hqdefault.jpg"] },
 
     { id:8, name:"Indira", category:"urban", origin:"Cabo Verde",
       style:"Urban · R&B · Soul",
@@ -1720,7 +1721,8 @@ function defaultArtists() {
       youtube:"",
       spotify:"",
       discography:[],
-      youtubeVideos:[{ytId:"1ztMmdEZ1bw",title:"Momento de Musica — Live"},{ytId:"_j4sWioN6FY",title:"Live au Gamboa 2025"}] },
+      youtubeVideos:[{ytId:"1ztMmdEZ1bw",title:"Momento de Musica — Live"},{ytId:"_j4sWioN6FY",title:"Live au Gamboa 2025"}],
+      gallery:["https://img.youtube.com/vi/1ztMmdEZ1bw/hqdefault.jpg","https://img.youtube.com/vi/_j4sWioN6FY/hqdefault.jpg"] },
 
     { id:9, name:"Ley Lazz", category:"urban", origin:"Cabo Verde",
       style:"Urban · Afrobeat · R&B",
@@ -1738,7 +1740,8 @@ function defaultArtists() {
       discography:[
         {title:"We Vibe",year:2024,cover:"https://img.youtube.com/vi/NDqCs1c7eYU/hqdefault.jpg",desc:"Single — Afrobeat et R&B cap-verdien en fusion.",spotify:""}
       ],
-      youtubeVideos:[{ytId:"NDqCs1c7eYU",title:"We Vibe"}] },
+      youtubeVideos:[{ytId:"NDqCs1c7eYU",title:"We Vibe"}],
+      gallery:["https://img.youtube.com/vi/NDqCs1c7eYU/hqdefault.jpg"] },
 
     { id:10, name:"Mureno", category:"urban", origin:"Cabo Verde",
       style:"Urban · R&B · Kizomba",
@@ -1756,7 +1759,8 @@ function defaultArtists() {
       discography:[
         {title:"Diskulpam",year:2023,cover:"https://img.youtube.com/vi/7HorxxeTgNs/hqdefault.jpg",desc:"Single — R&B cap-verdien, sincère et accrocheur.",spotify:""}
       ],
-      youtubeVideos:[{ytId:"7HorxxeTgNs",title:"Diskulpam"},{ytId:"-Gn9JJGG47g",title:"Conberso cu Distino feat. Neuza"}] },
+      youtubeVideos:[{ytId:"7HorxxeTgNs",title:"Diskulpam"},{ytId:"-Gn9JJGG47g",title:"Conberso cu Distino feat. Neuza"}],
+      gallery:["https://img.youtube.com/vi/7HorxxeTgNs/hqdefault.jpg","https://img.youtube.com/vi/-Gn9JJGG47g/hqdefault.jpg"] },
 
     { id:11, name:"Neguinho Tivane", category:"urban", origin:"São Vicente, Cabo Verde",
       style:"R&B · Soul · Afrobeat",
@@ -1776,7 +1780,8 @@ function defaultArtists() {
         {title:"Maria",year:2025,cover:"",desc:"Single — l'amour authentique, dans un monde qui l'a oublié.",spotify:""},
         {title:"Code",year:2026,cover:"",desc:"Single Afrobeat/Reggaeton — une palette sonore élargie.",spotify:""}
       ],
-      youtubeVideos:[] },
+      youtubeVideos:[],
+      gallery:[] },
 
     { id:12, name:"Sonia Sousa", category:"urban", origin:"Cabo Verde",
       style:"R&B · Funk · Soul",
@@ -1795,7 +1800,8 @@ function defaultArtists() {
         {title:"Pa Bo",year:2022,cover:"https://img.youtube.com/vi/5v_1jMCkFUE/hqdefault.jpg",desc:"Single R&B — groove cap-verdien, texte en créole.",spotify:"https://open.spotify.com/intl-fr/artist/6vYZ29NTfmd4Z4mpde2uNk"},
         {title:"Dexam Bua",year:2023,cover:"https://img.youtube.com/vi/zvmWpSRHy1k/hqdefault.jpg",desc:"Feat. Hélio Batalha — duo R&B/Funk devenu incontournable.",spotify:"https://open.spotify.com/intl-fr/artist/6vYZ29NTfmd4Z4mpde2uNk"}
       ],
-      youtubeVideos:[{ytId:"5v_1jMCkFUE",title:"Pa Bo"},{ytId:"zvmWpSRHy1k",title:"Dexam Bua feat. Hélio Batalha"}] }
+      youtubeVideos:[{ytId:"5v_1jMCkFUE",title:"Pa Bo"},{ytId:"zvmWpSRHy1k",title:"Dexam Bua feat. Hélio Batalha"}],
+      gallery:["https://img.youtube.com/vi/5v_1jMCkFUE/hqdefault.jpg","https://img.youtube.com/vi/zvmWpSRHy1k/hqdefault.jpg"] }
 
   ];
 }
