@@ -1254,36 +1254,36 @@ td.editable:hover { background: #eaf1fb !important; }
     <!-- Navigation -->
     <div class="snav-group">Vue d'ensemble</div>
     <div class="snav active" data-sec="dashboard"
-         onclick="switchSection('dashboard',this)">Dashboard</div>
+         onclick="switchSection('dashboard',this)" data-ai18n="nav_dashboard">Dashboard</div>
 
-    <div class="snav-group">Contenu</div>
+    <div class="snav-group" data-ai18n="nav_group_content">Contenu</div>
     <div class="snav" data-sec="artistes"
-         onclick="switchSection('artistes',this)">Artistes</div>
+         onclick="switchSection('artistes',this)" data-ai18n="nav_artistes">Artistes</div>
     <div class="snav" data-sec="albums"
-         onclick="switchSection('albums',this)">Albums</div>
+         onclick="switchSection('albums',this)" data-ai18n="nav_albums">Albums</div>
     <div class="snav" data-sec="tracks"
-         onclick="switchSection('tracks',this)">Musique</div>
+         onclick="switchSection('tracks',this)" data-ai18n="nav_musiques">Musique</div>
     <div class="snav" data-sec="news"
-         onclick="switchSection('news',this)">Actualités</div>
+         onclick="switchSection('news',this)" data-ai18n="nav_news">Actualités</div>
     <div class="snav" data-sec="events"
-         onclick="switchSection('events',this)">Événements</div>
+         onclick="switchSection('events',this)" data-ai18n="nav_events">Événements</div>
 
     <div class="snav" data-sec="showcases"
-         onclick="switchSection('showcases',this)">Showcases / Concerts</div>
+         onclick="switchSection('showcases',this)" data-ai18n="nav_showcases">Showcases / Concerts</div>
 
-    <div class="snav-group">Boutique</div>
+    <div class="snav-group" data-ai18n="nav_group_boutique">Boutique</div>
     <div class="snav" data-sec="produits"
-         onclick="switchSection('produits',this)">Produits</div>
+         onclick="switchSection('produits',this)" data-ai18n="nav_produits">Produits</div>
     <div class="snav" data-sec="commandes"
-         onclick="switchSection('commandes',this)">Commandes</div>
+         onclick="switchSection('commandes',this)" data-ai18n="nav_commandes">Commandes</div>
 
-    <div class="snav-group">Système</div>
+    <div class="snav-group" data-ai18n="nav_group_system">Système</div>
     <div class="snav" id="snav-users" data-sec="users"
-         onclick="switchSection('users',this)">Utilisateurs</div>
+         onclick="switchSection('users',this)" data-ai18n="nav_users">Utilisateurs</div>
     <div class="snav" data-sec="modules"
-         onclick="switchSection('modules',this)">Modules</div>
+         onclick="switchSection('modules',this)" data-ai18n="nav_modules">Modules</div>
     <div class="snav" data-sec="legaldocs"
-         onclick="switchSection('legaldocs',this)">Pages Légales</div>
+         onclick="switchSection('legaldocs',this)" data-ai18n="nav_legaldocs">Pages Légales</div>
 
     <div class="snav-group" id="snav-support-group">Support</div>
     <div class="snav" id="snav-assistance" data-sec="assistance"
@@ -1299,9 +1299,20 @@ td.editable:hover { background: #eaf1fb !important; }
       <button onclick="launchSiteEditMode()" style="display:block;width:100%;margin-top:12px;background:rgba(46,204,128,0.08);border:1px solid rgba(46,204,128,0.4);color:#2ecc80;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:10px 0;cursor:pointer;border-radius:2px;transition:background 0.2s;" onmouseover="this.style.background='rgba(46,204,128,0.18)'" onmouseout="this.style.background='rgba(46,204,128,0.08)'">&#9998; &Eacute;diter le site</button>
     </div>
 
+    <!-- Sélecteur de langue -->
+    <div class="admin-lang-switcher">
+      <div class="admin-lang-label">Langue</div>
+      <div class="admin-lang-row">
+        <button class="lang-option" data-lang="pt" onclick="setLang('pt')">PT</button>
+        <button class="lang-option" data-lang="fr" onclick="setLang('fr')">FR</button>
+        <button class="lang-option" data-lang="en" onclick="setLang('en')">EN</button>
+        <button class="lang-option" data-lang="es" onclick="setLang('es')">ES</button>
+      </div>
+    </div>
+
     <!-- Quitter — ancré en bas -->
     <div class="sb-logout-bar">
-      <span class="sb-logout" onclick="adminLogout()">Quitter</span>
+      <span class="sb-logout" onclick="adminLogout()" data-ai18n="nav_quit">Quitter</span>
     </div>
 
   </div><!-- /sidebar -->
@@ -1324,39 +1335,51 @@ td.editable:hover { background: #eaf1fb !important; }
 
     <!-- ── DASHBOARD ── -->
     <div class="admin-section active" id="sec-dashboard">
-      <div class="page-title">Dashboard</div>
-      <div class="page-sub">Vue d'ensemble — HARMONIA Production</div>
+      <div class="page-title" data-ai18n="dash_title">Dashboard</div>
+      <div class="page-sub" data-ai18n="dash_sub">Vue d'ensemble — HARMONIA Production</div>
 
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-val" id="stat-artists">—</div>
-          <div class="stat-label">Artistes</div>
+          <div class="stat-label" data-ai18n="dash_artists">Artistes</div>
         </div>
         <div class="stat-card">
           <div class="stat-val" id="stat-albums">—</div>
-          <div class="stat-label">Albums</div>
+          <div class="stat-label" data-ai18n="dash_albums">Albums</div>
         </div>
         <div class="stat-card">
           <div class="stat-val" id="stat-tracks">—</div>
-          <div class="stat-label">Titres</div>
+          <div class="stat-label" data-ai18n="dash_tracks">Titres</div>
         </div>
         <div class="stat-card">
           <div class="stat-val" id="stat-news">—</div>
-          <div class="stat-label">Actualités</div>
+          <div class="stat-label" data-ai18n="dash_news">Actualités</div>
         </div>
       </div>
 
       <div class="a-card">
-        <div class="a-card-title">Accès rapide</div>
+        <div class="a-card-title" data-ai18n="dash_quickaccess">Accès rapide</div>
         <div class="quick-access-grid">
-          <button class="a-btn qa-btn" onclick="switchSection('artistes')">Gérer artistes</button>
-          <button class="a-btn qa-btn" onclick="switchSection('albums')">Gérer albums</button>
-          <button class="a-btn qa-btn" onclick="switchSection('events')">Événements</button>
-          <button class="a-btn qa-btn" onclick="switchSection('produits')">Boutique</button>
-          <button class="a-btn qa-btn" onclick="switchSection('commandes')">Commandes</button>
-          <button class="a-btn qa-btn" onclick="switchSection('users')">Utilisateurs</button>
-          <button class="a-btn qa-btn" onclick="switchSection('modules')">Modules</button>
+          <button class="a-btn qa-btn" onclick="switchSection('artistes')" data-ai18n="qa_artists">Gérer artistes</button>
+          <button class="a-btn qa-btn" onclick="switchSection('albums')" data-ai18n="qa_albums">Gérer albums</button>
+          <button class="a-btn qa-btn" onclick="switchSection('events')" data-ai18n="nav_events">Événements</button>
+          <button class="a-btn qa-btn" onclick="switchSection('produits')" data-ai18n="nav_produits">Produits</button>
+          <button class="a-btn qa-btn" onclick="switchSection('commandes')" data-ai18n="nav_commandes">Commandes</button>
+          <button class="a-btn qa-btn" onclick="switchSection('users')" data-ai18n="nav_users">Utilisateurs</button>
+          <button class="a-btn qa-btn" onclick="switchSection('modules')" data-ai18n="nav_modules">Modules</button>
         </div>
+      </div>
+
+      <!-- Langue du site -->
+      <div class="a-card" style="margin-top:16px;">
+        <div class="a-card-title" style="margin-bottom:12px;" data-ai18n="dash_lang">Langue du site</div>
+        <div style="display:flex;gap:8px;">
+          <button class="dash-lang-btn lang-option" data-lang="pt" onclick="setLang('pt')" style="flex:1;padding:12px 0;font-family:Arial;font-size:11px;letter-spacing:2px;border:1px solid rgba(10,22,40,0.2);background:#fff;color:#0a1628;cursor:pointer;transition:all 0.2s;">PT</button>
+          <button class="dash-lang-btn lang-option" data-lang="fr" onclick="setLang('fr')" style="flex:1;padding:12px 0;font-family:Arial;font-size:11px;letter-spacing:2px;border:1px solid rgba(10,22,40,0.2);background:#fff;color:#0a1628;cursor:pointer;transition:all 0.2s;">FR</button>
+          <button class="dash-lang-btn lang-option" data-lang="en" onclick="setLang('en')" style="flex:1;padding:12px 0;font-family:Arial;font-size:11px;letter-spacing:2px;border:1px solid rgba(10,22,40,0.2);background:#fff;color:#0a1628;cursor:pointer;transition:all 0.2s;">EN</button>
+          <button class="dash-lang-btn lang-option" data-lang="es" onclick="setLang('es')" style="flex:1;padding:12px 0;font-family:Arial;font-size:11px;letter-spacing:2px;border:1px solid rgba(10,22,40,0.2);background:#fff;color:#0a1628;cursor:pointer;transition:all 0.2s;">ES</button>
+        </div>
+        <div id="dash-lang-current" style="font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#999;margin-top:10px;"></div>
       </div>
     </div><!-- /dashboard -->
 
@@ -5127,6 +5150,109 @@ document.getElementById('edit-modal').addEventListener('click', function(e) {
       });
     }
   });
+})();
+
+// ════════════════════════════════════════════════════════
+//  ADMIN I18N — Traductions panneau d'administration
+// ════════════════════════════════════════════════════════
+var ADMIN_LANGS = {
+  fr: {
+    nav_dashboard:'Dashboard', nav_group_content:'Contenu',
+    nav_artistes:'Artistes', nav_albums:'Albums', nav_musiques:'Musique',
+    nav_news:'Actualités', nav_events:'Événements', nav_showcases:'Showcases / Concerts',
+    nav_group_boutique:'Boutique', nav_produits:'Produits', nav_commandes:'Commandes',
+    nav_group_system:'Système', nav_users:'Utilisateurs', nav_modules:'Modules',
+    nav_legaldocs:'Pages Légales', nav_quit:'Quitter',
+    dash_title:'Dashboard', dash_sub:"Vue d'ensemble — HARMONIA Production",
+    dash_artists:'Artistes', dash_albums:'Albums', dash_tracks:'Titres', dash_news:'Actualités',
+    dash_quickaccess:'Accès rapide', dash_lang:'Langue du site',
+    qa_artists:'Gérer artistes', qa_albums:'Gérer albums',
+    lang_active:'Langue active'
+  },
+  en: {
+    nav_dashboard:'Dashboard', nav_group_content:'Content',
+    nav_artistes:'Artists', nav_albums:'Albums', nav_musiques:'Music',
+    nav_news:'News', nav_events:'Events', nav_showcases:'Showcases / Concerts',
+    nav_group_boutique:'Shop', nav_produits:'Products', nav_commandes:'Orders',
+    nav_group_system:'System', nav_users:'Users', nav_modules:'Modules',
+    nav_legaldocs:'Legal Pages', nav_quit:'Logout',
+    dash_title:'Dashboard', dash_sub:'Overview — HARMONIA Production',
+    dash_artists:'Artists', dash_albums:'Albums', dash_tracks:'Tracks', dash_news:'News',
+    dash_quickaccess:'Quick Access', dash_lang:'Site Language',
+    qa_artists:'Manage Artists', qa_albums:'Manage Albums',
+    lang_active:'Active language'
+  },
+  pt: {
+    nav_dashboard:'Dashboard', nav_group_content:'Conteúdo',
+    nav_artistes:'Artistas', nav_albums:'Álbuns', nav_musiques:'Música',
+    nav_news:'Notícias', nav_events:'Eventos', nav_showcases:'Showcases / Concertos',
+    nav_group_boutique:'Loja', nav_produits:'Produtos', nav_commandes:'Encomendas',
+    nav_group_system:'Sistema', nav_users:'Utilizadores', nav_modules:'Módulos',
+    nav_legaldocs:'Páginas Legais', nav_quit:'Sair',
+    dash_title:'Dashboard', dash_sub:'Visão geral — HARMONIA Production',
+    dash_artists:'Artistas', dash_albums:'Álbuns', dash_tracks:'Faixas', dash_news:'Notícias',
+    dash_quickaccess:'Acesso rápido', dash_lang:'Idioma do site',
+    qa_artists:'Gerir artistas', qa_albums:'Gerir álbuns',
+    lang_active:'Idioma ativo'
+  },
+  es: {
+    nav_dashboard:'Dashboard', nav_group_content:'Contenido',
+    nav_artistes:'Artistas', nav_albums:'Álbumes', nav_musiques:'Música',
+    nav_news:'Noticias', nav_events:'Eventos', nav_showcases:'Showcases / Conciertos',
+    nav_group_boutique:'Tienda', nav_produits:'Productos', nav_commandes:'Pedidos',
+    nav_group_system:'Sistema', nav_users:'Usuarios', nav_modules:'Módulos',
+    nav_legaldocs:'Páginas Legales', nav_quit:'Salir',
+    dash_title:'Dashboard', dash_sub:'Resumen — HARMONIA Production',
+    dash_artists:'Artistas', dash_albums:'Álbumes', dash_tracks:'Pistas', dash_news:'Noticias',
+    dash_quickaccess:'Acceso rápido', dash_lang:'Idioma del sitio',
+    qa_artists:'Gestionar artistas', qa_albums:'Gestionar álbumes',
+    lang_active:'Idioma activo'
+  }
+};
+
+var LANG_NAMES = { fr:'Français', en:'English', pt:'Português', es:'Español' };
+
+function applyAdminLang(lang) {
+  var t = ADMIN_LANGS[lang] || ADMIN_LANGS['fr'];
+  // Traduire tous les éléments marqués data-ai18n
+  document.querySelectorAll('[data-ai18n]').forEach(function(el) {
+    var key = el.getAttribute('data-ai18n');
+    if (t[key] !== undefined) el.textContent = t[key];
+  });
+  // Indicateur langue active
+  var ind = document.getElementById('dash-lang-current');
+  if (ind) ind.textContent = (t.lang_active || 'Langue active') + ' : ' + (LANG_NAMES[lang] || lang.toUpperCase());
+  // Boutons dashboard : actif = navy fond blanc
+  document.querySelectorAll('.dash-lang-btn').forEach(function(b) {
+    var isActive = b.getAttribute('data-lang') === lang;
+    b.style.background    = isActive ? '#0a1628' : '#fff';
+    b.style.color         = isActive ? '#fff'    : '#0a1628';
+    b.style.borderColor   = isActive ? '#0a1628' : 'rgba(10,22,40,0.2)';
+    b.style.fontWeight    = isActive ? '700'     : '400';
+  });
+  // Boutons sidebar : active class gérée par harmonia-shared via lang-option
+  document.querySelectorAll('.lang-option[data-lang]').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+  });
+  // Stocker le choix
+  try { localStorage.setItem('harmonia_admin_lang', lang); } catch(e) {}
+}
+
+// Hook : intercept setLang() de harmonia-shared.js pour aussi traduire l'admin
+(function() {
+  var _orig = window.setLang;
+  window.setLang = function(lang) {
+    if (_orig) _orig(lang);
+    applyAdminLang(lang);
+  };
+})();
+
+// Init au chargement : lire la langue stockée
+(function() {
+  var stored = '';
+  try { stored = localStorage.getItem('harmonia_lang') || localStorage.getItem('harmonia_admin_lang') || 'fr'; } catch(e) { stored = 'fr'; }
+  // Attendre que le DOM soit prêt (script en fin de body, donc OK)
+  applyAdminLang(stored);
 })();
 </script>
 </body>
