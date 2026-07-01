@@ -1057,6 +1057,22 @@ if (!DB.modules)        { DB.modules = defaultModules(); saveData(DB); }
   saveData(DB);
 })();
 
+(function migrateSocialEnabledV4() {
+  if (DB._socialEnabledV >= 4) return;
+  var _changed = false;
+  (DB.artists||[]).forEach(function(a) {
+    if (!a.socialEnabled) a.socialEnabled = {};
+    var se = a.socialEnabled;
+    if (a.instagram && !se.instagram) { se.instagram = true; _changed = true; }
+    if (a.facebook  && !se.facebook)  { se.facebook  = true; _changed = true; }
+    if (a.youtube   && !se.youtube)   { se.youtube   = true; _changed = true; }
+    if (a.tiktok    && !se.tiktok)    { se.tiktok    = true; _changed = true; }
+    se.spotify = true;
+  });
+  DB._socialEnabledV = 4;
+  if (_changed) saveData(DB);
+})();
+
 (function(){
   var _defaults = [1, 3, 12];
   if (!DB.promoArtists) { DB.promoArtists = _defaults.slice(); saveData(DB); return; }
@@ -1537,7 +1553,8 @@ function defaultArtists() {
         {title:"Ora Doci Ora Margos",year:2014,cover:"https://img.youtube.com/vi/D6vBMXSFbfg/hqdefault.jpg",desc:"L'album révélation qui a propulsé Elida sur la scène mondiale.",spotify:"https://open.spotify.com/intl-fr/artist/4QMgntJ821xE1UtdWtJWbd"},
         {title:"Elida",year:2017,cover:"https://img.youtube.com/vi/kAGv6QLMJ6g/hqdefault.jpg",desc:"La confirmation d'un talent hors norme.",spotify:"https://open.spotify.com/intl-fr/artist/4QMgntJ821xE1UtdWtJWbd"}
       ],
-      youtubeVideos:[{ytId:"D6vBMXSFbfg",title:"Ora Doci Ora Margos"},{ytId:"kAGv6QLMJ6g",title:"Nha Cretcheu Di Alma"}] },
+      youtubeVideos:[{ytId:"D6vBMXSFbfg",title:"Ora Doci Ora Margos"},{ytId:"kAGv6QLMJ6g",title:"Nha Cretcheu Di Alma"}],
+      gallery:["images/artists/elida/photo1.jpg"] },
 
     { id:2, name:"Ceuzany", category:"traditional", origin:"Mindelo, São Vicente",
       style:"Morna · Coladeira · Funaná",
@@ -1553,7 +1570,8 @@ function defaultArtists() {
         {title:"Ilha d'Melodia",year:2016,cover:"https://img.youtube.com/vi/x30kc8zgbm0/hqdefault.jpg",desc:"Un voyage intérieur entre mémoire et désir.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"},
         {title:"Pays des Merveilles",year:2022,cover:"https://img.youtube.com/vi/x30kc8zgbm0/hqdefault.jpg",desc:"Single feat. Christophe Maé — tournée européenne.",spotify:"https://open.spotify.com/intl-fr/artist/5AYXYNFAvk8uUmCa5FDe7L"}
       ],
-      youtubeVideos:[{ytId:"x30kc8zgbm0",title:"Pays des Merveilles"},{ytId:"chbNmmhoKuM",title:"Pedra Run"}] },
+      youtubeVideos:[{ytId:"x30kc8zgbm0",title:"Pays des Merveilles"},{ytId:"chbNmmhoKuM",title:"Pedra Run"}],
+      gallery:["images/artists/ceuzany/photo1.jpg","images/artists/ceuzany/photo2.jpg"] },
 
     { id:3, name:"Lucibela", category:"traditional", origin:"Cabo Verde",
       style:"Morna · Coladeira",
@@ -1568,7 +1586,8 @@ function defaultArtists() {
         {title:"Laço Umbilical",year:2018,cover:"https://img.youtube.com/vi/CWjpLxduC24/hqdefault.jpg",desc:"Le disque événement qui a révélé Lucibela au monde.",spotify:"https://open.spotify.com/intl-fr/artist/6Vc5SDqQcMjBQ35yJW6mZX"},
         {title:"Aura",year:2021,cover:"https://img.youtube.com/vi/7NUbNjBakOY/hqdefault.jpg",desc:"Maturité et splendeur absolue de la morna.",spotify:"https://open.spotify.com/intl-fr/artist/6Vc5SDqQcMjBQ35yJW6mZX"}
       ],
-      youtubeVideos:[{ytId:"CWjpLxduC24",title:"Laço Umbilical"},{ytId:"7NUbNjBakOY",title:"Sodade"}] },
+      youtubeVideos:[{ytId:"CWjpLxduC24",title:"Laço Umbilical"},{ytId:"7NUbNjBakOY",title:"Sodade"}],
+      gallery:[] },
 
     { id:4, name:"Fábio Ramos", category:"traditional", origin:"São Nicolau · Mindelo, São Vicente",
       style:"Morna · Coladeira",
@@ -1582,7 +1601,8 @@ function defaultArtists() {
       discography:[
         {title:"Um Cálice d'Nha Terra",year:2022,cover:"https://img.youtube.com/vi/Jjfv6n5Og_g/hqdefault.jpg",desc:"Morna et coladeira — l'âme de Mindelo incarnée, dix compositions originales.",spotify:"https://open.spotify.com/intl-fr/artist/6CowL8BBT38y7guwUaSa4L"}
       ],
-      youtubeVideos:[{ytId:"Jjfv6n5Og_g",title:"Sonhe d'Flameng"},{ytId:"oQVkCBkX2Ug",title:"Morna Live"}] },
+      youtubeVideos:[{ytId:"Jjfv6n5Og_g",title:"Sonhe d'Flameng"},{ytId:"oQVkCBkX2Ug",title:"Morna Live"}],
+      gallery:["images/artists/fabio/photo1.jpg","images/artists/fabio/photo2.jpg"] },
 
     { id:5, name:"Jenifer Solidade", category:"traditional", origin:"Mindelo, São Vicente",
       style:"Morna · Coladeira",
@@ -1596,7 +1616,8 @@ function defaultArtists() {
       discography:[
         {title:"Um Click",year:2015,cover:"https://img.youtube.com/vi/iRByIDZvDT4/hqdefault.jpg",desc:"Premier album solo — morna, coladeira et regard lucide sur le monde contemporain.",spotify:"https://open.spotify.com/intl-fr/artist/7FAutlaokOl6lePZDdTEgs"}
       ],
-      youtubeVideos:[{ytId:"iRByIDZvDT4",title:"Criol Ê Bitche"},{ytId:"Rk1hfxSq6pI",title:"So Minha"}] },
+      youtubeVideos:[{ytId:"iRByIDZvDT4",title:"Criol Ê Bitche"},{ytId:"Rk1hfxSq6pI",title:"So Minha"}],
+      gallery:["images/artists/jenifer/photo1.jpg","images/artists/jenifer/photo2.jpg","images/artists/jenifer/photo3.jpg"] },
 
     { id:6, name:"Neuza de Pina", category:"traditional", origin:"Praia, Santiago",
       style:"Talaia Baxo · Rabolo · Samba de Fogo",
@@ -1611,7 +1632,8 @@ function defaultArtists() {
         {title:"Flor di Bila",year:2013,cover:"https://img.youtube.com/vi/naQ1EqomsWc/hqdefault.jpg",desc:"Révélation mondiale — les rythmes secrets de l'île do Fogo.",spotify:"https://open.spotify.com/intl-fr/artist/1xDJ96IbGuTLeuODZW4QN2"},
         {title:"Badia di Fogo",year:2018,cover:"https://img.youtube.com/vi/6jOgf4ihD8g/hqdefault.jpg",desc:"Album intime — 'Izilda', une chanson pour sa mère.",spotify:"https://open.spotify.com/intl-fr/artist/1xDJ96IbGuTLeuODZW4QN2"}
       ],
-      youtubeVideos:[{ytId:"6jOgf4ihD8g",title:"Badia Di Fogo"},{ytId:"naQ1EqomsWc",title:"Flor di Bila"}] },
+      youtubeVideos:[{ytId:"6jOgf4ihD8g",title:"Badia Di Fogo"},{ytId:"naQ1EqomsWc",title:"Flor di Bila"}],
+      gallery:["images/artists/neuza/photo1.jpg","images/artists/neuza/photo2.jpg"] },
 
 
 
@@ -3544,10 +3566,89 @@ function openArtistModal(id) {
     }
   }
 
+
+  if (el('modal-gallery')) {
+    var gallery = (a.gallery || []).filter(Boolean);
+
+    var dbGallery = [];
+    if (DB.images) {
+      for (var _gi = 0; ; _gi++) {
+        var _gk = 'gallery_' + a.id + '_' + _gi;
+        if (DB.images[_gk]) dbGallery.push(DB.images[_gk]); else break;
+      }
+    }
+    var allPhotos = dbGallery.length ? dbGallery : gallery;
+    if (!allPhotos.length) {
+      el('modal-gallery').innerHTML = '';
+    } else {
+      el('modal-gallery').innerHTML =
+        '<div class="modal-gallery-title">Galerie Photos</div>'
+        + '<div class="modal-gallery-grid">'
+        + allPhotos.map(function(src, i) {
+          return '<div class="gallery-thumb-wrap" onclick="_openGalleryLight(\'' + a.id + '\',' + i + ')">'
+            + '<img src="' + src + '" alt="Photo ' + (i+1) + '" loading="lazy" class="gallery-thumb-img">'
+            + '<div class="gallery-thumb-overlay"><span>&#8599;</span></div>'
+            + '</div>';
+        }).join('')
+        + '</div>';
+    }
+
+    window._galleryData = window._galleryData || {};
+    window._galleryData[a.id] = allPhotos;
+  }
+
   const ov = document.getElementById('artist-modal');
   if (ov) { ov.classList.add('active'); document.body.style.overflow = 'hidden'; }
 
   if (el('modal-bio') && typeof _initLirePlus === 'function') _initLirePlus(el('modal-bio'));
+}
+
+function _openGalleryLight(artistId, idx) {
+  var photos = (window._galleryData && window._galleryData[artistId]) || [];
+  if (!photos.length) return;
+  var existing = document.getElementById('gallery-lightbox');
+  if (existing) existing.remove();
+
+  var lb = document.createElement('div');
+  lb.id = 'gallery-lightbox';
+  lb.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.96);'
+    + 'display:flex;align-items:center;justify-content:center;';
+
+  function render(i) {
+    lb.innerHTML =
+      '<button onclick="document.getElementById(\'gallery-lightbox\').remove();event.stopPropagation();" '
+        + 'style="position:absolute;top:20px;right:24px;background:none;border:none;color:#fff;'
+        + 'font-size:28px;cursor:pointer;z-index:2;">✕</button>'
+      + (photos.length > 1
+        ? '<button onclick="event.stopPropagation();_glNav(' + artistId + ',' + i + ',-1)" '
+            + 'style="position:absolute;left:16px;background:none;border:none;color:#fff;font-size:36px;cursor:pointer;">&#8249;</button>'
+            + '<button onclick="event.stopPropagation();_glNav(' + artistId + ',' + i + ',1)" '
+            + 'style="position:absolute;right:16px;background:none;border:none;color:#fff;font-size:36px;cursor:pointer;">&#8250;</button>'
+        : '')
+      + '<img src="' + photos[i] + '" style="max-width:90vw;max-height:88vh;object-fit:contain;'
+        + 'box-shadow:0 8px 60px rgba(0,0,0,0.7);" alt="">'
+      + '<div style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);'
+        + 'font-family:Arial;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.4);">'
+        + (i+1) + ' / ' + photos.length + '</div>';
+    lb._cur = i;
+  }
+
+  render(idx);
+  lb.addEventListener('click', function(e) { if (e.target === lb) lb.remove(); });
+  document.body.appendChild(lb);
+}
+
+function _glNav(artistId, cur, dir) {
+  var photos = (window._galleryData && window._galleryData[artistId]) || [];
+  var next = (cur + dir + photos.length) % photos.length;
+  var lb = document.getElementById('gallery-lightbox');
+  if (!lb) return;
+  var img = lb.querySelector('img');
+  if (img) img.src = photos[next];
+  var counter = lb.querySelector('div[style*="bottom:18px"]');
+  if (counter) counter.textContent = (next+1) + ' / ' + photos.length;
+
+  _openGalleryLight(artistId, next);
 }
 
 function closeModal() {
