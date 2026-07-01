@@ -6106,6 +6106,21 @@ function deleteProd(id) {
   saveData(DB); renderProds();
 }
 
+let evtImgData = null;
+
+function handleEvtImg(inp) {
+  const f = inp.files[0]; if (!f) return;
+  const nameEl = document.getElementById('evt-img-name');
+  if (nameEl) nameEl.textContent = f.name;
+  const r = new FileReader();
+  r.onload = function(e) {
+    evtImgData = e.target.result;
+    const prev = document.getElementById('evt-img-preview');
+    if (prev) { prev.src = evtImgData; prev.style.display = 'block'; }
+  };
+  r.readAsDataURL(f);
+}
+
 function refreshEvtArtistSelect() {
   const sel = document.getElementById('evt-artist');
   if (!sel) return;
@@ -6119,7 +6134,9 @@ function resetEvtForm() {
   ['evt-price','evt-vip','evt-capacity'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
   const st=document.getElementById('evt-status'); if(st) st.value='active';
   const tp=document.getElementById('evt-type'); if(tp) tp.value='concert';
+  evtImgData = null;
   const prev=document.getElementById('evt-img-preview'); if(prev){prev.src='';prev.style.display='none';}
+  const nameEl=document.getElementById('evt-img-name'); if(nameEl) nameEl.textContent='';
   const imgIn=document.getElementById('evt-img-input'); if(imgIn) imgIn.value='';
   const editId=document.getElementById('evt-edit-id'); if(editId) editId.value='';
   const title=document.getElementById('evt-form-title'); if(title) title.textContent='Créer un événement';
@@ -6143,25 +6160,16 @@ function saveEvt() {
   const type = (document.getElementById('evt-type') ? document.getElementById('evt-type').value : 'concert') || 'concert';
   const editId = document.getElementById('evt-edit-id').value;
   if (!venue || !date) { alert('Venue et date sont requis.'); return; }
-  const imgInput = document.getElementById('evt-img-input');
-  function finish(imgData) {
-    if (editId) {
-      const idx = DB.events.findIndex(e => String(e.id) === editId);
-      if (idx >= 0) {
-        DB.events[idx] = Object.assign(DB.events[idx], {artist, venue, city, country, date, time, price, vip, capacity, desc, stripeLink, status, type});
-        if (imgData) DB.events[idx].img = imgData;
-      }
-    } else {
-      const newEvt = { id: Date.now(), artist, venue, city, country, date, time, price, vip, capacity, available: capacity, desc, stripeLink, img: imgData||null, status, type };
-      DB.events.unshift(newEvt);
+  if (editId) {
+    const idx = DB.events.findIndex(e => String(e.id) === editId);
+    if (idx >= 0) {
+      DB.events[idx] = Object.assign(DB.events[idx], {artist, venue, city, country, date, time, price, vip, capacity, desc, stripeLink, status, type});
+      if (evtImgData) DB.events[idx].img = evtImgData;
     }
-    saveData(DB); renderEvts(); resetEvtForm();
-  }
-  if (imgInput && imgInput.files && imgInput.files[0]) {
-    readFileAsBase64(imgInput, finish);
   } else {
-    finish(null);
+    DB.events.unshift({ id: Date.now(), artist, venue, city, country, date, time, price, vip, capacity, available: capacity, desc, stripeLink, img: evtImgData||null, status, type });
   }
+  saveData(DB); renderEvts(); resetEvtForm();
 }
 
 function renderEvts() {
@@ -6224,7 +6232,11 @@ function editEvt(id) {
   document.getElementById('evt-status').value = e.status||'active';
   var evtType = document.getElementById('evt-type'); if(evtType) evtType.value = e.type||'concert';
   document.getElementById('evt-edit-id').value = id;
-  if (e.img) { const prev=document.getElementById('evt-img-preview'); if(prev){prev.src=e.img;prev.style.display='block';} }
+  evtImgData = e.img || null;
+  const prev=document.getElementById('evt-img-preview');
+  const nameEl=document.getElementById('evt-img-name');
+  if (prev) { if (e.img) { prev.src=e.img; prev.style.display='block'; } else { prev.src=''; prev.style.display='none'; } }
+  if (nameEl) nameEl.textContent = e.img ? '(photo en place — sélectionnez pour remplacer)' : '';
   const title=document.getElementById('evt-form-title'); if(title) title.textContent="Modifier l'événement";
   const btn=document.querySelector('#page-shop-events .admin-btn-primary'); if(btn) btn.textContent='Enregistrer';
   const cancel=document.getElementById('evt-cancel-btn'); if(cancel) cancel.style.display='';

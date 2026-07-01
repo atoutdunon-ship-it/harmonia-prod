@@ -1000,6 +1000,20 @@
         <div class="shop-admin-grid">
           <div class="admin-card">
             <div class="admin-card-title" id="evt-form-title">Créer un événement</div>
+            <!-- PHOTO — visible immédiatement en haut du formulaire -->
+            <div class="admin-field" style="margin-bottom:18px;">
+              <label class="admin-label">Photo de l'événement</label>
+              <div class="file-upload-zone" style="padding:16px 20px;display:flex;align-items:center;gap:16px;">
+                <input type="file" accept="image/*" id="evt-img-input" onchange="handleEvtImg(this)">
+                <div style="display:flex;align-items:center;gap:14px;width:100%;">
+                  <img id="evt-img-preview" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:3px;border:1px solid rgba(255,255,255,0.12);display:none;flex-shrink:0;">
+                  <div>
+                    <div class="file-upload-text" style="margin:0 0 4px;">Cliquer ou glisser une photo</div>
+                    <div id="evt-img-name" style="font-family:Arial;font-size:10px;color:rgba(31,158,92,0.8);letter-spacing:0.5px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div class="admin-form-row">
               <div>
                 <label class="admin-label">Artiste</label>
@@ -1072,14 +1086,6 @@
             <div style="margin-bottom:16px;">
               <label class="admin-label">Description</label>
               <textarea class="admin-input" id="evt-desc" rows="3" placeholder="Description de l'événement..."></textarea>
-            </div>
-            <div class="admin-field">
-              <label class="admin-label">Photo de l'événement</label>
-              <div class="file-upload-zone" style="padding:20px;" onclick="document.getElementById('evt-img-input').click()">
-                <input type="file" accept="image/*" id="evt-img-input" onchange="previewUpload(this,'evt-img-preview')" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;border:none;padding:0;">
-                <div class="file-upload-text">Glisser une photo ou cliquer pour parcourir</div>
-              </div>
-              <img id="evt-img-preview" class="admin-upload-preview" alt="" style="margin-top:10px;max-width:120px;max-height:120px;object-fit:cover;border-radius:4px;display:none;border:1px solid rgba(255,255,255,0.1);">
             </div>
             <input type="hidden" id="evt-edit-id" value="">
             <div style="display:flex;gap:10px;margin-top:16px;">
@@ -1242,6 +1248,7 @@
 
     </div><!-- /admin-main -->
   </div><!-- /admin-panel -->
+</div><!-- /admin-overlay -->
 </div><!-- /admin-overlay -->
 </div><!-- /admin-overlay -->
 </div><!-- /admin-overlay -->
