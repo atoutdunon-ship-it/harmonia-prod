@@ -122,7 +122,8 @@ const LANGS = {
     footer_sede_label:'Siège — Mindelo',
     footer_office_label:'Bureau — Praia',
     footer_contact_label:'Contact',
-    footer_hf_tag:'Maison de disques de Cabo Verde · depuis 1998'
+    footer_hf_tag:'Maison de disques de Cabo Verde · depuis 1998',
+    lang_label:'Langue'
   },
   en: {
     nav_about:'WHO WE ARE', nav_search:'Search', nav_artists:'Artists', nav_cesaria:'Cesária Évora',
@@ -242,7 +243,8 @@ const LANGS = {
     footer_sede_label:'HQ — Mindelo',
     footer_office_label:'Office — Praia',
     footer_contact_label:'Contact',
-    footer_hf_tag:'Cape Verdean Record Label · since 1998'
+    footer_hf_tag:'Cape Verdean Record Label · since 1998',
+    lang_label:'Language'
   },
   pt: {
     nav_about:'QUEM SOMOS', nav_search:'Pesquisar', nav_artists:'Artistas', nav_cesaria:'Cesária Évora',
@@ -362,7 +364,8 @@ const LANGS = {
     footer_sede_label:'Sede — Mindelo',
     footer_office_label:'Escritório — Praia',
     footer_contact_label:'Contacto',
-    footer_hf_tag:'Editora discográfica de Cabo Verde · desde 1998'
+    footer_hf_tag:'Editora discográfica de Cabo Verde · desde 1998',
+    lang_label:'Língua'
   },
   es: {
     nav_about:'QUIÉNES SOMOS', nav_search:'Buscar', nav_artists:'Artistas', nav_cesaria:'Cesária Évora',
@@ -482,7 +485,8 @@ const LANGS = {
     footer_sede_label:'Sede — Mindelo',
     footer_office_label:'Oficina — Praia',
     footer_contact_label:'Contacto',
-    footer_hf_tag:'Sello discográfico de Cabo Verde · desde 1998'
+    footer_hf_tag:'Sello discográfico de Cabo Verde · desde 1998',
+    lang_label:'Idioma'
   }
 };
 
@@ -4577,9 +4581,17 @@ function renderMusicAdminList() {
       </div>
       <div class="admin-item-actions">
         ${can('music','edit') ? `<button class="admin-btn-sm" style="padding:6px 14px;font-size:9px;" onclick="editTrack(${t.id})">Modifier</button>` : ''}
+        ${can('music','add')    ? `<button class="admin-btn-sm" style="padding:6px 14px;font-size:9px;background:rgba(31,158,92,0.08);border-color:rgba(31,158,92,0.25);" onclick="duplicateTrack(${t.id})">Dupliquer</button>` : ''}
         ${can('music','delete') ? `<button class="admin-btn-del" onclick="deleteTrack(${t.id})">Supprimer</button>` : ''}
       </div>
     </div>`).join('') || '<div style="color:var(--gray);font-size:12px;">Aucun morceau.</div>';
+}
+
+function duplicateTrack(id) {
+  const t = DB.tracks.find(x => x.id === id); if (!t) return;
+  const copy = Object.assign({}, t, { id: Date.now(), title: t.title + ' (copie)' });
+  DB.tracks.push(copy);
+  saveData(DB); renderMusicAdminList(); updateStats();
 }
 
 let albumCoverData = null;
@@ -4640,9 +4652,17 @@ function renderAlbumsAdminList() {
       </div>
       <div class="admin-item-actions">
         ${can('albums','edit') ? `<button class="admin-btn-sm" style="padding:6px 14px;font-size:9px;" onclick="editAlbum(${a.id})">Modifier</button>` : ''}
+        ${can('albums','add')    ? `<button class="admin-btn-sm" style="padding:6px 14px;font-size:9px;background:rgba(31,158,92,0.08);border-color:rgba(31,158,92,0.25);" onclick="duplicateAlbum(${a.id})">Dupliquer</button>` : ''}
         ${can('albums','delete') ? `<button class="admin-btn-del" onclick="deleteAlbum(${a.id})">Supprimer</button>` : ''}
       </div>
     </div>`).join('') || '<div style="color:var(--gray);font-size:12px;">Aucun album.</div>';
+}
+
+function duplicateAlbum(id) {
+  const a = DB.albums.find(x => x.id === id); if (!a) return;
+  const copy = Object.assign({}, a, { id: Date.now(), title: a.title + ' (copie)' });
+  DB.albums.push(copy);
+  saveData(DB); renderAlbumsAdminList(); updateStats();
 }
 
 let newsImgData = null;
@@ -4699,14 +4719,33 @@ function renderNewsAdminList() {
   el.innerHTML = [...DB.news].reverse().map(n => `
     <div class="admin-list-item">
       <div class="admin-item-info">
-        <div class="admin-item-title">${n.title}</div>
-        <div class="admin-item-meta">${n.artist} · ${fmtDate(n.date)}</div>
+        ${n.img ? `<img src="${n.img}" style="width:40px;height:40px;object-fit:cover;border-radius:3px;margin-right:10px;vertical-align:middle;border:1px solid rgba(255,255,255,0.08);">` : ''}
+        <div style="display:inline-block;vertical-align:middle;">
+          <div class="admin-item-title">${n.title}</div>
+          <div class="admin-item-meta">${n.artist} · ${fmtDate(n.date)}</div>
+        </div>
       </div>
       <div class="admin-item-actions">
         ${can('news','edit') ? `<button class="admin-btn-sm" style="padding:6px 14px;font-size:9px;" onclick="editNews(${n.id})">Modifier</button>` : ''}
+        ${can('news','add') ? `<button class="admin-btn-sm" style="padding:6px 14px;font-size:9px;background:rgba(31,158,92,0.08);border-color:rgba(31,158,92,0.25);" onclick="duplicateNews(${n.id})">Dupliquer</button>` : ''}
         ${can('news','delete') ? `<button class="admin-btn-del" onclick="deleteNews(${n.id})">Supprimer</button>` : ''}
       </div>
     </div>`).join('') || '<div style="color:var(--gray);font-size:12px;">Aucun article.</div>';
+}
+
+function duplicateNews(id) {
+  const n = DB.news.find(x => x.id === id);
+  if (!n) return;
+  const copy = Object.assign({}, n, {
+    id: Date.now(),
+    title: n.title + ' (copie)',
+    date: new Date().toISOString().split('T')[0]
+  });
+  DB.news.unshift(copy);
+  saveData(DB);
+  renderNews();
+  renderNewsAdminList();
+  updateStats();
 }
 
 function populateArtistSelects() {
@@ -6131,7 +6170,11 @@ function renderEvts() {
     };
     const statusCls = (statusMap[e.status] || statusMap.active).cls;
     const statusLbl = (statusMap[e.status] || statusMap.active).lbl;
+    var imgCell = e.img
+      ? '<img src="'+e.img+'" style="width:36px;height:36px;object-fit:cover;border-radius:2px;border:1px solid rgba(255,255,255,0.1);">'
+      : '<span style="color:var(--gray);font-size:16px;">&#128248;</span>';
     return '<tr>'
+      + '<td>'+imgCell+'</td>'
       + '<td style="font-family:Arial;font-size:11px;color:var(--accent2);">'+escHtml(d)+(e.time?' '+escHtml(e.time):'')+'</td>'
       + '<td style="color:var(--accent2);font-family:Arial;font-size:11px;">'+escHtml(e.artist)+'</td>'
       + '<td style="font-family:Georgia;">'+escHtml(e.venue)+'</td>'
@@ -6140,8 +6183,11 @@ function renderEvts() {
       + '<td style="text-align:right;font-family:Georgia;color:var(--accent2);">'+fmtPrice(e.vip)+'</td>'
       + '<td style="font-family:Arial;font-size:12px;color:var(--gray);">'+(e.available!=null?e.available:e.capacity)+'</td>'
       + '<td><span class="order-status '+statusCls+'">'+statusLbl+'</span></td>'
-      + '<td><button onclick="editEvt('+e.id+')" style="background:none;border:1px solid rgba(31,158,92,0.3);color:var(--accent2);padding:5px 10px;font-family:Arial;font-size:9px;letter-spacing:1px;cursor:pointer;margin-right:6px;">Modifier</button>'
-      + '<button onclick="deleteEvt('+e.id+')" style="background:none;border:1px solid rgba(200,80,80,0.3);color:#e07070;padding:5px 10px;font-family:Arial;font-size:9px;letter-spacing:1px;cursor:pointer;">Supprimer</button></td>'
+      + '<td>'
+      + '<button onclick="editEvt('+e.id+')" style="background:none;border:1px solid rgba(31,158,92,0.3);color:var(--accent2);padding:5px 10px;font-family:Arial;font-size:9px;letter-spacing:1px;cursor:pointer;margin-right:4px;">Modifier</button>'
+      + '<button onclick="duplicateEvt('+e.id+')" style="background:none;border:1px solid rgba(31,158,92,0.2);color:var(--accent2);padding:5px 10px;font-family:Arial;font-size:9px;letter-spacing:1px;cursor:pointer;margin-right:4px;">Dupliquer</button>'
+      + '<button onclick="deleteEvt('+e.id+')" style="background:none;border:1px solid rgba(200,80,80,0.3);color:#e07070;padding:5px 10px;font-family:Arial;font-size:9px;letter-spacing:1px;cursor:pointer;">Supprimer</button>'
+      + '</td>'
       + '</tr>';
   }).join('');
 }
@@ -6185,10 +6231,41 @@ function cycleEvtStatus(id) {
   saveData(DB);
   renderEvts();
 }
+function duplicateEvt(id) {
+  var e = DB.events.find(function(x){ return x.id === id; }); if (!e) return;
+  var copy = Object.assign({}, e, { id: Date.now(), venue: e.venue + ' (copie)', available: e.capacity, status: 'active' });
+  DB.events.unshift(copy);
+  saveData(DB); renderEvts();
+}
+
 function deleteEvt(id) {
   if (!confirm('Supprimer cet événement ?')) return;
   DB.events = DB.events.filter(e => e.id !== id);
   saveData(DB); renderEvts();
+}
+
+function openSpotifyEmbed(url) {
+  if (!url) return;
+
+  var embedUrl = url.replace(/https?:\/\/open\.spotify\.com\/(?:intl-\w+\/)?/, 'https://open.spotify.com/embed/');
+  var modal = document.getElementById('sp-embed-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'sp-embed-modal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,5,15,0.88);z-index:99999;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML = ''
+      + '<div style="width:min(500px,92vw);background:#0a1628;border:1px solid rgba(30,215,96,0.25);border-radius:10px;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.7);">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.06);">'
+      + '<span style="font-family:Arial;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(30,215,96,0.8);">&#9654; SPOTIFY</span>'
+      + '<button onclick="document.getElementById(\'sp-embed-modal\').remove()" style="background:none;border:none;color:var(--gray);font-size:18px;cursor:pointer;line-height:1;padding:0 2px;" title="Fermer">&#10005;</button>'
+      + '</div>'
+      + '<iframe id="sp-embed-frame" style="display:block;" src="" width="100%" height="352" frameborder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>'
+      + '</div>';
+    modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+    document.body.appendChild(modal);
+  }
+  document.getElementById('sp-embed-frame').src = embedUrl + '?utm_source=generator&theme=0';
+  modal.style.display = 'flex';
 }
 
 function refreshPLinkItems() {
@@ -6818,7 +6895,6 @@ function openArtistPage(id) {
       var tracksHtml = '';
       if (albumTracks.length) {
         tracksHtml = albumTracks.map(function(t, ti) {
-          var ytUrl  = t.ytId ? 'https://www.youtube.com/watch?v='+t.ytId : '';
           var spUrl  = t.spotify || al.spotify || a.spotify || '';
           return '<div class="ap-track-row">'
             + '<span class="ap-track-num">'+(ti+1)+'</span>'
@@ -6828,8 +6904,7 @@ function openArtistPage(id) {
             + '</div>'
             + '<span class="ap-track-dur">'+esc(t.duration||'')+'</span>'
             + '<div class="ap-track-links">'
-            +   (ytUrl ? '<a href="'+ytUrl+'" target="_blank" rel="noopener" class="ap-track-btn ap-track-yt" title="YouTube">▶ YouTube</a>' : '')
-            +   (spUrl ? '<a href="'+spUrl+'" target="_blank" rel="noopener" class="ap-track-btn ap-track-sp" title="Spotify">Spotify</a>' : '')
+            +   (spUrl ? '<button class="ap-track-btn ap-track-sp" onclick="openSpotifyEmbed(\''+spUrl+'\')" title="Écouter sur Spotify">&#9654; Écouter</button>' : '')
             + '</div>'
             + '</div>';
         }).join('');
@@ -6846,7 +6921,7 @@ function openArtistPage(id) {
         +     (al.desc ? '<div class="ap-album-desc-acc">'+esc(al.desc)+'</div>' : '')
         +   '</div>'
         +   '<div class="ap-album-links">'
-        +     (al.spotify ? '<a href="'+al.spotify+'" target="_blank" rel="noopener" class="ap-track-btn ap-track-sp" onclick="event.stopPropagation()">Spotify</a>' : '')
+        +     (al.spotify ? '<button class="ap-track-btn ap-track-sp" onclick="event.stopPropagation();openSpotifyEmbed(\''+al.spotify+'\')" title="Écouter cet album sur Spotify">&#9654; Écouter</button>' : '')
         +   '</div>'
         +   '<span class="ap-album-chevron">▾</span>'
         + '</div>'
@@ -6855,7 +6930,7 @@ function openArtistPage(id) {
         +     '<span style="width:32px;">#</span>'
         +     '<span style="flex:1;">Titre</span>'
         +     '<span>Durée</span>'
-        +     '<span>Écouter</span>'
+        +     '<span>Spotify</span>'
         +   '</div>'
         +   tracksHtml
         + '</div>'
@@ -7347,7 +7422,8 @@ function renderArtistEventsAdmin(artistId) {
       +   '<div style="font-size:11px;color:var(--accent2);">'+d+' · '+esc(e.city)+'</div>'
       +   '<div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);margin-top:2px;">'+typeLbl+'</div>'
       + '</div>'
-      + '<button class="admin-btn-sm" style="font-size:9px;padding:4px 12px;" onclick="editEvtAdmin('+e.id+')">Modifier</button>'
+      + '<button class="admin-btn-sm" style="font-size:9px;padding:4px 12px;margin-right:4px;" onclick="editEvtAdmin('+e.id+')">Modifier</button>'
+      + '<button class="admin-btn-sm" style="font-size:9px;padding:4px 12px;background:rgba(31,158,92,0.08);border-color:rgba(31,158,92,0.25);" onclick="duplicateEvt('+e.id+');renderArtistEventsAdmin(currentEditArtistId)">Dupliquer</button>'
       + '</div>';
   }).join('');
 }

@@ -255,6 +255,8 @@
 
 <!-- ADMIN OVERLAY -->
 <div id="admin-overlay">
+<!-- ADMIN OVERLAY -->
+<div id="admin-overlay">
   <!-- LOGIN -->
     <div id="admin-login" class="admin-login">
     <div class="admin-login-box">
@@ -310,7 +312,28 @@
   <!-- PANEL -->
   <div class="admin-panel" id="admin-panel">
     <div class="admin-sidebar">
-      <div class="admin-sidebar-logo" style="padding:8px 0;"><img src="images/logo-base.png" alt="HARMONIA" style="height:36px;"></div>
+      <div class="admin-sidebar-logo" style="padding:8px 0;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 52" height="40" aria-label="HARMONIA">
+  <defs>
+    <linearGradient id="lgM1" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#c8f060"/>
+      <stop offset="45%" stop-color="#4ecb71"/>
+      <stop offset="100%" stop-color="#1a8040"/>
+    </linearGradient>
+    <linearGradient id="lgM2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3aaa55"/>
+      <stop offset="100%" stop-color="#0d5c28"/>
+    </linearGradient>
+  </defs>
+  <text x="2" y="38" style="font-family:Arial,sans-serif;font-size:38px;font-weight:900;letter-spacing:5px;fill:#ffffff;">HARM</text>
+  <g transform="translate(147,22)">
+    <ellipse cx="0" cy="12" rx="18" ry="6" fill="url(#lgM2)"/>
+    <ellipse cx="0" cy="7"  rx="18" ry="6" fill="url(#lgM1)"/>
+    <ellipse cx="0" cy="6"  rx="10" ry="3.5" fill="#1a5c30"/>
+    <ellipse cx="0" cy="5"  rx="4"  ry="2"   fill="#051a0c"/>
+    <ellipse cx="-6" cy="3" rx="4" ry="1.5" fill="rgba(220,255,180,0.28)" transform="rotate(-8,-6,3)"/>
+  </g>
+  <text x="169" y="38" style="font-family:Arial,sans-serif;font-size:38px;font-weight:900;letter-spacing:5px;fill:#ffffff;">NIA</text>
+</svg></div>
       <div class="admin-nav-item active" onclick="showAdminPage('dashboard')">&#9632; <span data-i18n="admin_dashboard">Dashboard</span></div>
       <div class="admin-nav-item" onclick="showAdminPage('artists-admin')">&#9632; Artistes</div>
       <div class="admin-nav-item" onclick="showAdminPage('music-admin')">&#9632; Musiques</div>
@@ -328,6 +351,16 @@
         <span class="preview-icon">&#128065;</span>
         <span id="preview-btn-label">Voir le site</span>
       </button>
+      <!-- SÉLECTEUR DE LANGUE -->
+      <div class="admin-lang-switcher">
+        <div class="admin-lang-label" data-i18n="lang_label">Langue</div>
+        <div class="admin-lang-row">
+          <button class="lang-option" data-lang="pt" onclick="setLang('pt')">PT</button>
+          <button class="lang-option" data-lang="fr" onclick="setLang('fr')">FR</button>
+          <button class="lang-option" data-lang="en" onclick="setLang('en')">EN</button>
+          <button class="lang-option" data-lang="es" onclick="setLang('es')">ES</button>
+        </div>
+      </div>
       <div class="admin-logout">
         <button onclick="openChangePwd()" style="background:none;border:1px solid rgba(255,255,255,0.1);color:var(--gray);padding:10px 20px;font-family:Arial;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;width:100%;margin-bottom:8px;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--gray)'">Changer mot de passe</button>
         <button onclick="doLogout()">Déconnexion</button>
@@ -375,82 +408,143 @@
         <div class="admin-page-sub">Gérer le roster HARMONIA</div>
         <div class="admin-divider"></div>
         <div class="admin-success" id="artists-success">Artiste enregistré avec succès.</div>
-        <div class="admin-card">
-          <div class="admin-card-title">Ajouter / Modifier un artiste</div>
-          <div class="admin-grid-2">
-            <div class="admin-field">
-              <label>Nom de l'artiste</label>
-              <input type="text" id="a-name" placeholder="Nom complet">
+
+        <!-- Formulaire artiste avec onglets -->
+        <div class="admin-card" id="artist-edit-card">
+          <div class="admin-card-title" id="artist-form-title">Ajouter / Modifier un artiste</div>
+
+          <!-- Onglets -->
+          <div class="artist-admin-tabs">
+            <button class="artist-tab-btn active" onclick="showArtistTab('info')" id="atab-info">Informations</button>
+            <button class="artist-tab-btn" onclick="showArtistTab('disco')" id="atab-disco">Discographie</button>
+            <button class="artist-tab-btn" onclick="showArtistTab('events')" id="atab-events">Événements</button>
+            <button class="artist-tab-btn" onclick="showArtistTab('photos')" id="atab-photos">Photos</button>
+          </div>
+
+          <!-- Onglet : Informations -->
+          <div class="artist-tab-content active" id="atab-content-info">
+            <div class="admin-grid-2">
+              <div class="admin-field">
+                <label>Nom de l'artiste</label>
+                <input type="text" id="a-name" placeholder="Nom complet">
+              </div>
+              <div class="admin-field">
+                <label>Origine / Pays</label>
+                <input type="text" id="a-origin" placeholder="Ex: Cabo Verde">
+              </div>
             </div>
             <div class="admin-field">
-              <label>Origine / Pays</label>
-              <input type="text" id="a-origin" placeholder="Ex: Cabo Verde">
-            </div>
-          </div>
-          <div class="admin-field">
-            <label>Biographie courte</label>
-            <textarea id="a-bio-short" rows="2" placeholder="Résumé (affiché sur la carte)"></textarea>
-          </div>
-          <div class="admin-field">
-            <label>Biographie longue</label>
-            <textarea id="a-bio-long" rows="5" placeholder="Biographie complète (modale)"></textarea>
-          </div>
-          <div class="admin-grid-2">
-            <div class="admin-field">
-              <label>Instagram</label>
-              <input type="text" id="a-insta" placeholder="@handle">
+              <label>Biographie courte</label>
+              <textarea id="a-bio-short" rows="2" placeholder="Résumé (affiché sur la carte)"></textarea>
             </div>
             <div class="admin-field">
-              <label>Spotify / Streaming</label>
-              <input type="text" id="a-spotify" placeholder="URL Spotify">
+              <label>Biographie longue</label>
+              <textarea id="a-bio-long" rows="5" placeholder="Biographie complète (modale)"></textarea>
+            </div>
+            <div class="admin-grid-2">
+              <div class="admin-field">
+                <label>Instagram</label>
+                <input type="text" id="a-insta" placeholder="@handle">
+              </div>
+              <div class="admin-field">
+                <label>Spotify</label>
+                <input type="text" id="a-spotify" placeholder="https://open.spotify.com/artist/...">
+              </div>
+            </div>
+            <div class="admin-grid-2">
+              <div class="admin-field">
+                <label>Apple Music</label>
+                <input type="text" id="a-apple-music" placeholder="https://music.apple.com/...">
+              </div>
+              <div class="admin-field">
+                <label>Deezer</label>
+                <input type="text" id="a-deezer" placeholder="https://www.deezer.com/artist/...">
+              </div>
+            </div>
+            <div class="admin-field">
+              <label>Photo</label>
+              <div class="file-upload-zone">
+                <input type="file" id="a-photo-file" accept="image/*" onchange="handleArtistPhoto(this)">
+                <div class="file-upload-text">Glisser une photo ou cliquer pour parcourir</div>
+                <div class="file-name-preview" id="a-photo-preview"></div>
+              </div>
+            </div>
+            <div class="admin-submit-row">
+              <button class="admin-btn-ghost" onclick="resetArtistForm()">Réinitialiser</button>
+              <button class="admin-btn-sm" onclick="saveArtist()">Enregistrer l'artiste</button>
             </div>
           </div>
-          <div class="admin-field">
-            <label>Photo (URL ou base64)</label>
-            <div class="file-upload-zone">
-              <input type="file" id="a-photo-file" accept="image/*" onchange="handleArtistPhoto(this)">
-              <div class="file-upload-text">Glisser une photo ou cliquer pour parcourir</div>
-              <div class="file-name-preview" id="a-photo-preview"></div>
+
+          <!-- Onglet : Discographie -->
+          <div class="artist-tab-content" id="atab-content-disco" style="display:none;">
+            <div id="disco-list-inline" style="margin-bottom:16px;"></div>
+            <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:4px;">
+              <div class="admin-card-title" id="disco-form-title" style="font-size:11px;margin-bottom:12px;">Ajouter un album</div>
+              <div class="admin-form-row">
+                <div><label class="admin-label">Titre</label><input class="admin-input" id="disco-title" type="text" placeholder="Nom de l'album"></div>
+                <div><label class="admin-label">Année</label><input class="admin-input" id="disco-year" type="number" placeholder="2024"></div>
+              </div>
+              <div><label class="admin-label">Description</label><textarea class="admin-input" id="disco-desc" rows="2" placeholder="Courte description..."></textarea></div>
+              <div class="admin-form-row" style="margin-top:8px;">
+                <div><label class="admin-label">Spotify</label><input class="admin-input" id="disco-spotify" type="url" placeholder="https://open.spotify.com/..."></div>
+                <div><label class="admin-label">Apple Music</label><input class="admin-input" id="disco-apple" type="url" placeholder="https://music.apple.com/..."></div>
+              </div>
+              <div><label class="admin-label">Deezer</label><input class="admin-input" id="disco-deezer" type="url" placeholder="https://www.deezer.com/album/..."></div>
+              <div style="margin-top:12px;display:flex;align-items:flex-start;gap:16px;">
+                <div style="flex:1;"><label class="admin-label">Pochette (image)</label>
+                  <input type="file" accept="image/*" id="disco-cover-input" onchange="previewUpload(this,'disco-cover-preview')" style="background:none;border:none;color:var(--white);padding:0;">
+                </div>
+                <img id="disco-cover-preview" class="admin-upload-preview" alt="" style="width:80px;height:80px;object-fit:cover;display:none;">
+              </div>
+              <div style="display:flex;gap:8px;margin-top:12px;">
+                <button class="admin-btn-ghost" style="font-size:9px;" onclick="_editDiscoIdx=null;document.getElementById('disco-form-title').textContent='Ajouter un album';document.getElementById('disco-save-btn').textContent='Ajouter cet album';">Annuler</button>
+                <button class="admin-btn-primary" id="disco-save-btn" onclick="addDiscoAlbumInline()">Ajouter cet album</button>
+              </div>
+            </div>
+            <!-- YouTube section -->
+            <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:20px;">
+              <div class="admin-card-title" style="font-size:11px;margin-bottom:12px;">Vidéos YouTube</div>
+              <div id="yt-list-inline" style="margin-bottom:12px;"></div>
+              <div class="admin-form-row">
+                <div><label class="admin-label">ID YouTube</label><input class="admin-input" id="yt-id-input" type="text" placeholder="ex: D6vBMXSFbfg"></div>
+                <div><label class="admin-label">Titre</label><input class="admin-input" id="yt-title-input" type="text" placeholder="Titre de la vidéo"></div>
+              </div>
+              <button class="admin-btn-primary" onclick="addArtistYTInline()">Ajouter cette vidéo</button>
             </div>
           </div>
-          <div class="admin-submit-row">
-            <button class="admin-btn-ghost" onclick="resetArtistForm()">Réinitialiser</button>
-            <button class="admin-btn-sm" onclick="saveArtist()">Enregistrer l'artiste</button>
+
+          <!-- Onglet : Événements -->
+          <div class="artist-tab-content" id="atab-content-events" style="display:none;">
+            <div id="artist-events-list" style="margin-bottom:16px;"></div>
+            <button class="admin-btn-sm" onclick="addEventForCurrentArtist()" style="margin-top:8px;">+ Ajouter un événement</button>
+          </div>
+
+          <!-- Onglet : Photos -->
+          <div class="artist-tab-content" id="atab-content-photos" style="display:none;">
+            <div id="artist-photos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:16px;"></div>
+            <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:4px;">
+              <div class="admin-card-title" style="font-size:11px;margin-bottom:12px;">Ajouter une photo</div>
+              <input type="file" accept="image/*" id="artist-photo-upload" style="background:none;border:none;color:var(--white);padding:0;margin-bottom:8px;">
+              <div><label class="admin-label">Légende (optionnelle)</label><input class="admin-input" id="artist-photo-caption" type="text" placeholder="Légende de la photo..."></div>
+              <button class="admin-btn-primary" style="margin-top:12px;" onclick="addArtistPhoto()">Ajouter cette photo</button>
+            </div>
           </div>
         </div>
+
+        <!-- Liste des artistes -->
         <div class="admin-card">
           <div class="admin-card-title">Artistes enregistrés</div>
           <div id="artists-admin-list"></div>
         </div>
 
-        <div class="admin-card" id="disco-admin-section" style="display:none;">
-          <div class="admin-card-title">Discographie de <span id="disco-artist-name"></span></div>
+        <!-- Sections cachées conservées pour compatibilité avec openDiscoAdmin() -->
+        <div id="disco-admin-section" style="display:none;">
+          <span id="disco-artist-name"></span>
           <div id="disco-list"></div>
-          <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:16px;">
-            <div class="admin-card-title" style="font-size:11px;">Ajouter un album</div>
-            <div class="admin-form-row">
-              <div><label class="admin-label">Titre</label><input class="admin-input" id="disco-title" type="text" placeholder="Nom de l'album"></div>
-              <div><label class="admin-label">Année</label><input class="admin-input" id="disco-year" type="number" placeholder="2024"></div>
-            </div>
-            <div><label class="admin-label">Description</label><textarea class="admin-input" id="disco-desc" rows="2" placeholder="Courte description..."></textarea></div>
-            <div><label class="admin-label">Lien Spotify</label><input class="admin-input" id="disco-spotify" type="url" placeholder="https://open.spotify.com/..."></div>
-            <div style="margin-top:8px;"><label class="admin-label">Pochette (image)</label><input type="file" accept="image/*" id="disco-cover-input" onchange="previewUpload(this,'disco-cover-preview')" style="background:none;border:none;color:var(--white);padding:0;"></div>
-            <img id="disco-cover-preview" class="admin-upload-preview" alt="">
-            <button class="admin-btn-primary" style="margin-top:12px;" onclick="addDiscoAlbum()">Ajouter cet album</button>
-          </div>
         </div>
-
-        <div class="admin-card" id="yt-admin-section" style="display:none;">
-          <div class="admin-card-title">Vidéos YouTube de <span id="yt-artist-name"></span></div>
+        <div id="yt-admin-section" style="display:none;">
+          <span id="yt-artist-name"></span>
           <div id="yt-list"></div>
-          <div style="border-top:1px solid rgba(31,158,92,0.15);padding-top:16px;margin-top:16px;">
-            <div class="admin-card-title" style="font-size:11px;">Ajouter une vidéo</div>
-            <div class="admin-form-row">
-              <div><label class="admin-label">ID YouTube</label><input class="admin-input" id="yt-id-input" type="text" placeholder="ex: D6vBMXSFbfg"></div>
-              <div><label class="admin-label">Titre</label><input class="admin-input" id="yt-title-input" type="text" placeholder="Titre de la vidéo"></div>
-            </div>
-            <button class="admin-btn-primary" onclick="addArtistYT()">Ajouter cette vidéo</button>
-          </div>
         </div>
       </div>
 
@@ -630,6 +724,14 @@
         <div class="admin-card">
           <div class="admin-card-title">Articles publiés</div>
           <div id="news-admin-list"></div>
+        </div>
+        <div class="admin-card" style="margin-top:16px;">
+          <div class="admin-card-title">Événements</div>
+          <div style="color:var(--gray);font-family:Arial;font-size:12px;letter-spacing:0.5px;margin-bottom:16px;">Concerts, showcases et festivals — créez et gérez depuis le module dédié</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="admin-btn-sm" onclick="showAdminPage('shop-events')">+ Créer un événement</button>
+            <button class="admin-btn-ghost" onclick="showAdminPage('shop-events')" style="font-size:10px;letter-spacing:2px;">Voir tous les événements ›</button>
+          </div>
         </div>
       </div>
 
@@ -903,6 +1005,16 @@
                 <select class="admin-input" id="evt-artist"></select>
               </div>
               <div>
+                <label class="admin-label">Type d'événement</label>
+                <select class="admin-input" id="evt-type">
+                  <option value="concert">Concert</option>
+                  <option value="showcase">Showcase</option>
+                  <option value="festival">Festival</option>
+                </select>
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div>
                 <label class="admin-label">Venue (salle)</label>
                 <input class="admin-input" id="evt-venue" type="text" placeholder="Olympia...">
               </div>
@@ -983,7 +1095,7 @@
           <div class="admin-card-title">Liste des événements (<span id="evt-count">0</span>)</div>
           <div class="orders-table-wrap">
             <table class="orders-table">
-              <thead><tr><th>Date</th><th>Artiste</th><th>Venue</th><th>Ville</th><th style="text-align:right;">Standard</th><th style="text-align:right;">VIP</th><th>Places</th><th>Statut</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Photo</th><th>Date</th><th>Artiste</th><th>Venue</th><th>Ville</th><th style="text-align:right;">Standard</th><th style="text-align:right;">VIP</th><th>Places</th><th>Statut</th><th>Actions</th></tr></thead>
               <tbody id="evt-table-body"></tbody>
             </table>
             <div id="evt-empty" style="text-align:center;padding:32px;color:var(--gray);font-family:Arial;font-size:12px;display:none;">Aucun événement.</div>
@@ -1126,6 +1238,11 @@
 
     </div><!-- /admin-main -->
   </div><!-- /admin-panel -->
+</div><!-- /admin-overlay -->
+</div><!-- /admin-overlay -->
+
+</div><!-- /admin-overlay -->
+
 </div><!-- /admin-overlay -->
 
 
@@ -1430,7 +1547,7 @@
   </div>
 </div>
 
-<script src="harmonia-shared.js?v=104"></script>
+<script src="harmonia-shared.js?v=108"></script>
 <script>
 // Backup : garantir l'application de la langue après chargement complet
 document.addEventListener('DOMContentLoaded', function() {

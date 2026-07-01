@@ -3044,6 +3044,55 @@ nav.scrolled .hamburger:not(.open):active {
     color: var(--white);
   }
 
+
+  .admin-lang-switcher {
+    padding: 10px 16px 6px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 4px;
+  }
+  .admin-lang-label {
+    font-family: Arial, sans-serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.28);
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  .admin-lang-row {
+    display: flex;
+    gap: 4px;
+  }
+  .admin-lang-row .lang-option {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    padding: 5px 0;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-left-width: 1px !important;
+    border-radius: 2px;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-align: center;
+    white-space: nowrap;
+    color: rgba(255,255,255,0.45);
+    background: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .admin-lang-row .lang-option:hover {
+    color: var(--white);
+    background: rgba(46,204,128,0.07);
+    border-color: rgba(46,204,128,0.3) !important;
+  }
+  .admin-lang-row .lang-option.active {
+    color: var(--accent2);
+    background: rgba(46,204,128,0.1);
+    border-color: rgba(46,204,128,0.45) !important;
+    border-left-width: 1px !important;
+  }
+
   #admin-preview-bar {
     display: none;
     position: fixed;
