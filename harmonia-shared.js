@@ -6844,6 +6844,7 @@ function openArtistPage(id) {
     +   '<button class="ap-tab-btn" onclick="switchArtistTab(this,\'ap-tab-videos\')">Vidéos</button>'
     +   '<button class="ap-tab-btn" onclick="switchArtistTab(this,\'ap-tab-showcases\')">Showcases</button>'
     +   '<button class="ap-tab-btn" onclick="switchArtistTab(this,\'ap-tab-concerts\')">Concerts</button>'
+    +   '<button class="ap-tab-btn" onclick="switchArtistTab(this,\'ap-tab-gallery\')">Galerie</button>'
     + '</div>'
 
     + '<div class="ap-tab-panel" id="ap-tab-albums">'
@@ -6866,6 +6867,10 @@ function openArtistPage(id) {
     +   '<div class="ap-section"><div class="ap-section-title">Concerts</div>'
     +   buildArtistEventHtml(evConcerts)
     +   '</div>'
+    + '</div>'
+
+    + '<div class="ap-tab-panel" id="ap-tab-gallery" style="display:none">'
+    +   buildGalleryCarousel(a)
     + '</div>';
 
   page.style.display = 'block';
@@ -6978,6 +6983,50 @@ function buildArtistEventHtml(events) {
   }
 
   return '<div class="ap-event-list">'+sorted.map(renderCard).join('')+'</div>';
+}
+
+function buildGalleryCarousel(a) {
+
+  var adminPhotos = (a.photos || []).filter(function(p){ return p && p.url; });
+  var defPhotos   = (a.gallery || []).filter(Boolean).map(function(u){ return {url:u, caption:''}; });
+  var photos = adminPhotos.length ? adminPhotos : defPhotos;
+
+  if (!photos.length) {
+    return '<div class="ap-section"><div class="ap-car-empty">Photos à venir</div></div>';
+  }
+
+  var cid = 'apc-' + a.id;
+  var multi = photos.length > 1;
+  var slides = photos.map(function(p, i) {
+    return '<div class="ap-car-slide"' + (i > 0 ? ' style="display:none"' : '') + '>'
+      + '<img src="' + esc(p.url) + '" alt="' + esc(p.caption || ('Photo ' + (i+1))) + '" class="ap-car-img" loading="lazy">'
+      + (p.caption ? '<div class="ap-car-caption">' + esc(p.caption) + '</div>' : '')
+      + '</div>';
+  }).join('');
+
+  return '<div class="ap-section">'
+    + '<div class="ap-carousel" id="' + cid + '" data-current="0">'
+    + (multi ? '<button class="ap-car-btn ap-car-prev" onclick="apCarouselNav(\'' + cid + '\',-1)">&#8249;</button>' : '')
+    + '<div class="ap-car-track">' + slides + '</div>'
+    + (multi ? '<button class="ap-car-btn ap-car-next" onclick="apCarouselNav(\'' + cid + '\',1)">&#8250;</button>' : '')
+    + (multi ? '<div class="ap-car-counter"><span class="ap-car-cur">1</span> / ' + photos.length + '</div>' : '')
+    + '</div>'
+    + '</div>';
+}
+
+function apCarouselNav(cid, dir) {
+  var car = document.getElementById(cid);
+  if (!car) return;
+  var slides = car.querySelectorAll('.ap-car-slide');
+  var n = slides.length;
+  if (!n) return;
+  var cur = parseInt(car.dataset.current) || 0;
+  slides[cur].style.display = 'none';
+  cur = (cur + dir + n) % n;
+  slides[cur].style.display = '';
+  car.dataset.current = String(cur);
+  var curEl = car.querySelector('.ap-car-cur');
+  if (curEl) curEl.textContent = cur + 1;
 }
 
 function closeArtistPage() {
