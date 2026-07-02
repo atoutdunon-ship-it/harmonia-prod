@@ -803,6 +803,33 @@ html, body {
 #perm-table td:first-child { text-align: left; padding: 10px 0; }
 #perm-table tr { border-top: 1px solid rgba(10,22,40,0.1); }
 
+/* Permissions granulaires — nouvelle table */
+.perm-row:hover { background: #f7f9fc !important; }
+.perm-row:hover .perm-label { color: #0a1628 !important; }
+.perm-label {
+  padding: 9px 10px !important;
+  color: #333 !important;
+  font-size: 11px !important;
+  font-family: Arial, sans-serif !important;
+  white-space: nowrap;
+}
+.perm-cell {
+  text-align: center !important;
+  padding: 9px 8px !important;
+}
+.perm-cell input[type=checkbox] {
+  width: 16px; height: 16px; cursor: pointer;
+  accent-color: #0a1628;
+}
+.perm-del input[type=checkbox] { accent-color: #c00; }
+#perm-table .perm-row { border-top: 1px solid rgba(10,22,40,0.08); }
+/* ── Badges validité utilisateur ── */
+.acc-badge { display:inline-block; padding:2px 9px; font-size:8px; letter-spacing:1.5px;
+             text-transform:uppercase; font-family:Arial,sans-serif; font-weight:700; border-radius:2px; }
+.acc-active  { background:#0a1628; color:#fff; }
+.acc-pending { background:#e8a800; color:#fff; }
+.acc-expired { background:#c00;    color:#fff; }
+
 /* ─────────────────────────────────────────────
    RESPONSIVE — ADMIN PANEL
 ───────────────────────────────────────────── */
@@ -1576,51 +1603,168 @@ td.editable:hover { background: #eaf1fb !important; }
         </div>
 
         <!-- Permissions granulaires -->
-        <div style="margin:20px 0 12px;font-size:10px;letter-spacing:3px;
+        <div style="margin:20px 0 8px;font-size:10px;letter-spacing:3px;
                     text-transform:uppercase;color:#000000;
                     border-bottom:1.5px solid #0a1628;padding-bottom:12px;">
           Permissions granulaires
         </div>
+
+        <!-- Presets rapides -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <span style="font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#888;line-height:28px;">Présets :</span>
+          <button type="button" onclick="_permPreset('all')"
+            style="background:#0a1628;color:#fff;border:none;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;cursor:pointer;">
+            Accès total
+          </button>
+          <button type="button" onclick="_permPreset('editor')"
+            style="background:#fff;color:#0a1628;border:1px solid #0a1628;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;cursor:pointer;">
+            Éditeur (sans suppression)
+          </button>
+          <button type="button" onclick="_permPreset('readonly')"
+            style="background:#fff;color:#0a1628;border:1px solid #ccc;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;cursor:pointer;">
+            Lecture seule
+          </button>
+          <button type="button" onclick="_permPreset('none')"
+            style="background:#fff;color:#c00;border:1px solid #c00;font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:6px 14px;cursor:pointer;">
+            Aucun accès
+          </button>
+        </div>
+
         <div style="overflow-x:auto;">
-          <table id="perm-table" style="width:100%;border-collapse:collapse;">
+          <table id="perm-table" style="width:100%;border-collapse:collapse;font-size:11px;">
             <thead>
-              <tr>
-                <th style="text-align:left;width:140px;">Section</th>
-                <th>Voir</th><th>Ajouter</th>
-                <th>Modifier</th><th>Supprimer</th>
+              <tr style="background:#f5f5f5;">
+                <th style="text-align:left;padding:8px 10px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#000;font-weight:600;min-width:160px;border-bottom:2px solid #0a1628;">Section</th>
+                <th style="padding:8px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#0a1628;border-bottom:2px solid #0a1628;">Voir</th>
+                <th style="padding:8px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#0a1628;border-bottom:2px solid #0a1628;">Ajouter</th>
+                <th style="padding:8px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#0a1628;border-bottom:2px solid #0a1628;">Modifier</th>
+                <th style="padding:8px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#c00;border-bottom:2px solid #0a1628;">Supprimer</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td style="color:#000000;">Artistes</td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="view" checked></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="add"></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="edit"></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="artists" data-action="delete"></td>
+            <tbody id="perm-tbody">
+
+              <!-- ── CONTENU ── -->
+              <tr><td colspan="5" style="background:#0a1628;color:#fff;font-size:8px;letter-spacing:3px;text-transform:uppercase;padding:5px 10px;">Contenu</td></tr>
+
+              <tr class="perm-row">
+                <td class="perm-label">Artistes</td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="artists" data-action="view" checked></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="artists" data-action="add"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="artists" data-action="edit"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk perm-del" data-section="artists" data-action="delete"></td>
               </tr>
-              <tr>
-                <td style="color:#000000;">Musiques</td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="view" checked></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="add"></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="edit"></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="music" data-action="delete"></td>
+              <tr class="perm-row">
+                <td class="perm-label">Albums</td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="albums" data-action="view" checked></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="albums" data-action="add"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="albums" data-action="edit"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk perm-del" data-section="albums" data-action="delete"></td>
               </tr>
-              <tr>
-                <td style="color:#000000;">Albums</td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="view" checked></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="add"></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="edit"></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="albums" data-action="delete"></td>
+              <tr class="perm-row">
+                <td class="perm-label">Musiques / Titres</td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="music" data-action="view" checked></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="music" data-action="add"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="music" data-action="edit"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk perm-del" data-section="music" data-action="delete"></td>
               </tr>
-              <tr>
-                <td style="color:#000000;">Actualités</td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="view" checked></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="add"></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="edit"></td>
-                <td style="text-align:center;"><input type="checkbox" class="perm-chk" data-section="news" data-action="delete"></td>
+              <tr class="perm-row">
+                <td class="perm-label">Actualités</td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="news" data-action="view" checked></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="news" data-action="add"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="news" data-action="edit"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk perm-del" data-section="news" data-action="delete"></td>
               </tr>
+              <tr class="perm-row">
+                <td class="perm-label">Événements</td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="events" data-action="view" checked></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="events" data-action="add"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="events" data-action="edit"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk perm-del" data-section="events" data-action="delete"></td>
+              </tr>
+              <tr class="perm-row">
+                <td class="perm-label">Showcases / Concerts</td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="showcases" data-action="view" checked></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="showcases" data-action="add"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="showcases" data-action="edit"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk perm-del" data-section="showcases" data-action="delete"></td>
+              </tr>
+
+              <!-- ── BOUTIQUE ── -->
+              <tr><td colspan="5" style="background:#0a1628;color:#fff;font-size:8px;letter-spacing:3px;text-transform:uppercase;padding:5px 10px;">Boutique</td></tr>
+
+              <tr class="perm-row">
+                <td class="perm-label">Produits</td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="products" data-action="view" checked></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="products" data-action="add"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="products" data-action="edit"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk perm-del" data-section="products" data-action="delete"></td>
+              </tr>
+              <tr class="perm-row">
+                <td class="perm-label">Commandes</td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="orders" data-action="view" checked></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="orders" data-action="add" disabled style="opacity:.3;"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="orders" data-action="edit"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk perm-del" data-section="orders" data-action="delete"></td>
+              </tr>
+
+              <!-- ── SYSTÈME ── -->
+              <tr><td colspan="5" style="background:#0a1628;color:#fff;font-size:8px;letter-spacing:3px;text-transform:uppercase;padding:5px 10px;">Système</td></tr>
+
+              <tr class="perm-row">
+                <td class="perm-label">Utilisateurs</td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="users" data-action="view"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="users" data-action="add"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="users" data-action="edit"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk perm-del" data-section="users" data-action="delete"></td>
+              </tr>
+              <tr class="perm-row">
+                <td class="perm-label">Modules</td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="modules" data-action="view"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="modules" data-action="add" disabled style="opacity:.3;"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="modules" data-action="edit"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk perm-del" data-section="modules" data-action="delete"></td>
+              </tr>
+              <tr class="perm-row">
+                <td class="perm-label">Pages Légales</td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="legaldocs" data-action="view"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="legaldocs" data-action="add"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk" data-section="legaldocs" data-action="edit"></td>
+                <td class="perm-cell"><input type="checkbox" class="perm-chk perm-del" data-section="legaldocs" data-action="delete"></td>
+              </tr>
+
             </tbody>
           </table>
+        </div>
+
+        <!-- ── Période d'accès ── -->
+        <div style="margin:24px 0 8px;font-size:10px;letter-spacing:3px;text-transform:uppercase;
+                    color:#000;border-bottom:1.5px solid #0a1628;padding-bottom:12px;">
+          Période d'accès
+        </div>
+        <div style="background:#f7f9fc;border:1px solid rgba(10,22,40,0.1);padding:16px;margin-bottom:4px;">
+          <div style="font-size:10px;color:#666;margin-bottom:14px;line-height:1.5;">
+            Définissez une plage de validité pour ce profil. En dehors de cette période, le compte est
+            automatiquement désactivé. Laisser vide = accès permanent.
+            <br><strong style="color:#c00;">Réservé au Super Admin et aux Administrateurs.</strong>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+            <div class="a-field">
+              <label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#000;display:block;margin-bottom:6px;">
+                Date de début
+              </label>
+              <input type="date" id="u-access-from"
+                style="width:100%;border:1px solid rgba(10,22,40,0.3);padding:10px 14px;font-size:13px;color:#000;background:#fff;outline:none;box-sizing:border-box;">
+              <div style="font-size:9px;color:#888;margin-top:4px;">Vide = accès immédiat dès création</div>
+            </div>
+            <div class="a-field">
+              <label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#000;display:block;margin-bottom:6px;">
+                Date de fin
+              </label>
+              <input type="date" id="u-access-until"
+                style="width:100%;border:1px solid rgba(10,22,40,0.3);padding:10px 14px;font-size:13px;color:#000;background:#fff;outline:none;box-sizing:border-box;">
+              <div style="font-size:9px;color:#888;margin-top:4px;">Vide = accès illimité</div>
+            </div>
+          </div>
         </div>
 
         <div style="display:flex;gap:12px;margin-top:20px;">
@@ -1641,7 +1785,7 @@ td.editable:hover { background: #eaf1fb !important; }
           <thead>
             <tr>
               <th>Nom</th><th>Email / Login</th>
-              <th>Rôle</th><th>Créé le</th><th>Mot de passe</th><th>Actions</th>
+              <th>Rôle</th><th>Créé le</th><th>Validité</th><th>Mot de passe</th><th>Actions</th>
             </tr>
           </thead>
           <tbody id="users-tbody"></tbody>
@@ -2623,6 +2767,15 @@ var _ROLE_BADGES = {
   membre:'badge-gray', custom:'badge-gray'
 };
 
+function _accessBadge(u) {
+  var today = new Date(); today.setHours(0,0,0,0);
+  var from  = u.accessFrom  ? new Date(u.accessFrom)  : null;
+  var until = u.accessUntil ? new Date(u.accessUntil) : null;
+  if (from  && from  > today) return '<span class="acc-badge acc-pending">En attente</span>';
+  if (until && until < today) return '<span class="acc-badge acc-expired">Expiré</span>';
+  return '<span class="acc-badge acc-active">Actif</span>';
+}
+
 function _renderUsers() {
   var el = document.getElementById('users-tbody');
   if (!el || typeof DB === 'undefined') return;
@@ -2639,6 +2792,7 @@ function _renderUsers() {
       + '<td><span style="display:inline-block;padding:3px 10px;font-size:8px;letter-spacing:2px;text-transform:uppercase;background:#4a4a4a;color:#fff;">'
       + (_ROLE_LABELS[u.role] || u.role) + '</span></td>'
       + '<td style="color:#000000;font-size:11px;">' + _esc((u.createdAt || '').substring(0, 10)) + '</td>'
+      + '<td>' + _accessBadge(u) + '</td>'
       + '<td style="color:#000000;font-size:11px;font-family:monospace;letter-spacing:2px;">••••••••</td>'
       + '<td style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'
       + (canEdit
@@ -2669,13 +2823,22 @@ function _editUser(id) {
   set('u-login', u.login || '');
   set('u-pass',  ''); // toujours vide — inchangé si laissé vide
   set('u-role',  u.role  || 'readonly');
+  // Dates d'accès (visibles uniquement aux superadmin/administrateur)
+  set('u-access-from',  u.accessFrom  || '');
+  set('u-access-until', u.accessUntil || '');
 
-  // Permissions
-  if (u.permissions) {
-    document.querySelectorAll('.perm-chk').forEach(function(c) {
-      c.checked = !!(u.permissions[c.dataset.action]);
-    });
-  }
+  // Permissions granulaires : structure { section: { action: bool } }
+  document.querySelectorAll('.perm-chk').forEach(function(c) {
+    var sec = c.dataset.section;
+    var act = c.dataset.action;
+    if (c.disabled) { c.checked = false; return; }
+    if (u.permissions && u.permissions[sec]) {
+      c.checked = !!(u.permissions[sec][act]);
+    } else {
+      // Fallback : lecture seule si aucune permission explicite
+      c.checked = (act === 'view');
+    }
+  });
 
   // Indicateur mode édition
   _editingUserId    = id;
@@ -2698,12 +2861,15 @@ function resetUserFormAdmin() {
   document.getElementById('users-cancel-btn').style.display = 'none';
   var hint = document.getElementById('u-pass-hint');
   if (hint) hint.style.display = 'none';
-  ['u-name','u-email','u-login','u-pass'].forEach(function(id) {
+  ['u-name','u-email','u-login','u-pass','u-access-from','u-access-until'].forEach(function(id) {
     var el = document.getElementById(id); if (el) el.value = '';
   });
   document.getElementById('u-role').value = 'readonly';
+  // Reset : lecture seule sur sections contenu, aucun accès système
+  var contentSections = ['artists','albums','music','news','events','showcases','products','orders'];
   document.querySelectorAll('.perm-chk').forEach(function(c) {
-    c.checked = c.dataset.action === 'view';
+    if (c.disabled) { c.checked = false; return; }
+    c.checked = (c.dataset.action === 'view' && contentSections.indexOf(c.dataset.section) !== -1);
   });
 }
 
@@ -2723,6 +2889,42 @@ function _deleteUser(id) {
 }
 
 // saveUser() est fourni par harmonia-shared.js
+// Wrapper : injecte accessFrom/accessUntil dans l'utilisateur avant/après save
+(function() {
+  var _origSaveUser = window.saveUser;
+  window.saveUser = function() {
+    // Appel original (crée/met à jour l'user dans DB)
+    if (typeof _origSaveUser === 'function') _origSaveUser();
+    // Injecter les dates d'accès dans l'user qui vient d'être sauvé
+    var role = currentUser ? currentUser.role : '';
+    if (role === 'superadmin' || role === 'administrateur') {
+      var uid = window._editUserId || null;
+      var elFrom  = document.getElementById('u-access-from');
+      var elUntil = document.getElementById('u-access-until');
+      var vFrom   = elFrom  ? elFrom.value.trim()  : '';
+      var vUntil  = elUntil ? elUntil.value.trim() : '';
+      if (uid !== null) {
+        // Mode édition — mise à jour de l'user existant
+        var u = (DB.users || []).find(function(x) { return x.id === uid; });
+        if (u) {
+          u.accessFrom  = vFrom  || null;
+          u.accessUntil = vUntil || null;
+          if (typeof saveData === 'function') saveData(DB);
+        }
+      } else {
+        // Mode création — dernier user créé (id max)
+        var arr = DB.users || [];
+        if (arr.length) {
+          var last = arr.reduce(function(a,b){ return (b.id > a.id ? b : a); }, arr[0]);
+          last.accessFrom  = vFrom  || null;
+          last.accessUntil = vUntil || null;
+          if (typeof saveData === 'function') saveData(DB);
+        }
+      }
+    }
+  };
+})();
+
 // On s'assure que renderUsersAdminList (appelé par shared) redirige vers notre rendu
 window.renderUsersAdminList = function() {
   _renderUsers();
@@ -3480,12 +3682,70 @@ function _renderArtGallery() {
 }
 
 // ── Droits par rôle ──────────────────────────────────────
-function canDo(action) {
+var _canSection = ''; // section courante pour canDo() — set par chaque fonction render
+
+function canDo(action, section) {
   if (typeof currentUser === 'undefined' || !currentUser) return false;
   var role = currentUser.role;
-  if (role === 'superadmin' || role === 'administrateur') return true;
+  // Superadmin : accès total sans restriction de date
+  if (role === 'superadmin') return true;
+  // Validation de la plage d'accès (pour tous les autres rôles)
+  var today = new Date(); today.setHours(0,0,0,0);
+  if (currentUser.accessFrom) {
+    var df = new Date(currentUser.accessFrom);
+    if (df > today) return false; // accès pas encore démarré
+  }
+  if (currentUser.accessUntil) {
+    var du = new Date(currentUser.accessUntil);
+    if (du < today) return false; // accès expiré
+  }
+  // Administrateur : accès total (dans la plage)
+  if (role === 'administrateur') return true;
+  // Permissions granulaires
+  var p = currentUser.permissions;
+  var sec = section || _canSection;
+  if (p && sec) {
+    var sp = p[sec];
+    if (sp) return !!sp[action];
+    return false; // section inconnue = aucun accès
+  }
+  // Fallback legacy : éditeur = tout sauf suppression
   if (role === 'editor') return action !== 'delete';
   return false;
+}
+
+// Override getPermissionsFromForm() de shared.js pour inclure toutes les sections
+window.getPermissionsFromForm = function() {
+  var sections = ['artists','albums','music','news','events','showcases','products','orders','users','modules','legaldocs'];
+  var actions  = ['view','add','edit','delete'];
+  var p = {};
+  sections.forEach(function(s) {
+    p[s] = {};
+    actions.forEach(function(a) {
+      var chk = document.querySelector('.perm-chk[data-section="'+s+'"][data-action="'+a+'"]');
+      p[s][a] = chk ? chk.checked : false;
+    });
+  });
+  return p;
+};
+
+// Presets permissions rapides
+function _permPreset(type) {
+  var all    = document.querySelectorAll('.perm-chk:not([disabled])');
+  var full   = ['view','add','edit','delete'];
+  var noSys  = ['artists','albums','music','news','events','showcases','products','orders'];
+  if (type === 'all') {
+    all.forEach(function(c) { c.checked = true; });
+  } else if (type === 'none') {
+    all.forEach(function(c) { c.checked = false; });
+  } else if (type === 'readonly') {
+    all.forEach(function(c) { c.checked = (c.dataset.action === 'view' && noSys.indexOf(c.dataset.section) !== -1); });
+  } else if (type === 'editor') {
+    all.forEach(function(c) {
+      var inContent = noSys.indexOf(c.dataset.section) !== -1;
+      c.checked = inContent && c.dataset.action !== 'delete';
+    });
+  }
 }
 
 // ── Resize image via canvas ───────────────────────────────
@@ -3774,6 +4034,7 @@ function _saveArtisteModal() {
 function renderArtistesAdmin() { _renderArtistes(); }
 
 function _renderArtistes() {
+  _canSection = 'artists';
   var el = document.getElementById('artistes-list');
   if (!el || typeof DB === 'undefined') return;
   var list = DB.artists || [];
@@ -3939,6 +4200,7 @@ function _saveAlbumModal() {
 function renderAlbumsAdmin() { _renderAlbums(); }
 
 function _renderAlbums() {
+  _canSection = 'albums';
   var el = document.getElementById('albums-list');
   if (!el || typeof DB === 'undefined') return;
   var list = DB.albums || [];
@@ -4144,6 +4406,7 @@ function _saveTrackModal() {
 function renderTracksAdmin() { _renderTracks(); }
 
 function _renderTracks() {
+  _canSection = 'music';
   var el = document.getElementById('tracks-list');
   if (!el || typeof DB === 'undefined') return;
   var list = DB.tracks || [];
@@ -4357,6 +4620,7 @@ function _saveNewsModal() {
 function renderNewsAdmin() { _renderNews(); }
 
 function _renderNews() {
+  _canSection = 'news';
   var el = document.getElementById('news-list');
   if (!el || typeof DB === 'undefined') return;
   var list = DB.news || [];
@@ -4538,6 +4802,7 @@ function _saveEventModal() {
 function renderEventsAdmin() { _renderEvents(); }
 
 function _renderEvents() {
+  _canSection = 'events';
   var el = document.getElementById('events-list');
   if (!el || typeof DB === 'undefined') return;
   var list = DB.events || [];
@@ -4717,6 +4982,7 @@ function _saveProduitModal() {
 function renderProduitsAdmin() { _renderProduits(); }
 
 function _renderProduits() {
+  _canSection = 'products';
   var el = document.getElementById('produits-list');
   if (!el || typeof DB === 'undefined') return;
   var list = DB.products || [];
