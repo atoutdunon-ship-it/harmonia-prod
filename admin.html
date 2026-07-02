@@ -2642,10 +2642,10 @@ function _renderUsers() {
       + '<td style="color:#000000;font-size:11px;font-family:monospace;letter-spacing:2px;">••••••••</td>'
       + '<td style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">'
       + (canEdit
-          ? '<button class="a-btn-edit" onclick="_editUser(' + u.id + ')" style="font-size:9px;padding:4px 10px;">Modifier</button>'
+          ? '<button class="a-btn-edit" onclick="_editUser(' + u.id + ')" style="font-size:9px;padding:4px 10px;">' + AT('btn_edit') + '</button>'
           : '')
       + (canDelete
-          ? '<button class="a-btn-danger" onclick="_deleteUser(' + u.id + ')">Supprimer</button>'
+          ? '<button class="a-btn-danger" onclick="_deleteUser(' + u.id + ')">' + AT('btn_delete') + '</button>'
           : (u.protected ? '<span style="color:#000000;font-size:9px;letter-spacing:1px;">Protégé</span>' : ''))
       + '</td>'
       + '</tr>';
@@ -3412,6 +3412,27 @@ var _modalImageKey  = null;  // imgKey en cours
 var _addEvtImgData  = null;  // photo ajout rapide événement
 var _addNewsImgData = null;  // photo ajout rapide actualité
 var _artGallery     = [];    // [{key,src,isNew}] galerie photos artiste en cours d'édition
+var currentAdminLang = 'fr'; // langue courante du panneau admin
+
+function AT(key) {
+  var t = ADMIN_LANGS[currentAdminLang] || ADMIN_LANGS['fr'];
+  return (t && t[key] !== undefined) ? t[key] : ((ADMIN_LANGS['fr'] && ADMIN_LANGS['fr'][key]) || key);
+}
+
+function _getCurrentAdminSection() {
+  var sec = document.querySelector('.admin-section.active');
+  return sec ? (sec.id || '').replace('sec-', '') : '';
+}
+
+function _rerenderCurrentSection() {
+  var s = _getCurrentAdminSection();
+  if      (s === 'artistes')  _renderArtistes();
+  else if (s === 'albums')    _renderAlbums();
+  else if (s === 'tracks')    _renderTracks();
+  else if (s === 'news')      _renderNews();
+  else if (s === 'events')    _renderEvents();
+  else if (s === 'produits')  _renderProduits();
+}
 
 function _handleAddEvtImg(inp) {
   var f = inp.files[0]; if (!f) return;
@@ -3447,7 +3468,7 @@ function _renderArtGallery() {
   var cont = document.getElementById('art-gallery-cont');
   if (!cont) return;
   if (!_artGallery.length) {
-    cont.innerHTML = '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0;">Aucune photo — ajoutez en cliquant sur le bouton ci-dessous.</div>';
+    cont.innerHTML = '<div style="font-size:10px;color:#888;font-style:italic;padding:8px 0;">' + AT('gallery_empty') + '</div>';
     return;
   }
   cont.innerHTML = _artGallery.map(function(g, i) {
@@ -3636,7 +3657,7 @@ function openArtisteModal(id) {
   var item = id ? (DB.artists || []).find(function(x){ return x.id === id; }) : null;
   _modalImageKey = (item && item.imgKey) ? item.imgKey : (item ? 'art_' + (id || Date.now()) : 'art_' + Date.now());
 
-  var title = id ? 'Modifier l\'artiste' : 'Ajouter un artiste';
+  var title = id ? AT('form_edit_artist') : AT('form_add_artist');
   var imgSrc = '';
   if (item) {
     if (DB.images && item.imgKey && DB.images[item.imgKey]) imgSrc = DB.images[item.imgKey];
@@ -3650,9 +3671,9 @@ function openArtisteModal(id) {
   var customVal = isCustomCat ? curCat : '';
 
   var categoryOptions = [
-    {value:'traditional', label:'Traditionnel'},
-    {value:'urban',       label:'Urban'},
-    {value:'autre',       label:'Autre'}
+    {value:'traditional', label:AT('cat_traditional')},
+    {value:'urban',       label:AT('cat_urban')},
+    {value:'autre',       label:AT('cat_other')}
   ];
 
   // Init galerie depuis DB
@@ -3664,28 +3685,28 @@ function openArtisteModal(id) {
   }
 
   var gallerySection = '<div class="a-field" style="margin-top:10px;border-top:1px solid rgba(0,0,0,0.1);padding-top:14px;">'
-    + '<label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#000;display:block;margin-bottom:10px;">Galerie photos</label>'
+    + '<label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#000;display:block;margin-bottom:10px;">' + AT('lbl_gallery') + '</label>'
     + '<div id="art-gallery-cont" style="margin-bottom:10px;"></div>'
     + '<input type="file" id="art-gallery-inp" accept="image/*" multiple style="display:none;" onchange="_artGalleryAddImg(this)">'
-    + '<button type="button" onclick="document.getElementById(\'art-gallery-inp\').click()" style="background:#fff;border:1px solid rgba(10,22,40,0.35);color:#0a1628;font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:8px 18px;cursor:pointer;">+ Ajouter des photos</button>'
+    + '<button type="button" onclick="document.getElementById(\'art-gallery-inp\').click()" style="background:#fff;border:1px solid rgba(10,22,40,0.35);color:#0a1628;font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:8px 18px;cursor:pointer;">' + AT('btn_add_photos') + '</button>'
     + '</div>';
 
   document.getElementById('edit-modal-title').textContent = title;
   document.getElementById('edit-modal-body').innerHTML =
     _mGrid(
-      _mField('Nom', 'ma-name', 'text', item ? item.name : '') +
-      _mField('Origine', 'ma-origin', 'text', item ? item.origin : '')
+      _mField(AT('lbl_name'), 'ma-name', 'text', item ? item.name : '') +
+      _mField(AT('lbl_origin'), 'ma-origin', 'text', item ? item.origin : '')
     ) +
     _mGrid(
-      _mField('Style musical', 'ma-style', 'text', item ? item.style : '') +
-      _mField('Catégorie', 'ma-category', 'select', selectVal, {options: categoryOptions})
+      _mField(AT('lbl_style'), 'ma-style', 'text', item ? item.style : '') +
+      _mField(AT('lbl_category'), 'ma-category', 'select', selectVal, {options: categoryOptions})
     ) +
     '<div class="a-field" id="ma-category-custom-wrap" style="display:' + (isCustomCat ? 'block' : 'none') + ';">' +
-      '<label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#000;display:block;margin-bottom:6px;">Catégorie personnalisée</label>' +
-      '<input type="text" id="ma-category-custom" value="' + customVal + '" placeholder="Saisir la catégorie..." ' +
+      '<label style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#000;display:block;margin-bottom:6px;">' + AT('lbl_cat_custom') + '</label>' +
+      '<input type="text" id="ma-category-custom" value="' + customVal + '" placeholder="' + AT('ph_cat_custom') + '" ' +
       'style="width:100%;border:1px solid rgba(10,22,40,0.3);padding:10px 14px;font-size:13px;color:#000;background:#fff;outline:none;">' +
     '</div>' +
-    _mField('Bio courte', 'ma-bio', 'textarea', item ? (item.bioShort || item.bio || '') : '', {rows:3}) +
+    _mField(AT('lbl_bio'), 'ma-bio', 'textarea', item ? (item.bioShort || item.bio || '') : '', {rows:3}) +
     _mImageField(imgSrc) +
     gallerySection;
 
@@ -3709,7 +3730,7 @@ function openArtisteModal(id) {
 
 function _saveArtisteModal() {
   var name = _mVal('ma-name');
-  if (!name) { alert('Le nom est requis.'); return; }
+  if (!name) { alert(AT('alert_name_req')); return; }
 
   var isNew = !_modalId;
   var item;
@@ -3760,28 +3781,28 @@ function _renderArtistes() {
   var addForm = '';
   if (canDo('add')) {
     addForm = '<div class="crud-add-form">'
-      + '<div class="crud-add-form-title">Ajouter un artiste</div>'
+      + '<div class="crud-add-form-title">' + AT('form_add_artist') + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field"><label>Nom</label><input type="text" id="add-art-name" placeholder="Nom artiste"></div>'
-      + '<div class="a-field"><label>Style</label><input type="text" id="add-art-style" placeholder="Morna · Funaná"></div>'
-      + '<div class="a-field"><label>Origine</label><input type="text" id="add-art-origin" placeholder="Mindelo, São Vicente"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_name') + '</label><input type="text" id="add-art-name" placeholder="' + AT('ph_artist_name') + '"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_style_simple') + '</label><input type="text" id="add-art-style" placeholder="' + AT('ph_style') + '"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_origin') + '</label><input type="text" id="add-art-origin" placeholder="' + AT('ph_origin') + '"></div>'
       + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field"><label>Catégorie</label>'
+      + '<div class="a-field"><label>' + AT('lbl_category') + '</label>'
       + '<select id="add-art-cat" onchange="var w=document.getElementById(\'add-art-cat-custom-wrap\');if(w)w.style.display=this.value===\'autre\'?\'block\':\'none\';">'
-      + '<option value="traditional">Traditionnel</option>'
-      + '<option value="urban">Urban</option>'
-      + '<option value="autre">Autre</option>'
+      + '<option value="traditional">' + AT('cat_traditional') + '</option>'
+      + '<option value="urban">' + AT('cat_urban') + '</option>'
+      + '<option value="autre">' + AT('cat_other') + '</option>'
       + '</select></div>'
-      + '<div class="a-field" id="add-art-cat-custom-wrap" style="display:none;"><label>Préciser</label><input type="text" id="add-art-cat-custom" placeholder="Catégorie..."></div>'
-      + '<div class="a-field" style="grid-column:span 2;"><label>Bio courte</label><input type="text" id="add-art-bio" placeholder="Description courte..."></div>'
+      + '<div class="a-field" id="add-art-cat-custom-wrap" style="display:none;"><label>' + AT('lbl_cat_custom') + '</label><input type="text" id="add-art-cat-custom" placeholder="' + AT('ph_cat_custom') + '"></div>'
+      + '<div class="a-field" style="grid-column:span 2;"><label>' + AT('lbl_bio') + '</label><input type="text" id="add-art-bio" placeholder="' + AT('ph_bio') + '"></div>'
       + '</div>'
-      + '<button class="a-btn a-btn-primary" onclick="_addArtiste()" style="margin-top:4px;">Ajouter</button>'
+      + '<button class="a-btn a-btn-primary" onclick="_addArtiste()" style="margin-top:4px;">' + AT('btn_add') + '</button>'
       + '</div>';
   }
 
   if (!list.length) {
-    el.innerHTML = addForm + '<p style="color:#000000">Aucun artiste.</p>';
+    el.innerHTML = addForm + '<p style="color:#000000">' + AT('empty_artists') + '</p>';
     return;
   }
 
@@ -3792,13 +3813,13 @@ function _renderArtistes() {
       : '';
     var actBtns = '';
     if (canDo('edit')) {
-      actBtns += '<button class="a-btn-crud-edit" onclick="openArtisteModal(' + a.id + ')">Modifier</button>';
+      actBtns += '<button class="a-btn-crud-edit" onclick="openArtisteModal(' + a.id + ')">' + AT('btn_edit') + '</button>';
     }
     actBtns += '<button class="a-btn-sm ' + (active ? 'a-btn-danger' : 'a-btn-edit') + '"'
       + ' onclick="_toggleActive(\'artist\',' + a.id + ')">'
-      + (active ? 'Désactiver' : 'Activer') + '</button>';
+      + (active ? AT('btn_deactivate') : AT('btn_activate')) + '</button>';
     if (canDo('delete')) {
-      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'artiste\',' + a.id + ')">Supprimer</button>';
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'artiste\',' + a.id + ')">' + AT('btn_delete') + '</button>';
     }
     return '<tr>'
       + '<td style="width:40px;">' + imgSrc + '</td>'
@@ -3816,14 +3837,15 @@ function _renderArtistes() {
   el.innerHTML = addForm
     + '<div class="a-table-wrap"><table class="a-table">'
     + '<thead><tr>'
-    + '<th></th><th>Nom</th><th>Style</th><th>Origine</th><th>Catégorie</th><th>Actions</th>'
+    + '<th></th><th>' + AT('th_name') + '</th><th>' + AT('th_style') + '</th>'
+    + '<th>' + AT('th_origin') + '</th><th>' + AT('th_category') + '</th><th>' + AT('th_actions') + '</th>'
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 function _addArtiste() {
   if (!canDo('add')) return;
   var name = (document.getElementById('add-art-name') || {}).value || '';
-  if (!name.trim()) { alert('Le nom est requis.'); return; }
+  if (!name.trim()) { alert(AT('alert_name_req')); return; }
   createItem('artiste', {
     name:     name.trim(),
     style:    ((document.getElementById('add-art-style') || {}).value || '').trim(),
@@ -3860,23 +3882,23 @@ function openAlbumModal(id) {
 
   var artistNames = (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; });
 
-  document.getElementById('edit-modal-title').textContent = id ? 'Modifier l\'album' : 'Ajouter un album';
+  document.getElementById('edit-modal-title').textContent = id ? AT('form_edit_album') : AT('form_add_album');
   document.getElementById('edit-modal-body').innerHTML =
     _mGrid(
-      _mField('Titre', 'ma-title', 'text', item ? item.title : '') +
-      _mField('Artiste', 'ma-artist', 'select', item ? item.artist : '', {options: artistNames})
+      _mField(AT('lbl_title'), 'ma-title', 'text', item ? item.title : '') +
+      _mField(AT('lbl_artist'), 'ma-artist', 'select', item ? item.artist : '', {options: artistNames})
     ) +
     _mGrid(
-      _mField('Année', 'ma-year', 'number', item ? item.year : '') +
-      _mField('Genre', 'ma-genre', 'text', item ? item.genre : '')
+      _mField(AT('lbl_year'), 'ma-year', 'number', item ? item.year : '') +
+      _mField(AT('lbl_genre'), 'ma-genre', 'text', item ? item.genre : '')
     ) +
     _mGrid(
-      _mField('Label', 'ma-label', 'text', item ? item.label : '') +
-      _mField('Nb titres', 'ma-tracks', 'number', item ? item.tracks : '')
+      _mField(AT('lbl_label'), 'ma-label', 'text', item ? item.label : '') +
+      _mField(AT('lbl_nb_tracks'), 'ma-tracks', 'number', item ? item.tracks : '')
     ) +
     _mGrid(
-      _mField('Prix (€)', 'ma-price', 'number', item ? item.price : '') +
-      _mField('Stripe Link', 'ma-stripe', 'text', item ? (item.stripeLink || '') : '')
+      _mField(AT('lbl_price'), 'ma-price', 'number', item ? item.price : '') +
+      _mField(AT('lbl_stripe'), 'ma-stripe', 'text', item ? (item.stripeLink || '') : '')
     ) +
     _mImageField(imgSrc, item ? (item.cover || '') : '');
 
@@ -3885,7 +3907,7 @@ function openAlbumModal(id) {
 
 function _saveAlbumModal() {
   var title = _mVal('ma-title');
-  if (!title) { alert('Le titre est requis.'); return; }
+  if (!title) { alert(AT('alert_title_req')); return; }
 
   var isNew = !_modalId;
   var item;
@@ -3927,34 +3949,34 @@ function _renderAlbums() {
       return '<option value="' + _esc(a.name) + '">' + _esc(a.name) + '</option>';
     }).join('');
     addForm = '<div class="crud-add-form">'
-      + '<div class="crud-add-form-title">Ajouter un album</div>'
+      + '<div class="crud-add-form-title">' + AT('form_add_album') + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field"><label>Titre</label><input type="text" id="add-alb-title" placeholder="Titre de l\'album"></div>'
-      + '<div class="a-field"><label>Artiste</label><select id="add-alb-artist">' + artistOpts + '</select></div>'
-      + '<div class="a-field"><label>Année</label><input type="number" id="add-alb-year" placeholder="2024"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_title') + '</label><input type="text" id="add-alb-title" placeholder="' + AT('ph_alb_title') + '"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_artist') + '</label><select id="add-alb-artist">' + artistOpts + '</select></div>'
+      + '<div class="a-field"><label>' + AT('lbl_year') + '</label><input type="number" id="add-alb-year" placeholder="2024"></div>'
       + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field"><label>Genre</label><input type="text" id="add-alb-genre" placeholder="Morna · Coladeira"></div>'
-      + '<div class="a-field"><label>Label</label><input type="text" id="add-alb-label" placeholder="HARMONIA"></div>'
-      + '<div class="a-field"><label>Nb titres</label><input type="number" id="add-alb-tracks" placeholder="10"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_genre') + '</label><input type="text" id="add-alb-genre" placeholder="Morna · Coladeira"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_label') + '</label><input type="text" id="add-alb-label" placeholder="HARMONIA"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_nb_tracks') + '</label><input type="number" id="add-alb-tracks" placeholder="10"></div>'
       + '</div>'
       + '<div class="a-field" style="margin-top:4px;">'
-      +   '<label>Pochette</label>'
+      +   '<label>' + AT('lbl_cover') + '</label>'
       +   '<div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">'
       +     '<div>'
       +       '<input type="file" id="add-alb-img-input" accept="image/*" style="font-size:12px;" onchange="_onAddAlbImgChange(this)">'
-      +       '<div style="margin:6px 0 3px;font-size:9px;letter-spacing:1px;color:#666;text-transform:uppercase;">— ou URL —</div>'
-      +       '<input type="text" id="add-alb-cover" placeholder="https://img.youtube.com/vi/YTID/hqdefault.jpg" style="width:320px;max-width:100%;font-size:12px;padding:6px 8px;border:1px solid #ccc;" oninput="_onAddAlbUrlChange(this)">'
+      +       '<div style="margin:6px 0 3px;font-size:9px;letter-spacing:1px;color:#666;text-transform:uppercase;">' + AT('lbl_or_url') + '</div>'
+      +       '<input type="text" id="add-alb-cover" placeholder="' + AT('ph_alb_cover') + '" style="width:320px;max-width:100%;font-size:12px;padding:6px 8px;border:1px solid #ccc;" oninput="_onAddAlbUrlChange(this)">'
       +     '</div>'
       +     '<img id="add-alb-preview" style="width:72px;height:72px;object-fit:cover;border:1px solid #ccc;display:none;" alt="">'
       +   '</div>'
       + '</div>'
-      + '<button class="a-btn a-btn-primary" onclick="_addAlbum()" style="margin-top:12px;">Ajouter</button>'
+      + '<button class="a-btn a-btn-primary" onclick="_addAlbum()" style="margin-top:12px;">' + AT('btn_add') + '</button>'
       + '</div>';
   }
 
   if (!list.length) {
-    el.innerHTML = addForm + '<p style="color:#000000">Aucun album.</p>';
+    el.innerHTML = addForm + '<p style="color:#000000">' + AT('empty_albums') + '</p>';
     return;
   }
 
@@ -3966,13 +3988,13 @@ function _renderAlbums() {
       : '<div style="width:40px;height:40px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:14px;color:#aaa;">♪</div>';
     var actBtns = '';
     if (canDo('edit')) {
-      actBtns += '<button class="a-btn-crud-edit" onclick="openAlbumModal(' + a.id + ')">Modifier</button>';
+      actBtns += '<button class="a-btn-crud-edit" onclick="openAlbumModal(' + a.id + ')">' + AT('btn_edit') + '</button>';
     }
     actBtns += '<button class="a-btn-sm ' + (active ? 'a-btn-danger' : 'a-btn-edit') + '"'
       + ' onclick="_toggleActive(\'album\',' + a.id + ')">'
-      + (active ? 'Désactiver' : 'Activer') + '</button>';
+      + (active ? AT('btn_deactivate') : AT('btn_activate')) + '</button>';
     if (canDo('delete')) {
-      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'album\',' + a.id + ')">Supprimer</button>';
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'album\',' + a.id + ')">' + AT('btn_delete') + '</button>';
     }
     return '<tr>'
       + '<td style="width:40px;">' + imgSrc + '</td>'
@@ -3993,8 +4015,8 @@ function _renderAlbums() {
   el.innerHTML = addForm
     + '<div class="a-table-wrap"><table class="a-table">'
     + '<thead><tr>'
-    + '<th></th><th>Titre</th><th>Artiste</th><th>Année</th>'
-    + '<th>Genre</th><th>Label</th><th>Titres</th><th>Actions</th>'
+    + '<th></th><th>' + AT('th_title') + '</th><th>' + AT('th_artist') + '</th><th>' + AT('th_year') + '</th>'
+    + '<th>' + AT('th_genre') + '</th><th>' + AT('th_label') + '</th><th>' + AT('th_tracks_nb') + '</th><th>' + AT('th_actions') + '</th>'
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
@@ -4020,7 +4042,7 @@ function _onAddAlbUrlChange(input) {
 function _addAlbum() {
   if (!canDo('add')) return;
   var title = (document.getElementById('add-alb-title') || {}).value || '';
-  if (!title.trim()) { alert('Le titre est requis.'); return; }
+  if (!title.trim()) { alert(AT('alert_title_req')); return; }
   var coverUrl = ((document.getElementById('add-alb-cover') || {}).value || '').trim();
   var newItem = {
     title:  title.trim(),
@@ -4066,23 +4088,23 @@ function openTrackModal(id) {
 
   var artistNames = (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; });
   var albumNames  = (DB.albums  || []).map(function(a){ return {value: a.title, label: a.title}; });
-  var catOptions  = [{value:'traditional',label:'Traditionnel'},{value:'urban',label:'Urban'}];
+  var catOptions  = [{value:'traditional',label:AT('cat_traditional')},{value:'urban',label:AT('cat_urban')}];
 
-  document.getElementById('edit-modal-title').textContent = id ? 'Modifier le titre' : 'Ajouter un titre';
+  document.getElementById('edit-modal-title').textContent = id ? AT('form_edit_track') : AT('form_add_track');
   document.getElementById('edit-modal-body').innerHTML =
     _mGrid(
-      _mField('Titre', 'mt-title', 'text', item ? item.title : '') +
-      _mField('Artiste', 'mt-artist', 'select', item ? item.artist : '', {options: artistNames})
+      _mField(AT('lbl_title'), 'mt-title', 'text', item ? item.title : '') +
+      _mField(AT('lbl_artist'), 'mt-artist', 'select', item ? item.artist : '', {options: artistNames})
     ) +
     _mGrid(
-      _mField('Album', 'mt-album', 'select', item ? item.album : '', {options: albumNames}) +
-      _mField('Durée (ex: 3:42)', 'mt-duration', 'text', item ? item.duration : '')
+      _mField(AT('lbl_album'), 'mt-album', 'select', item ? item.album : '', {options: albumNames}) +
+      _mField(AT('lbl_duration'), 'mt-duration', 'text', item ? item.duration : '')
     ) +
     _mGrid(
-      _mField('Style', 'mt-style', 'text', item ? (item.style || '') : '') +
-      _mField('Catégorie', 'mt-category', 'select', item ? item.category : 'traditional', {options: catOptions})
+      _mField(AT('lbl_style_simple'), 'mt-style', 'text', item ? (item.style || '') : '') +
+      _mField(AT('lbl_category'), 'mt-category', 'select', item ? item.category : 'traditional', {options: catOptions})
     ) +
-    _mField('URL / YouTube ID', 'mt-url', 'text', item ? (item.url || item.ytId || '') : '') +
+    _mField(AT('lbl_url'), 'mt-url', 'text', item ? (item.url || item.ytId || '') : '') +
     _mImageField(imgSrc, item ? (item.cover || '') : '');
 
   document.getElementById('edit-modal').classList.add('open');
@@ -4090,7 +4112,7 @@ function openTrackModal(id) {
 
 function _saveTrackModal() {
   var title = _mVal('mt-title');
-  if (!title) { alert('Le titre est requis.'); return; }
+  if (!title) { alert(AT('alert_title_req')); return; }
 
   var isNew = !_modalId;
   var item;
@@ -4135,35 +4157,35 @@ function _renderTracks() {
       return '<option value="' + _esc(a.title) + '">' + _esc(a.title) + '</option>';
     }).join('');
     addForm = '<div class="crud-add-form">'
-      + '<div class="crud-add-form-title">Ajouter un titre</div>'
+      + '<div class="crud-add-form-title">' + AT('form_add_track') + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field"><label>Titre</label><input type="text" id="add-trk-title" placeholder="Titre du morceau"></div>'
-      + '<div class="a-field"><label>Artiste</label><select id="add-trk-artist">' + artistOpts + '</select></div>'
-      + '<div class="a-field"><label>Album</label><select id="add-trk-album">' + albumOpts + '</select></div>'
+      + '<div class="a-field"><label>' + AT('lbl_title') + '</label><input type="text" id="add-trk-title" placeholder="' + AT('ph_trk_title') + '"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_artist') + '</label><select id="add-trk-artist">' + artistOpts + '</select></div>'
+      + '<div class="a-field"><label>' + AT('lbl_album') + '</label><select id="add-trk-album">' + albumOpts + '</select></div>'
       + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field"><label>Durée</label><input type="text" id="add-trk-dur" placeholder="3:42"></div>'
-      + '<div class="a-field"><label>Style</label><input type="text" id="add-trk-style" placeholder="Morna"></div>'
-      + '<div class="a-field"><label>Catégorie</label>'
-      + '<select id="add-trk-cat"><option value="traditional">Traditionnel</option><option value="urban">Urban</option></select></div>'
+      + '<div class="a-field"><label>' + AT('lbl_duration_simple') + '</label><input type="text" id="add-trk-dur" placeholder="' + AT('ph_trk_dur') + '"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_style_simple') + '</label><input type="text" id="add-trk-style" placeholder="' + AT('ph_trk_style') + '"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_category') + '</label>'
+      + '<select id="add-trk-cat"><option value="traditional">' + AT('cat_traditional') + '</option><option value="urban">' + AT('cat_urban') + '</option></select></div>'
       + '</div>'
       + '<div class="a-field" style="margin-top:4px;">'
-      +   '<label>Pochette</label>'
+      +   '<label>' + AT('lbl_cover') + '</label>'
       +   '<div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;">'
       +     '<div>'
       +       '<input type="file" id="add-trk-img-input" accept="image/*" style="font-size:12px;" onchange="_onAddTrkImgChange(this)">'
-      +       '<div style="margin:6px 0 3px;font-size:9px;letter-spacing:1px;color:#666;text-transform:uppercase;">— ou URL —</div>'
-      +       '<input type="text" id="add-trk-cover" placeholder="https://img.youtube.com/vi/YTID/hqdefault.jpg" style="width:320px;max-width:100%;font-size:12px;padding:6px 8px;border:1px solid #ccc;" oninput="_onAddTrkUrlChange(this)">'
+      +       '<div style="margin:6px 0 3px;font-size:9px;letter-spacing:1px;color:#666;text-transform:uppercase;">' + AT('lbl_or_url') + '</div>'
+      +       '<input type="text" id="add-trk-cover" placeholder="' + AT('ph_alb_cover') + '" style="width:320px;max-width:100%;font-size:12px;padding:6px 8px;border:1px solid #ccc;" oninput="_onAddTrkUrlChange(this)">'
       +     '</div>'
       +     '<img id="add-trk-preview" style="width:72px;height:72px;object-fit:cover;border:1px solid #ccc;display:none;" alt="">'
       +   '</div>'
       + '</div>'
-      + '<button class="a-btn a-btn-primary" onclick="_addTrack()" style="margin-top:12px;">Ajouter</button>'
+      + '<button class="a-btn a-btn-primary" onclick="_addTrack()" style="margin-top:12px;">' + AT('btn_add') + '</button>'
       + '</div>';
   }
 
   if (!list.length) {
-    el.innerHTML = addForm + '<p style="color:#000000">Aucun titre.</p>';
+    el.innerHTML = addForm + '<p style="color:#000000">' + AT('empty_tracks') + '</p>';
     return;
   }
 
@@ -4180,10 +4202,10 @@ function _renderTracks() {
 
     var actBtns = '';
     if (canDo('edit')) {
-      actBtns += '<button class="a-btn-crud-edit" onclick="openTrackModal(' + t.id + ')">Modifier</button>';
+      actBtns += '<button class="a-btn-crud-edit" onclick="openTrackModal(' + t.id + ')">' + AT('btn_edit') + '</button>';
     }
     if (canDo('delete')) {
-      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'track\',' + t.id + ')">Supprimer</button>';
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'track\',' + t.id + ')">' + AT('btn_delete') + '</button>';
     }
     return '<tr>'
       + '<td style="width:44px;">' + thumbHtml + '</td>'
@@ -4206,8 +4228,8 @@ function _renderTracks() {
   el.innerHTML = addForm
     + '<div class="a-table-wrap"><table class="a-table">'
     + '<thead><tr>'
-    + '<th style="width:44px;"></th><th>Titre</th><th>Artiste</th><th>Album</th>'
-    + '<th>Durée</th><th>Style</th><th>Catégorie</th><th>Actions</th>'
+    + '<th style="width:44px;"></th><th>' + AT('th_title') + '</th><th>' + AT('th_artist') + '</th><th>' + AT('lbl_album') + '</th>'
+    + '<th>' + AT('th_duration') + '</th><th>' + AT('th_style') + '</th><th>' + AT('th_category') + '</th><th>' + AT('th_actions') + '</th>'
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
@@ -4233,7 +4255,7 @@ function _onAddTrkUrlChange(input) {
 function _addTrack() {
   if (!canDo('add')) return;
   var title = (document.getElementById('add-trk-title') || {}).value || '';
-  if (!title.trim()) { alert('Le titre est requis.'); return; }
+  if (!title.trim()) { alert(AT('alert_title_req')); return; }
   var coverUrl = ((document.getElementById('add-trk-cover') || {}).value || '').trim();
   var newItem = {
     title:    title.trim(),
@@ -4288,18 +4310,18 @@ function openNewsModal(id) {
       : (item.content || item.excerpt && (typeof item.excerpt === 'object' ? item.excerpt.fr : item.excerpt) || '');
   }
 
-  var artistNames = [{value:'',label:'— Aucun —'}].concat(
+  var artistNames = [{value:'',label:AT('none_artist')}].concat(
     (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; })
   );
 
-  document.getElementById('edit-modal-title').textContent = id ? 'Modifier l\'actualité' : 'Ajouter une actualité';
+  document.getElementById('edit-modal-title').textContent = id ? AT('form_edit_news') : AT('form_add_news');
   document.getElementById('edit-modal-body').innerHTML =
-    _mField('Titre', 'mn-title', 'text', titleVal) +
+    _mField(AT('lbl_title'), 'mn-title', 'text', titleVal) +
     _mGrid(
-      _mField('Artiste', 'mn-artist', 'select', item ? (item.artist || '') : '', {options: artistNames}) +
-      _mField('Date (YYYY-MM-DD)', 'mn-date', 'text', item ? (item.date || '') : '')
+      _mField(AT('lbl_artist'), 'mn-artist', 'select', item ? (item.artist || '') : '', {options: artistNames}) +
+      _mField(AT('lbl_date_fmt'), 'mn-date', 'text', item ? (item.date || '') : '')
     ) +
-    _mField('Contenu / Extrait', 'mn-content', 'textarea', contentVal, {rows:5}) +
+    _mField(AT('lbl_content'), 'mn-content', 'textarea', contentVal, {rows:5}) +
     _mImageField(imgSrc);
 
   document.getElementById('edit-modal').classList.add('open');
@@ -4307,7 +4329,7 @@ function openNewsModal(id) {
 
 function _saveNewsModal() {
   var title = _mVal('mn-title');
-  if (!title) { alert('Le titre est requis.'); return; }
+  if (!title) { alert(AT('alert_title_req')); return; }
 
   var isNew = !_modalId;
   var item;
@@ -4341,35 +4363,35 @@ function _renderNews() {
 
   var addForm = '';
   if (canDo('add')) {
-    var artistOpts = '<option value="">— Aucun —</option>'
+    var artistOpts = '<option value="">' + AT('none_artist') + '</option>'
       + (DB.artists || []).map(function(a){
           return '<option value="' + _esc(a.name) + '">' + _esc(a.name) + '</option>';
         }).join('');
     addForm = '<div class="crud-add-form">'
-      + '<div class="crud-add-form-title">Ajouter une actualité</div>'
+      + '<div class="crud-add-form-title">' + AT('form_add_news') + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field" style="grid-column:span 2;"><label>Titre</label><input type="text" id="add-nws-title" placeholder="Titre de l\'article"></div>'
-      + '<div class="a-field"><label>Date</label><input type="date" id="add-nws-date"></div>'
+      + '<div class="a-field" style="grid-column:span 2;"><label>' + AT('lbl_title') + '</label><input type="text" id="add-nws-title" placeholder="' + AT('ph_nws_title') + '"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_date') + '</label><input type="date" id="add-nws-date"></div>'
       + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field"><label>Artiste</label><select id="add-nws-artist">' + artistOpts + '</select></div>'
-      + '<div class="a-field" style="grid-column:span 2;"><label>Extrait</label><input type="text" id="add-nws-content" placeholder="Résumé court..."></div>'
+      + '<div class="a-field"><label>' + AT('lbl_artist') + '</label><select id="add-nws-artist">' + artistOpts + '</select></div>'
+      + '<div class="a-field" style="grid-column:span 2;"><label>' + AT('lbl_content') + '</label><input type="text" id="add-nws-content" placeholder="' + AT('ph_nws_content') + '"></div>'
       + '</div>'
       + '<div class="a-field" style="margin-top:4px;">'
-      + '<label>Image de couverture</label>'
+      + '<label>' + AT('lbl_image') + '</label>'
       + '<input type="file" id="add-nws-img" accept="image/*" style="display:none;" onchange="_handleAddNewsImg(this)">'
       + '<div style="display:flex;align-items:center;gap:12px;border:1px solid #ccc;padding:10px 14px;cursor:pointer;background:#fff;" onclick="document.getElementById(\'add-nws-img\').click()">'
       + '<img id="add-nws-img-prev" src="" alt="" style="width:44px;height:44px;object-fit:cover;border:1px solid #ccc;display:none;flex-shrink:0;">'
-      + '<div><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#666;">Cliquer pour choisir une image</div>'
+      + '<div><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#666;">' + AT('click_image') + '</div>'
       + '<div id="add-nws-img-lbl" style="font-size:10px;color:#0a1628;margin-top:3px;"></div></div>'
       + '</div>'
       + '</div>'
-      + '<button class="a-btn a-btn-primary" onclick="_addNews()" style="margin-top:4px;">Ajouter</button>'
+      + '<button class="a-btn a-btn-primary" onclick="_addNews()" style="margin-top:4px;">' + AT('btn_add') + '</button>'
       + '</div>';
   }
 
   if (!list.length) {
-    el.innerHTML = addForm + '<p style="color:#000000">Aucune actualité.</p>';
+    el.innerHTML = addForm + '<p style="color:#000000">' + AT('empty_news') + '</p>';
     return;
   }
 
@@ -4381,13 +4403,13 @@ function _renderNews() {
     var displayTitle = typeof n.title === 'object' ? (n.title.fr || '') : (n.title || '');
     var actBtns = '';
     if (canDo('edit')) {
-      actBtns += '<button class="a-btn-crud-edit" onclick="openNewsModal(' + n.id + ')">Modifier</button>';
+      actBtns += '<button class="a-btn-crud-edit" onclick="openNewsModal(' + n.id + ')">' + AT('btn_edit') + '</button>';
     }
     actBtns += '<button class="a-btn-sm ' + (active ? 'a-btn-danger' : 'a-btn-edit') + '"'
       + ' onclick="_toggleActive(\'news\',' + n.id + ')">'
-      + (active ? 'Dépublier' : 'Publier') + '</button>';
+      + (active ? AT('btn_unpublish') : AT('btn_publish')) + '</button>';
     if (canDo('delete')) {
-      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'news\',' + n.id + ')">Supprimer</button>';
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'news\',' + n.id + ')">' + AT('btn_delete') + '</button>';
     }
     return '<tr>'
       + '<td style="width:40px;">' + imgSrc + '</td>'
@@ -4404,7 +4426,7 @@ function _renderNews() {
   el.innerHTML = addForm
     + '<div class="a-table-wrap"><table class="a-table">'
     + '<thead><tr>'
-    + '<th></th><th>Titre</th><th>Artiste</th><th>Date</th><th>Actions</th>'
+    + '<th></th><th>' + AT('th_title') + '</th><th>' + AT('th_artist') + '</th><th>' + AT('th_date') + '</th><th>' + AT('th_actions') + '</th>'
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
@@ -4446,35 +4468,35 @@ function openEventModal(id) {
     else if (item.cover) imgSrc = item.cover;
   }
 
-  var artistNames = [{value:'',label:'— Aucun —'}].concat(
+  var artistNames = [{value:'',label:AT('none_artist')}].concat(
     (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; })
   );
   var statusOpts = [
-    {value:'active',label:'Actif'},
-    {value:'cancelled',label:'Annulé'},
-    {value:'rescheduled',label:'Reprogrammé'},
-    {value:'extended',label:'Prolongé'}
+    {value:'active',      label:AT('status_active')},
+    {value:'cancelled',   label:AT('status_cancelled')},
+    {value:'rescheduled', label:AT('status_rescheduled')},
+    {value:'extended',    label:AT('status_extended')}
   ];
 
-  document.getElementById('edit-modal-title').textContent = id ? 'Modifier l\'événement' : 'Ajouter un événement';
+  document.getElementById('edit-modal-title').textContent = id ? AT('form_edit_event') : AT('form_add_event');
   document.getElementById('edit-modal-body').innerHTML =
     _mGrid(
-      _mField('Artiste', 'me-artist', 'select', item ? (item.artist || '') : '', {options: artistNames}) +
-      _mField('Titre / Description', 'me-title', 'text', item ? (item.title || '') : '')
+      _mField(AT('lbl_artist'), 'me-artist', 'select', item ? (item.artist || '') : '', {options: artistNames}) +
+      _mField(AT('lbl_title'), 'me-title', 'text', item ? (item.title || '') : '')
     ) +
     _mGrid(
-      _mField('Date (YYYY-MM-DD)', 'me-date', 'text', item ? (item.date || '') : '') +
-      _mField('Heure (HH:MM)', 'me-time', 'text', item ? (item.time || '20:00') : '20:00')
+      _mField(AT('lbl_date_fmt'), 'me-date', 'text', item ? (item.date || '') : '') +
+      _mField(AT('lbl_time'), 'me-time', 'text', item ? (item.time || '20:00') : '20:00')
     ) +
     _mGrid(
-      _mField('Venue / Salle', 'me-venue', 'text', item ? (item.venue || '') : '') +
-      _mField('Ville', 'me-city', 'text', item ? (item.city || '') : '')
+      _mField(AT('lbl_venue'), 'me-venue', 'text', item ? (item.venue || '') : '') +
+      _mField(AT('lbl_city'), 'me-city', 'text', item ? (item.city || '') : '')
     ) +
     _mGrid(
-      _mField('Prix standard (€)', 'me-price', 'number', item ? (item.price || '') : '') +
-      _mField('Prix VIP (€)', 'me-vip', 'number', item ? (item.vip || '') : '')
+      _mField(AT('lbl_price_std'), 'me-price', 'number', item ? (item.price || '') : '') +
+      _mField(AT('lbl_vip'), 'me-vip', 'number', item ? (item.vip || '') : '')
     ) +
-    _mField('Statut', 'me-status', 'select', item ? (item.status || 'active') : 'active', {options: statusOpts}) +
+    _mField(AT('lbl_status'), 'me-status', 'select', item ? (item.status || 'active') : 'active', {options: statusOpts}) +
     _mImageField(imgSrc);
 
   document.getElementById('edit-modal').classList.add('open');
@@ -4483,7 +4505,7 @@ function openEventModal(id) {
 function _saveEventModal() {
   var artist = _mVal('me-artist');
   var venue  = _mVal('me-venue');
-  if (!artist && !venue) { alert('L\'artiste ou la salle est requis.'); return; }
+  if (!artist && !venue) { alert(AT('alert_artist_venue')); return; }
 
   var isNew = !_modalId;
   var item;
@@ -4520,42 +4542,42 @@ function _renderEvents() {
   if (!el || typeof DB === 'undefined') return;
   var list = DB.events || [];
 
-  var statusLabels = { active:'Actif', cancelled:'Annulé', rescheduled:'Reprogrammé', extended:'Prolongé' };
+  var statusLabels = { active:AT('status_active'), cancelled:AT('status_cancelled'), rescheduled:AT('status_rescheduled'), extended:AT('status_extended') };
   var statusBadges = { active:'badge-green', cancelled:'badge-red', rescheduled:'badge-orange', extended:'badge-orange' };
 
   var addForm = '';
   if (canDo('add')) {
-    var artistOpts = '<option value="">— Aucun —</option>'
+    var artistOpts = '<option value="">' + AT('none_artist') + '</option>'
       + (DB.artists || []).map(function(a){
           return '<option value="' + _esc(a.name) + '">' + _esc(a.name) + '</option>';
         }).join('');
     addForm = '<div class="crud-add-form">'
-      + '<div class="crud-add-form-title">Ajouter un événement</div>'
+      + '<div class="crud-add-form-title">' + AT('form_add_event') + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field"><label>Artiste</label><select id="add-evt-artist">' + artistOpts + '</select></div>'
-      + '<div class="a-field"><label>Venue</label><input type="text" id="add-evt-venue" placeholder="Nom de la salle"></div>'
-      + '<div class="a-field"><label>Ville</label><input type="text" id="add-evt-city" placeholder="Paris"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_artist') + '</label><select id="add-evt-artist">' + artistOpts + '</select></div>'
+      + '<div class="a-field"><label>' + AT('lbl_venue_simple') + '</label><input type="text" id="add-evt-venue" placeholder="' + AT('ph_evt_venue') + '"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_city') + '</label><input type="text" id="add-evt-city" placeholder="' + AT('ph_evt_city') + '"></div>'
       + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field"><label>Date</label><input type="date" id="add-evt-date"></div>'
-      + '<div class="a-field"><label>Prix (€)</label><input type="number" id="add-evt-price" placeholder="30"></div>'
-      + '<div class="a-field"><label>Prix VIP (€)</label><input type="number" id="add-evt-vip" placeholder="80"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_date') + '</label><input type="date" id="add-evt-date"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_price') + '</label><input type="number" id="add-evt-price" placeholder="30"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_vip') + '</label><input type="number" id="add-evt-vip" placeholder="80"></div>'
       + '</div>'
       + '<div class="a-field" style="margin-top:4px;">'
-      + '<label>Photo de l\'événement</label>'
+      + '<label>' + AT('lbl_photo') + '</label>'
       + '<input type="file" id="add-evt-img" accept="image/*" style="display:none;" onchange="_handleAddEvtImg(this)">'
       + '<div style="display:flex;align-items:center;gap:12px;border:1px solid #ccc;padding:10px 14px;cursor:pointer;background:#fff;" onclick="document.getElementById(\'add-evt-img\').click()">'
       + '<img id="add-evt-img-prev" src="" alt="" style="width:44px;height:44px;object-fit:cover;border:1px solid #ccc;display:none;flex-shrink:0;">'
-      + '<div><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#666;">Cliquer pour choisir un visuel</div>'
+      + '<div><div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#666;">' + AT('click_photo') + '</div>'
       + '<div id="add-evt-img-lbl" style="font-size:10px;color:#0a1628;margin-top:3px;"></div></div>'
       + '</div>'
       + '</div>'
-      + '<button class="a-btn a-btn-primary" onclick="_addEvent()" style="margin-top:4px;">Ajouter</button>'
+      + '<button class="a-btn a-btn-primary" onclick="_addEvent()" style="margin-top:4px;">' + AT('btn_add') + '</button>'
       + '</div>';
   }
 
   if (!list.length) {
-    el.innerHTML = addForm + '<p style="color:#000000">Aucun événement.</p>';
+    el.innerHTML = addForm + '<p style="color:#000000">' + AT('empty_events') + '</p>';
     return;
   }
 
@@ -4567,10 +4589,10 @@ function _renderEvents() {
       : '<span style="color:#ccc;font-size:18px;">&#128248;</span>';
     var actBtns = '';
     if (canDo('edit')) {
-      actBtns += '<button class="a-btn-crud-edit" onclick="openEventModal(' + e.id + ')">Modifier</button>';
+      actBtns += '<button class="a-btn-crud-edit" onclick="openEventModal(' + e.id + ')">' + AT('btn_edit') + '</button>';
     }
     if (canDo('delete')) {
-      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'event\',' + e.id + ')">Supprimer</button>';
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'event\',' + e.id + ')">' + AT('btn_delete') + '</button>';
     }
     return '<tr>'
       + '<td style="width:44px;">' + imgCell + '</td>'
@@ -4593,15 +4615,15 @@ function _renderEvents() {
   el.innerHTML = addForm
     + '<div class="a-table-wrap"><table class="a-table">'
     + '<thead><tr>'
-    + '<th></th><th>Artiste</th><th>Venue</th><th>Ville</th>'
-    + '<th>Date</th><th>Standard</th><th>VIP</th><th>Statut</th><th>Actions</th>'
+    + '<th></th><th>' + AT('th_artist') + '</th><th>' + AT('th_venue') + '</th><th>' + AT('th_city') + '</th>'
+    + '<th>' + AT('th_date') + '</th><th>' + AT('th_price_std') + '</th><th>' + AT('th_vip') + '</th><th>' + AT('th_status') + '</th><th>' + AT('th_actions') + '</th>'
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 function _addEvent() {
   if (!canDo('add')) return;
   var venue = (document.getElementById('add-evt-venue') || {}).value || '';
-  if (!venue.trim()) { alert('La salle est requise.'); return; }
+  if (!venue.trim()) { alert(AT('alert_venue_req')); return; }
   createItem('event', {
     artist: ((document.getElementById('add-evt-artist') || {}).value || '').trim(),
     venue:  venue.trim(),
@@ -4633,30 +4655,30 @@ function openProduitModal(id) {
     else if (item.img && !item.img.startsWith('IMG_')) imgSrc = item.img;
   }
 
-  var artistNames = [{value:'',label:'— Aucun —'}].concat(
+  var artistNames = [{value:'',label:AT('none_artist')}].concat(
     (DB.artists || []).map(function(a){ return {value: a.name, label: a.name}; })
   );
   var typeOpts = [
-    {value:'cd',label:'CD'},
-    {value:'vinyl',label:'Vinyle'},
-    {value:'merch',label:'Merchandising'},
-    {value:'album',label:'Album numérique'},
-    {value:'concert',label:'Concert'}
+    {value:'cd',      label:AT('type_cd')},
+    {value:'vinyl',   label:AT('type_vinyl')},
+    {value:'merch',   label:AT('type_merch')},
+    {value:'album',   label:AT('type_album_num')},
+    {value:'concert', label:AT('type_concert')}
   ];
 
-  document.getElementById('edit-modal-title').textContent = id ? 'Modifier le produit' : 'Ajouter un produit';
+  document.getElementById('edit-modal-title').textContent = id ? AT('form_edit_produit') : AT('form_add_produit');
   document.getElementById('edit-modal-body').innerHTML =
     _mGrid(
-      _mField('Nom', 'mp-name', 'text', item ? (item.name || '') : '') +
-      _mField('Artiste', 'mp-artist', 'select', item ? (item.artist || '') : '', {options: artistNames})
+      _mField(AT('lbl_name'), 'mp-name', 'text', item ? (item.name || '') : '') +
+      _mField(AT('lbl_artist'), 'mp-artist', 'select', item ? (item.artist || '') : '', {options: artistNames})
     ) +
     _mGrid(
-      _mField('Type', 'mp-type', 'select', item ? (item.type || 'cd') : 'cd', {options: typeOpts}) +
-      _mField('Prix (€)', 'mp-price', 'number', item ? (item.price || '') : '')
+      _mField(AT('lbl_type'), 'mp-type', 'select', item ? (item.type || 'cd') : 'cd', {options: typeOpts}) +
+      _mField(AT('lbl_price'), 'mp-price', 'number', item ? (item.price || '') : '')
     ) +
     _mGrid(
-      _mField('Stock (-1 = illimité)', 'mp-stock', 'number', item ? (item.stock !== undefined ? item.stock : '') : '') +
-      _mField('Stripe Link', 'mp-stripe', 'text', item ? (item.stripeLink || '') : '')
+      _mField(AT('lbl_stock'), 'mp-stock', 'number', item ? (item.stock !== undefined ? item.stock : '') : '') +
+      _mField(AT('lbl_stripe'), 'mp-stripe', 'text', item ? (item.stripeLink || '') : '')
     ) +
     _mImageField(imgSrc);
 
@@ -4665,7 +4687,7 @@ function openProduitModal(id) {
 
 function _saveProduitModal() {
   var name = _mVal('mp-name');
-  if (!name) { alert('Le nom est requis.'); return; }
+  if (!name) { alert(AT('alert_name_req')); return; }
 
   var isNew = !_modalId;
   var item;
@@ -4706,24 +4728,28 @@ function _renderProduits() {
           return '<option value="' + _esc(a.name) + '">' + _esc(a.name) + '</option>';
         }).join('');
     addForm = '<div class="crud-add-form">'
-      + '<div class="crud-add-form-title">Ajouter un produit</div>'
+      + '<div class="crud-add-form-title">' + AT('form_add_produit') + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field"><label>Nom</label><input type="text" id="add-prd-name" placeholder="Nom du produit"></div>'
-      + '<div class="a-field"><label>Artiste</label><select id="add-prd-artist">' + artistOpts + '</select></div>'
-      + '<div class="a-field"><label>Type</label>'
-      + '<select id="add-prd-type"><option value="cd">CD</option><option value="vinyl">Vinyle</option>'
-      + '<option value="merch">Merchandising</option><option value="album">Album numérique</option></select></div>'
+      + '<div class="a-field"><label>' + AT('lbl_name') + '</label><input type="text" id="add-prd-name" placeholder="' + AT('ph_prd_name') + '"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_artist') + '</label><select id="add-prd-artist">' + artistOpts + '</select></div>'
+      + '<div class="a-field"><label>' + AT('lbl_type') + '</label>'
+      + '<select id="add-prd-type">'
+      + '<option value="cd">' + AT('type_cd') + '</option>'
+      + '<option value="vinyl">' + AT('type_vinyl') + '</option>'
+      + '<option value="merch">' + AT('type_merch') + '</option>'
+      + '<option value="album">' + AT('type_album_num') + '</option>'
+      + '</select></div>'
       + '</div>'
       + '<div class="crud-add-grid">'
-      + '<div class="a-field"><label>Prix (€)</label><input type="number" id="add-prd-price" placeholder="20"></div>'
-      + '<div class="a-field"><label>Stock</label><input type="number" id="add-prd-stock" placeholder="999 = illimité"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_price') + '</label><input type="number" id="add-prd-price" placeholder="20"></div>'
+      + '<div class="a-field"><label>' + AT('lbl_stock_simple') + '</label><input type="number" id="add-prd-stock" placeholder="' + AT('ph_prd_stock') + '"></div>'
       + '</div>'
-      + '<button class="a-btn a-btn-primary" onclick="_addProduit()" style="margin-top:4px;">Ajouter</button>'
+      + '<button class="a-btn a-btn-primary" onclick="_addProduit()" style="margin-top:4px;">' + AT('btn_add') + '</button>'
       + '</div>';
   }
 
   if (!list.length) {
-    el.innerHTML = addForm + '<p style="color:#000000">Aucun produit.</p>';
+    el.innerHTML = addForm + '<p style="color:#000000">' + AT('empty_products') + '</p>';
     return;
   }
 
@@ -4733,10 +4759,10 @@ function _renderProduits() {
       : '';
     var actBtns = '';
     if (canDo('edit')) {
-      actBtns += '<button class="a-btn-crud-edit" onclick="openProduitModal(' + p.id + ')">Modifier</button>';
+      actBtns += '<button class="a-btn-crud-edit" onclick="openProduitModal(' + p.id + ')">' + AT('btn_edit') + '</button>';
     }
     if (canDo('delete')) {
-      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'produit\',' + p.id + ')">Supprimer</button>';
+      actBtns += '<button class="a-btn-crud-del" onclick="deleteItem(\'produit\',' + p.id + ')">' + AT('btn_delete') + '</button>';
     }
     return '<tr>'
       + '<td style="width:40px;">' + imgSrc + '</td>'
@@ -4757,14 +4783,15 @@ function _renderProduits() {
   el.innerHTML = addForm
     + '<div class="a-table-wrap"><table class="a-table">'
     + '<thead><tr>'
-    + '<th></th><th>Nom</th><th>Artiste</th><th>Type</th><th>Prix</th><th>Stock</th><th>Actions</th>'
+    + '<th></th><th>' + AT('th_name') + '</th><th>' + AT('th_artist') + '</th>'
+    + '<th>' + AT('th_type') + '</th><th>' + AT('lbl_price') + '</th><th>' + AT('th_stock') + '</th><th>' + AT('th_actions') + '</th>'
     + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
 }
 
 function _addProduit() {
   if (!canDo('add')) return;
   var name = (document.getElementById('add-prd-name') || {}).value || '';
-  if (!name.trim()) { alert('Le nom est requis.'); return; }
+  if (!name.trim()) { alert(AT('alert_name_req')); return; }
   createItem('produit', {
     name:   name.trim(),
     artist: ((document.getElementById('add-prd-artist') || {}).value || '').trim(),
@@ -4797,7 +4824,7 @@ function createItem(type, data) {
 
 function deleteItem(type, id) {
   if (!canDo('delete')) return;
-  if (!confirm('Supprimer cet élément ? Cette action est irréversible.')) return;
+  if (!confirm(AT('alert_confirm_del'))) return;
   var map = { artiste:'artists', album:'albums', track:'tracks', news:'news', event:'events', produit:'products' };
   if (map[type]) {
     if (!DB[map[type]]) return;
@@ -5050,7 +5077,7 @@ window._aeOpenForm = function(id) {
     +   '<div style="display:flex;align-items:center;gap:14px;border:1px dashed rgba(46,204,128,0.3);padding:12px 16px;cursor:pointer;" onclick="document.getElementById(\'ae-img-input\').click()">'
     +     '<img id="ae-img-preview" src="' + (_aeImgData||'') + '" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:2px;border:1px solid rgba(255,255,255,0.1);flex-shrink:0;' + (_aeImgData?'display:block;':'display:none;') + '">'
     +     '<div>'
-    +       '<div style="font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);">Cliquer pour choisir un visuel</div>'
+    +       '<div style="font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);">' + AT('click_photo') + '</div>'
     +       '<div id="ae-img-label" style="font-family:Arial;font-size:10px;color:rgba(46,204,128,0.8);margin-top:4px;">'+ (_aeImgData ? '(photo en place — cliquer pour remplacer)' : '') +'</div>'
     +     '</div>'
     +   '</div>'
@@ -5058,7 +5085,7 @@ window._aeOpenForm = function(id) {
     /* Bouton save */
     + '<div style="display:flex;gap:12px;margin-top:8px;">'
     +   '<button onclick="_aeSave('+(id||'null')+')" style="background:rgba(46,204,128,0.15);border:1px solid rgba(46,204,128,0.4);color:#2ecc80;font-family:Arial;font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:11px 28px;cursor:pointer;">✓ '+(id?'Mettre à jour':'Enregistrer')+'</button>'
-    +   '<button type="button" onclick="document.getElementById(\'ae-form-wrap\').style.display=\'none\'" style="background:none;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);font-family:Arial;font-size:9px;letter-spacing:2px;padding:11px 20px;cursor:pointer;">Annuler</button>'
+    +   '<button type="button" onclick="document.getElementById(\'ae-form-wrap\').style.display=\'none\'" style="background:none;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.4);font-family:Arial;font-size:9px;letter-spacing:2px;padding:11px 20px;cursor:pointer;">' + AT('btn_cancel_text') + '</button>'
     + '</div>'
     + '</div>';
 
@@ -5238,17 +5265,80 @@ document.getElementById('edit-modal').addEventListener('click', function(e) {
 // ════════════════════════════════════════════════════════
 var ADMIN_LANGS = {
   fr: {
+    // Navigation
     nav_dashboard:'Dashboard', nav_group_content:'Contenu',
     nav_artistes:'Artistes', nav_albums:'Albums', nav_musiques:'Musique',
     nav_news:'Actualités', nav_events:'Événements', nav_showcases:'Showcases / Concerts',
     nav_group_boutique:'Boutique', nav_produits:'Produits', nav_commandes:'Commandes',
     nav_group_system:'Système', nav_users:'Utilisateurs', nav_modules:'Modules',
     nav_legaldocs:'Pages Légales', nav_quit:'Quitter',
+    // Dashboard
     dash_title:'Dashboard', dash_sub:"Vue d'ensemble — HARMONIA Production",
     dash_artists:'Artistes', dash_albums:'Albums', dash_tracks:'Titres', dash_news:'Actualités',
     dash_quickaccess:'Accès rapide', dash_lang:'Langue du site',
-    qa_artists:'Gérer artistes', qa_albums:'Gérer albums',
-    lang_active:'Langue active'
+    qa_artists:'Gérer artistes', qa_albums:'Gérer albums', lang_active:'Langue active',
+    // Titres formulaires
+    form_add_artist:'Ajouter un artiste', form_edit_artist:"Modifier l'artiste",
+    form_add_album:'Ajouter un album', form_edit_album:"Modifier l'album",
+    form_add_track:'Ajouter un titre', form_edit_track:'Modifier le titre',
+    form_add_news:'Ajouter une actualité', form_edit_news:"Modifier l'actualité",
+    form_add_event:'Ajouter un événement', form_edit_event:"Modifier l'événement",
+    form_add_produit:'Ajouter un produit', form_edit_produit:'Modifier le produit',
+    // Labels champs
+    lbl_name:'Nom', lbl_title:'Titre', lbl_artist:'Artiste', lbl_origin:'Origine',
+    lbl_style:'Style musical', lbl_style_simple:'Style', lbl_category:'Catégorie',
+    lbl_bio:'Bio courte', lbl_cover:'Pochette', lbl_image:'Image de couverture',
+    lbl_photo:"Photo de l'événement", lbl_gallery:'Galerie photos',
+    lbl_year:'Année', lbl_genre:'Genre', lbl_label:'Label', lbl_nb_tracks:'Nb titres',
+    lbl_price_std:'Prix standard (€)', lbl_price:'Prix (€)', lbl_vip:'Prix VIP (€)',
+    lbl_stripe:'Stripe Link', lbl_venue:'Venue / Salle', lbl_venue_simple:'Venue',
+    lbl_city:'Ville', lbl_date:'Date', lbl_date_fmt:'Date (YYYY-MM-DD)',
+    lbl_time:'Heure (HH:MM)', lbl_status:'Statut', lbl_album:'Album',
+    lbl_duration:'Durée (ex: 3:42)', lbl_duration_simple:'Durée',
+    lbl_url:'URL / YouTube ID', lbl_content:'Contenu / Extrait',
+    lbl_stock:'Stock (-1 = illimité)', lbl_stock_simple:'Stock',
+    lbl_type:'Type', lbl_cat_custom:'Catégorie personnalisée', lbl_or_url:'— ou URL —',
+    // En-têtes tableau
+    th_name:'Nom', th_title:'Titre', th_artist:'Artiste', th_origin:'Origine',
+    th_style:'Style', th_category:'Catégorie', th_date:'Date', th_venue:'Venue',
+    th_city:'Ville', th_price_std:'Standard', th_vip:'VIP', th_status:'Statut',
+    th_actions:'Actions', th_year:'Année', th_genre:'Genre', th_label:'Label',
+    th_tracks_nb:'Titres', th_duration:'Durée', th_stock:'Stock', th_type:'Type',
+    // Boutons
+    btn_add:'Ajouter', btn_edit:'Modifier', btn_delete:'Supprimer',
+    btn_activate:'Activer', btn_deactivate:'Désactiver',
+    btn_publish:'Publier', btn_unpublish:'Dépublier',
+    btn_add_photos:'+ Ajouter des photos', btn_cancel_text:'Annuler',
+    // Statuts événement
+    status_active:'Actif', status_cancelled:'Annulé',
+    status_rescheduled:'Reprogrammé', status_extended:'Prolongé',
+    // Catégories
+    cat_traditional:'Traditionnel', cat_urban:'Urban', cat_other:'Autre',
+    // Types produit
+    type_cd:'CD', type_vinyl:'Vinyle', type_merch:'Merchandising',
+    type_album_num:'Album numérique', type_concert:'Concert',
+    // Placeholders
+    ph_artist_name:'Nom artiste', ph_style:'Morna · Funaná',
+    ph_origin:'Mindelo, São Vicente', ph_bio:'Description courte...',
+    ph_cat_custom:'Saisir la catégorie...',
+    ph_alb_title:"Titre de l'album", ph_alb_cover:'https://img.youtube.com/vi/YTID/hqdefault.jpg',
+    ph_trk_title:'Titre du morceau', ph_trk_dur:'3:42', ph_trk_style:'Morna',
+    ph_nws_title:"Titre de l'article", ph_nws_content:'Résumé court...',
+    ph_evt_venue:'Nom de la salle', ph_evt_city:'Paris',
+    ph_prd_name:'Nom du produit', ph_prd_stock:'999 = illimité',
+    // États vides
+    empty_artists:'Aucun artiste.', empty_albums:'Aucun album.',
+    empty_tracks:'Aucun titre.', empty_news:'Aucune actualité.',
+    empty_events:'Aucun événement.', empty_products:'Aucun produit.',
+    // Alertes
+    alert_name_req:'Le nom est requis.', alert_title_req:'Le titre est requis.',
+    alert_venue_req:'La salle est requise.',
+    alert_artist_venue:"L'artiste ou la salle est requis.",
+    alert_confirm_del:'Supprimer cet élément ? Cette action est irréversible.',
+    // Divers
+    none_artist:'— Aucun —', click_photo:'Cliquer pour choisir un visuel',
+    click_image:'Cliquer pour choisir une image',
+    gallery_empty:'Aucune photo — ajoutez en cliquant sur le bouton ci-dessous.'
   },
   en: {
     nav_dashboard:'Dashboard', nav_group_content:'Content',
@@ -5260,8 +5350,58 @@ var ADMIN_LANGS = {
     dash_title:'Dashboard', dash_sub:'Overview — HARMONIA Production',
     dash_artists:'Artists', dash_albums:'Albums', dash_tracks:'Tracks', dash_news:'News',
     dash_quickaccess:'Quick Access', dash_lang:'Site Language',
-    qa_artists:'Manage Artists', qa_albums:'Manage Albums',
-    lang_active:'Active language'
+    qa_artists:'Manage Artists', qa_albums:'Manage Albums', lang_active:'Active language',
+    form_add_artist:'Add an artist', form_edit_artist:'Edit artist',
+    form_add_album:'Add an album', form_edit_album:'Edit album',
+    form_add_track:'Add a track', form_edit_track:'Edit track',
+    form_add_news:'Add news', form_edit_news:'Edit news',
+    form_add_event:'Add an event', form_edit_event:'Edit event',
+    form_add_produit:'Add a product', form_edit_produit:'Edit product',
+    lbl_name:'Name', lbl_title:'Title', lbl_artist:'Artist', lbl_origin:'Origin',
+    lbl_style:'Musical style', lbl_style_simple:'Style', lbl_category:'Category',
+    lbl_bio:'Short bio', lbl_cover:'Cover', lbl_image:'Cover image',
+    lbl_photo:'Event photo', lbl_gallery:'Photo gallery',
+    lbl_year:'Year', lbl_genre:'Genre', lbl_label:'Label', lbl_nb_tracks:'Track count',
+    lbl_price_std:'Standard price (€)', lbl_price:'Price (€)', lbl_vip:'VIP price (€)',
+    lbl_stripe:'Stripe Link', lbl_venue:'Venue / Hall', lbl_venue_simple:'Venue',
+    lbl_city:'City', lbl_date:'Date', lbl_date_fmt:'Date (YYYY-MM-DD)',
+    lbl_time:'Time (HH:MM)', lbl_status:'Status', lbl_album:'Album',
+    lbl_duration:'Duration (e.g. 3:42)', lbl_duration_simple:'Duration',
+    lbl_url:'URL / YouTube ID', lbl_content:'Content / Excerpt',
+    lbl_stock:'Stock (-1 = unlimited)', lbl_stock_simple:'Stock',
+    lbl_type:'Type', lbl_cat_custom:'Custom category', lbl_or_url:'— or URL —',
+    th_name:'Name', th_title:'Title', th_artist:'Artist', th_origin:'Origin',
+    th_style:'Style', th_category:'Category', th_date:'Date', th_venue:'Venue',
+    th_city:'City', th_price_std:'Standard', th_vip:'VIP', th_status:'Status',
+    th_actions:'Actions', th_year:'Year', th_genre:'Genre', th_label:'Label',
+    th_tracks_nb:'Tracks', th_duration:'Duration', th_stock:'Stock', th_type:'Type',
+    btn_add:'Add', btn_edit:'Edit', btn_delete:'Delete',
+    btn_activate:'Activate', btn_deactivate:'Deactivate',
+    btn_publish:'Publish', btn_unpublish:'Unpublish',
+    btn_add_photos:'+ Add photos', btn_cancel_text:'Cancel',
+    status_active:'Active', status_cancelled:'Cancelled',
+    status_rescheduled:'Rescheduled', status_extended:'Extended',
+    cat_traditional:'Traditional', cat_urban:'Urban', cat_other:'Other',
+    type_cd:'CD', type_vinyl:'Vinyl', type_merch:'Merchandise',
+    type_album_num:'Digital album', type_concert:'Concert',
+    ph_artist_name:'Artist name', ph_style:'Morna · Funaná',
+    ph_origin:'Mindelo, São Vicente', ph_bio:'Short description...',
+    ph_cat_custom:'Enter category...',
+    ph_alb_title:'Album title', ph_alb_cover:'https://img.youtube.com/vi/YTID/hqdefault.jpg',
+    ph_trk_title:'Track title', ph_trk_dur:'3:42', ph_trk_style:'Morna',
+    ph_nws_title:'Article title', ph_nws_content:'Short summary...',
+    ph_evt_venue:'Venue name', ph_evt_city:'Paris',
+    ph_prd_name:'Product name', ph_prd_stock:'999 = unlimited',
+    empty_artists:'No artists.', empty_albums:'No albums.',
+    empty_tracks:'No tracks.', empty_news:'No news.',
+    empty_events:'No events.', empty_products:'No products.',
+    alert_name_req:'Name is required.', alert_title_req:'Title is required.',
+    alert_venue_req:'Venue is required.',
+    alert_artist_venue:'Artist or venue is required.',
+    alert_confirm_del:'Delete this item? This action is irreversible.',
+    none_artist:'— None —', click_photo:'Click to choose a visual',
+    click_image:'Click to choose an image',
+    gallery_empty:'No photos — add some by clicking the button below.'
   },
   pt: {
     nav_dashboard:'Dashboard', nav_group_content:'Conteúdo',
@@ -5273,8 +5413,58 @@ var ADMIN_LANGS = {
     dash_title:'Dashboard', dash_sub:'Visão geral — HARMONIA Production',
     dash_artists:'Artistas', dash_albums:'Álbuns', dash_tracks:'Faixas', dash_news:'Notícias',
     dash_quickaccess:'Acesso rápido', dash_lang:'Idioma do site',
-    qa_artists:'Gerir artistas', qa_albums:'Gerir álbuns',
-    lang_active:'Idioma ativo'
+    qa_artists:'Gerir artistas', qa_albums:'Gerir álbuns', lang_active:'Idioma ativo',
+    form_add_artist:'Adicionar artista', form_edit_artist:'Editar artista',
+    form_add_album:'Adicionar álbum', form_edit_album:'Editar álbum',
+    form_add_track:'Adicionar faixa', form_edit_track:'Editar faixa',
+    form_add_news:'Adicionar notícia', form_edit_news:'Editar notícia',
+    form_add_event:'Adicionar evento', form_edit_event:'Editar evento',
+    form_add_produit:'Adicionar produto', form_edit_produit:'Editar produto',
+    lbl_name:'Nome', lbl_title:'Título', lbl_artist:'Artista', lbl_origin:'Origem',
+    lbl_style:'Estilo musical', lbl_style_simple:'Estilo', lbl_category:'Categoria',
+    lbl_bio:'Bio curta', lbl_cover:'Capa', lbl_image:'Imagem de capa',
+    lbl_photo:'Foto do evento', lbl_gallery:'Galeria de fotos',
+    lbl_year:'Ano', lbl_genre:'Género', lbl_label:'Editora', lbl_nb_tracks:'Nº de faixas',
+    lbl_price_std:'Preço padrão (€)', lbl_price:'Preço (€)', lbl_vip:'Preço VIP (€)',
+    lbl_stripe:'Stripe Link', lbl_venue:'Local / Sala', lbl_venue_simple:'Local',
+    lbl_city:'Cidade', lbl_date:'Data', lbl_date_fmt:'Data (YYYY-MM-DD)',
+    lbl_time:'Hora (HH:MM)', lbl_status:'Estado', lbl_album:'Álbum',
+    lbl_duration:'Duração (ex: 3:42)', lbl_duration_simple:'Duração',
+    lbl_url:'URL / YouTube ID', lbl_content:'Conteúdo / Extrato',
+    lbl_stock:'Stock (-1 = ilimitado)', lbl_stock_simple:'Stock',
+    lbl_type:'Tipo', lbl_cat_custom:'Categoria personalizada', lbl_or_url:'— ou URL —',
+    th_name:'Nome', th_title:'Título', th_artist:'Artista', th_origin:'Origem',
+    th_style:'Estilo', th_category:'Categoria', th_date:'Data', th_venue:'Local',
+    th_city:'Cidade', th_price_std:'Padrão', th_vip:'VIP', th_status:'Estado',
+    th_actions:'Ações', th_year:'Ano', th_genre:'Género', th_label:'Editora',
+    th_tracks_nb:'Faixas', th_duration:'Duração', th_stock:'Stock', th_type:'Tipo',
+    btn_add:'Adicionar', btn_edit:'Editar', btn_delete:'Eliminar',
+    btn_activate:'Ativar', btn_deactivate:'Desativar',
+    btn_publish:'Publicar', btn_unpublish:'Despublicar',
+    btn_add_photos:'+ Adicionar fotos', btn_cancel_text:'Cancelar',
+    status_active:'Ativo', status_cancelled:'Cancelado',
+    status_rescheduled:'Reagendado', status_extended:'Prolongado',
+    cat_traditional:'Tradicional', cat_urban:'Urbano', cat_other:'Outro',
+    type_cd:'CD', type_vinyl:'Vinil', type_merch:'Merchandising',
+    type_album_num:'Álbum digital', type_concert:'Concerto',
+    ph_artist_name:'Nome do artista', ph_style:'Morna · Funaná',
+    ph_origin:'Mindelo, São Vicente', ph_bio:'Descrição curta...',
+    ph_cat_custom:'Inserir categoria...',
+    ph_alb_title:'Título do álbum', ph_alb_cover:'https://img.youtube.com/vi/YTID/hqdefault.jpg',
+    ph_trk_title:'Título da faixa', ph_trk_dur:'3:42', ph_trk_style:'Morna',
+    ph_nws_title:'Título do artigo', ph_nws_content:'Resumo curto...',
+    ph_evt_venue:'Nome do local', ph_evt_city:'Lisboa',
+    ph_prd_name:'Nome do produto', ph_prd_stock:'999 = ilimitado',
+    empty_artists:'Sem artistas.', empty_albums:'Sem álbuns.',
+    empty_tracks:'Sem faixas.', empty_news:'Sem notícias.',
+    empty_events:'Sem eventos.', empty_products:'Sem produtos.',
+    alert_name_req:'O nome é obrigatório.', alert_title_req:'O título é obrigatório.',
+    alert_venue_req:'O local é obrigatório.',
+    alert_artist_venue:'O artista ou o local é obrigatório.',
+    alert_confirm_del:'Eliminar este elemento? Esta ação é irreversível.',
+    none_artist:'— Nenhum —', click_photo:'Clique para escolher um visual',
+    click_image:'Clique para escolher uma imagem',
+    gallery_empty:'Sem fotos — adicione clicando no botão abaixo.'
   },
   es: {
     nav_dashboard:'Dashboard', nav_group_content:'Contenido',
@@ -5286,14 +5476,65 @@ var ADMIN_LANGS = {
     dash_title:'Dashboard', dash_sub:'Resumen — HARMONIA Production',
     dash_artists:'Artistas', dash_albums:'Álbumes', dash_tracks:'Pistas', dash_news:'Noticias',
     dash_quickaccess:'Acceso rápido', dash_lang:'Idioma del sitio',
-    qa_artists:'Gestionar artistas', qa_albums:'Gestionar álbumes',
-    lang_active:'Idioma activo'
+    qa_artists:'Gestionar artistas', qa_albums:'Gestionar álbumes', lang_active:'Idioma activo',
+    form_add_artist:'Añadir artista', form_edit_artist:'Editar artista',
+    form_add_album:'Añadir álbum', form_edit_album:'Editar álbum',
+    form_add_track:'Añadir pista', form_edit_track:'Editar pista',
+    form_add_news:'Añadir noticia', form_edit_news:'Editar noticia',
+    form_add_event:'Añadir evento', form_edit_event:'Editar evento',
+    form_add_produit:'Añadir producto', form_edit_produit:'Editar producto',
+    lbl_name:'Nombre', lbl_title:'Título', lbl_artist:'Artista', lbl_origin:'Origen',
+    lbl_style:'Estilo musical', lbl_style_simple:'Estilo', lbl_category:'Categoría',
+    lbl_bio:'Bio corta', lbl_cover:'Portada', lbl_image:'Imagen de portada',
+    lbl_photo:'Foto del evento', lbl_gallery:'Galería de fotos',
+    lbl_year:'Año', lbl_genre:'Género', lbl_label:'Sello', lbl_nb_tracks:'Nº pistas',
+    lbl_price_std:'Precio estándar (€)', lbl_price:'Precio (€)', lbl_vip:'Precio VIP (€)',
+    lbl_stripe:'Stripe Link', lbl_venue:'Local / Sala', lbl_venue_simple:'Local',
+    lbl_city:'Ciudad', lbl_date:'Fecha', lbl_date_fmt:'Fecha (YYYY-MM-DD)',
+    lbl_time:'Hora (HH:MM)', lbl_status:'Estado', lbl_album:'Álbum',
+    lbl_duration:'Duración (ej: 3:42)', lbl_duration_simple:'Duración',
+    lbl_url:'URL / YouTube ID', lbl_content:'Contenido / Extracto',
+    lbl_stock:'Stock (-1 = ilimitado)', lbl_stock_simple:'Stock',
+    lbl_type:'Tipo', lbl_cat_custom:'Categoría personalizada', lbl_or_url:'— o URL —',
+    th_name:'Nombre', th_title:'Título', th_artist:'Artista', th_origin:'Origen',
+    th_style:'Estilo', th_category:'Categoría', th_date:'Fecha', th_venue:'Local',
+    th_city:'Ciudad', th_price_std:'Estándar', th_vip:'VIP', th_status:'Estado',
+    th_actions:'Acciones', th_year:'Año', th_genre:'Género', th_label:'Sello',
+    th_tracks_nb:'Pistas', th_duration:'Duración', th_stock:'Stock', th_type:'Tipo',
+    btn_add:'Añadir', btn_edit:'Editar', btn_delete:'Eliminar',
+    btn_activate:'Activar', btn_deactivate:'Desactivar',
+    btn_publish:'Publicar', btn_unpublish:'Despublicar',
+    btn_add_photos:'+ Añadir fotos', btn_cancel_text:'Cancelar',
+    status_active:'Activo', status_cancelled:'Cancelado',
+    status_rescheduled:'Reprogramado', status_extended:'Prolongado',
+    cat_traditional:'Tradicional', cat_urban:'Urbano', cat_other:'Otro',
+    type_cd:'CD', type_vinyl:'Vinilo', type_merch:'Merchandising',
+    type_album_num:'Álbum digital', type_concert:'Concierto',
+    ph_artist_name:'Nombre del artista', ph_style:'Morna · Funaná',
+    ph_origin:'Mindelo, São Vicente', ph_bio:'Descripción corta...',
+    ph_cat_custom:'Introducir categoría...',
+    ph_alb_title:'Título del álbum', ph_alb_cover:'https://img.youtube.com/vi/YTID/hqdefault.jpg',
+    ph_trk_title:'Título de la pista', ph_trk_dur:'3:42', ph_trk_style:'Morna',
+    ph_nws_title:'Título del artículo', ph_nws_content:'Resumen corto...',
+    ph_evt_venue:'Nombre del local', ph_evt_city:'Madrid',
+    ph_prd_name:'Nombre del producto', ph_prd_stock:'999 = ilimitado',
+    empty_artists:'Sin artistas.', empty_albums:'Sin álbumes.',
+    empty_tracks:'Sin pistas.', empty_news:'Sin noticias.',
+    empty_events:'Sin eventos.', empty_products:'Sin productos.',
+    alert_name_req:'El nombre es obligatorio.', alert_title_req:'El título es obligatorio.',
+    alert_venue_req:'El local es obligatorio.',
+    alert_artist_venue:'El artista o el local es obligatorio.',
+    alert_confirm_del:'¿Eliminar este elemento? Esta acción es irreversible.',
+    none_artist:'— Ninguno —', click_photo:'Clic para elegir un visual',
+    click_image:'Clic para elegir una imagen',
+    gallery_empty:'Sin fotos — añada haciendo clic en el botón de abajo.'
   }
 };
 
 var LANG_NAMES = { fr:'Français', en:'English', pt:'Português', es:'Español' };
 
 function applyAdminLang(lang) {
+  currentAdminLang = lang;
   var t = ADMIN_LANGS[lang] || ADMIN_LANGS['fr'];
   // Traduire tous les éléments marqués data-ai18n
   document.querySelectorAll('[data-ai18n]').forEach(function(el) {
@@ -5313,6 +5554,8 @@ function applyAdminLang(lang) {
   });
   // Stocker le choix
   try { localStorage.setItem('harmonia_admin_lang', lang); } catch(e) {}
+  // Re-render la section courante pour traduire le contenu dynamique
+  _rerenderCurrentSection();
 }
 
 // Dropdown admin-lang-dropdown
